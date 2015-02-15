@@ -77,7 +77,7 @@ class TasksArea extends NavigateArea
 	    actions.close();
 	    return true;
 	case EnvironmentEvent.INTRODUCE:
-	    Speech.say(stringConstructor.appName() + " " + stringConstructor.tasksAreaName());
+	    luwrain.say(stringConstructor.appName() + " " + stringConstructor.tasksAreaName());
 	    return true;
 	default:
 	    return super.onEnvironmentEvent(event);
@@ -104,12 +104,12 @@ class TasksArea extends NavigateArea
 	task.percent = event.getPercent();
 	if (task.state == Task.DONE)
 	{
-	    Speech.say(stringConstructor.done());
+	    luwrain.say(stringConstructor.done());
 	    actions.refresh();
 	}
 	if (task.state == Task.FAILED)
 	{
-	    Speech.say(stringConstructor.failed());
+	    luwrain.say(stringConstructor.failed());
 	    actions.refresh();
 	}
 	luwrain.onAreaNewContent(this);

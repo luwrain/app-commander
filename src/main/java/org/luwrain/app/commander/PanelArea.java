@@ -20,7 +20,7 @@ import java.io.*;
 import java.util.*;
 import org.luwrain.core.*;
 import org.luwrain.core.events.*;
-import org.luwrain.core.registry.Registry;
+import org.luwrain.core.Registry;
 
 public class PanelArea implements Area
 {
@@ -51,13 +51,7 @@ public class PanelArea implements Area
 	this.stringConstructor = stringConstructor;
 	this.actions = actions;
 	this.side = side;
-	Registry registry = luwrain.getRegistry();
-	if (registry.getTypeOf(CoreRegistryValues.INSTANCE_USER_HOME_DIR) != Registry.STRING)
-	{
-	    Log.warning("commander", "registry hasn\'t value with user home directory");
-	openByPath(ROOT_DIR);
-	} else
-	    openByPath(registry.getString(CoreRegistryValues.INSTANCE_USER_HOME_DIR));
+	    openByPath(luwrain.launchContext().userHomeDir());
     }
 
     public File[] getSelected()
@@ -187,7 +181,7 @@ public class PanelArea implements Area
 	switch(event.getCode())
 	{
 	case EnvironmentEvent.INTRODUCE:
-    Speech.say(stringConstructor.appName() + " " + getName());
+    luwrain.say(stringConstructor.appName() + " " + getName());
     return true;
 	case EnvironmentEvent.CLOSE:
 	    actions.close();
@@ -217,7 +211,7 @@ public class PanelArea implements Area
     {
 	if (items == null)
 	{
-	    Speech.say(stringConstructor.inaccessibleDirectoryContent(), Speech.PITCH_HIGH);
+	    luwrain.say(stringConstructor.inaccessibleDirectoryContent());
 	    return true;
 	}
 	if (hotPointY >= items.size())
@@ -268,12 +262,12 @@ public class PanelArea implements Area
     {
 	if (items == null)
 	{
-	    Speech.say(stringConstructor.inaccessibleDirectoryContent(), Speech.PITCH_HIGH);
+	    luwrain.say(stringConstructor.inaccessibleDirectoryContent());
 	    return true;
 	}
 	if (hotPointY + 1> items.size())
 	{
-	    Speech.say(stringConstructor.noItemsBelow(), Speech.PITCH_HIGH);
+	    luwrain.say(stringConstructor.noItemsBelow());
 	    return true;
 	}
 	hotPointX = hotPointY < items.size()?INITIAL_HOT_POINT_X:0;
@@ -287,12 +281,12 @@ public class PanelArea implements Area
     {
 	if (items == null)
 	{
-	    Speech.say(stringConstructor.inaccessibleDirectoryContent(), Speech.PITCH_HIGH);
+	    luwrain.say(stringConstructor.inaccessibleDirectoryContent());
 	    return true;
 	}
 	if (hotPointY < 1)
 	{
-	    Speech.say(stringConstructor.noItemsAbove(), Speech.PITCH_HIGH);
+	    luwrain.say(stringConstructor.noItemsAbove());
 	    return true;
 	}
 	hotPointX = INITIAL_HOT_POINT_X;
@@ -306,12 +300,12 @@ public class PanelArea implements Area
     {
 	if (items == null)
 	{
-	    Speech.say(stringConstructor.inaccessibleDirectoryContent(), Speech.PITCH_HIGH);
+	    luwrain.say(stringConstructor.inaccessibleDirectoryContent());
 	    return true;
 	}
 	if (hotPointY >= items.size())
 	{
-	    Speech.say(Langs.staticValue(Langs.EMPTY_LINE), Speech.PITCH_HIGH);
+	    luwrain.say(Langs.staticValue(Langs.EMPTY_LINE));
 	    return true;
 	}
 	if (items.get(hotPointY) == null ||
@@ -322,7 +316,7 @@ public class PanelArea implements Area
 	    return true;
 	if (hotPointX >= name.length() + INITIAL_HOT_POINT_X)
 	{
-	    Speech.say(Langs.staticValue(Langs.END_OF_LINE), Speech.PITCH_HIGH);
+	    luwrain.say(Langs.staticValue(Langs.END_OF_LINE));
 	    return true;
 	}
 	hotPointX++;
@@ -330,8 +324,8 @@ public class PanelArea implements Area
 	    hotPointX = INITIAL_HOT_POINT_X;
 	luwrain.onAreaNewHotPoint(this);
 	if (hotPointX < name.length() + 2)
-	    Speech.sayLetter(name.charAt(hotPointX - 2)); else
-	    Speech.say(Langs.staticValue(Langs.END_OF_LINE), Speech.PITCH_HIGH);
+	    luwrain.sayLetter(name.charAt(hotPointX - 2)); else
+	    luwrain.say(Langs.staticValue(Langs.END_OF_LINE));
 	return true;
     }
 
@@ -340,13 +334,13 @@ public class PanelArea implements Area
 
 	if (items == null)
 	{
-	    Speech.say(stringConstructor.inaccessibleDirectoryContent(), Speech.PITCH_HIGH);
+	    luwrain.say(stringConstructor.inaccessibleDirectoryContent());
 	    return true;
 	}
 
 	if (hotPointY >= items.size())
 	{
-	    Speech.say(Langs.staticValue(Langs.EMPTY_LINE), Speech.PITCH_HIGH);
+	    luwrain.say(Langs.staticValue(Langs.EMPTY_LINE));
 	    return true;
 	}
 	if (items.get(hotPointY) == null ||
@@ -357,14 +351,14 @@ public class PanelArea implements Area
 	    return true;
 	if (hotPointX <= INITIAL_HOT_POINT_X)
 	{
-	    Speech.say(Langs.staticValue(Langs.BEGIN_OF_LINE), Speech.PITCH_HIGH);
+	    luwrain.say(Langs.staticValue(Langs.BEGIN_OF_LINE));
 	    return true;
 	}
 	hotPointX--;
 	if (hotPointX > name.length()  + INITIAL_HOT_POINT_X)
 	    hotPointX = name.length() + INITIAL_HOT_POINT_X;
 	luwrain.onAreaNewHotPoint(this);
-	Speech.sayLetter(name.charAt(hotPointX - 2));
+	luwrain.sayLetter(name.charAt(hotPointX - 2));
 	return true;
     }
 
@@ -372,7 +366,7 @@ public class PanelArea implements Area
     {
 	if (items == null)
 	{
-	    Speech.say(stringConstructor.inaccessibleDirectoryContent(), Speech.PITCH_HIGH);
+	    luwrain.say(stringConstructor.inaccessibleDirectoryContent());
 	    return true;
 	}
 	final int visibleHeight = luwrain.getAreaVisibleHeight(this);
@@ -394,7 +388,7 @@ public class PanelArea implements Area
     {
 	if (items == null)
 	{
-	    Speech.say(stringConstructor.inaccessibleDirectoryContent(), Speech.PITCH_HIGH);
+	    luwrain.say(stringConstructor.inaccessibleDirectoryContent());
 	    return true;
 	}
 	final int visibleHeight = luwrain.getAreaVisibleHeight(this);
@@ -416,7 +410,7 @@ public class PanelArea implements Area
     {
 	if (items == null)
 	{
-	    Speech.say(stringConstructor.inaccessibleDirectoryContent(), Speech.PITCH_HIGH);
+	    luwrain.say(stringConstructor.inaccessibleDirectoryContent());
 	    return true;
 	}
 	hotPointY = 0;
@@ -430,13 +424,13 @@ public class PanelArea implements Area
     {
 	if (items == null)
 	{
-	    Speech.say(stringConstructor.inaccessibleDirectoryContent(), Speech.PITCH_HIGH);
+	    luwrain.say(stringConstructor.inaccessibleDirectoryContent());
 	    return true;
 	}
 	hotPointX = hotPointY < items.size()?INITIAL_HOT_POINT_X:0;
 	if (hotPointY >= items.size() || hotPointX >= items.get(hotPointY).getFileName().length() + INITIAL_HOT_POINT_X)
-	    Speech.say(Langs.staticValue(Langs.EMPTY_LINE), Speech.PITCH_HIGH); else
-	    Speech.sayLetter(items.get(hotPointY).getFileName().charAt(hotPointX - 2));
+	    luwrain.say(Langs.staticValue(Langs.EMPTY_LINE)); else
+	    luwrain.sayLetter(items.get(hotPointY).getFileName().charAt(hotPointX - 2));
 	return true;
     }
 
@@ -444,12 +438,12 @@ public class PanelArea implements Area
     {
 	if (items == null)
 	{
-	    Speech.say(stringConstructor.inaccessibleDirectoryContent(), Speech.PITCH_HIGH);
+	    luwrain.say(stringConstructor.inaccessibleDirectoryContent());
 	    return true;
 	}
 	hotPointY = items.size();
 	hotPointX = 0;
-	Speech.say(Langs.staticValue(Langs.EMPTY_LINE), Speech.PITCH_HIGH);
+	luwrain.say(Langs.staticValue(Langs.EMPTY_LINE));
 	luwrain.onAreaNewHotPoint(this);
 	return true;
     }
@@ -458,17 +452,17 @@ public class PanelArea implements Area
     {
 	if (items == null)
 	{
-	    Speech.say(stringConstructor.inaccessibleDirectoryContent(), Speech.PITCH_HIGH);
+	    luwrain.say(stringConstructor.inaccessibleDirectoryContent());
 	    return true;
 	}
 	if (hotPointY < items.size())
 	{
 	    hotPointX = items.get(hotPointY).getFileName().length() + INITIAL_HOT_POINT_X;
-	    Speech.say(Langs.staticValue(Langs.END_OF_LINE), Speech.PITCH_HIGH);
+	    luwrain.say(Langs.staticValue(Langs.END_OF_LINE));
 	} else
 	{
 	    hotPointX = 0;
-	    Speech.say(Langs.staticValue(Langs.EMPTY_LINE), Speech.PITCH_HIGH);
+	    luwrain.say(Langs.staticValue(Langs.EMPTY_LINE));
 	}
 	luwrain.onAreaNewHotPoint(this);
 	return true;
@@ -493,10 +487,10 @@ public class PanelArea implements Area
 	    return;
 	if (index >= items.size())
 	{
-	    Speech.say(Langs.staticValue(Langs.EMPTY_LINE), Speech.PITCH_HIGH);
+	    luwrain.say(Langs.staticValue(Langs.EMPTY_LINE));
 	    return;
 	}
-	Speech.say(stringConstructor.dirItemIntroduction(items.get(index), brief));
+	luwrain.say(stringConstructor.dirItemIntroduction(items.get(index), brief));
     }
 
     private void introduceLocation(File file)
@@ -505,10 +499,10 @@ public class PanelArea implements Area
 	    return;
 	if (file.getAbsolutePath().equals(ROOT_DIR))
 	{
-	    Speech.say(stringConstructor.rootDirectory());
+	    luwrain.say(stringConstructor.rootDirectory());
 	    return;
 	}
-	Speech.say(file.getName());
+	luwrain.say(file.getName());
     }
 
     private void openByPath(String path)
