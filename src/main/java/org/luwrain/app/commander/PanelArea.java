@@ -36,7 +36,7 @@ public class PanelArea implements Area
     private Vector<DirItem> items = null;//null means directory content is inaccessible;
 
     private int side = LEFT;
-    private StringConstructor stringConstructor;
+    private Strings strings;
     private Actions actions;
     private Luwrain luwrain;
     private int hotPointX = 0;
@@ -44,11 +44,11 @@ public class PanelArea implements Area
 
     public PanelArea(Luwrain luwrain,
 		     Actions actions,
-		     StringConstructor stringConstructor,
+		     Strings strings,
 		     int side)
     {
 	this.luwrain = luwrain;
-	this.stringConstructor = stringConstructor;
+	this.strings = strings;
 	this.actions = actions;
 	this.side = side;
 	    openByPath(luwrain.launchContext().userHomeDir());
@@ -98,7 +98,7 @@ public class PanelArea implements Area
     @Override public String getLine(int index)
     {
 	if (items == null)
-	    return stringConstructor.inaccessibleDirectoryContent();
+	    return strings.inaccessibleDirectoryContent();
 	if (index >= items.size())
 	    return new String();
 	return items.get(index).getScreenTitle();
@@ -181,7 +181,7 @@ public class PanelArea implements Area
 	switch(event.getCode())
 	{
 	case EnvironmentEvent.INTRODUCE:
-    luwrain.say(stringConstructor.appName() + " " + getName());
+    luwrain.say(strings.appName() + " " + getName());
     return true;
 	case EnvironmentEvent.CLOSE:
 	    actions.close();
@@ -201,9 +201,9 @@ public class PanelArea implements Area
     @Override public String getName()
     {
 	if (side == LEFT)
-	    return stringConstructor.leftPanelName(current != null?current.getAbsolutePath():null);
+	    return strings.leftPanelName(current != null?current.getAbsolutePath():null);
 	if (side == RIGHT)
-	    return stringConstructor.rightPanelName(current != null?current.getAbsolutePath():null);
+	    return strings.rightPanelName(current != null?current.getAbsolutePath():null);
 	return "";
     }
 
@@ -211,7 +211,7 @@ public class PanelArea implements Area
     {
 	if (items == null)
 	{
-	    luwrain.say(stringConstructor.inaccessibleDirectoryContent());
+	    luwrain.say(strings.inaccessibleDirectoryContent());
 	    return true;
 	}
 	if (hotPointY >= items.size())
@@ -262,12 +262,12 @@ public class PanelArea implements Area
     {
 	if (items == null)
 	{
-	    luwrain.say(stringConstructor.inaccessibleDirectoryContent());
+	    luwrain.say(strings.inaccessibleDirectoryContent());
 	    return true;
 	}
 	if (hotPointY + 1> items.size())
 	{
-	    luwrain.say(stringConstructor.noItemsBelow());
+	    luwrain.say(strings.noItemsBelow());
 	    return true;
 	}
 	hotPointX = hotPointY < items.size()?INITIAL_HOT_POINT_X:0;
@@ -281,12 +281,12 @@ public class PanelArea implements Area
     {
 	if (items == null)
 	{
-	    luwrain.say(stringConstructor.inaccessibleDirectoryContent());
+	    luwrain.say(strings.inaccessibleDirectoryContent());
 	    return true;
 	}
 	if (hotPointY < 1)
 	{
-	    luwrain.say(stringConstructor.noItemsAbove());
+	    luwrain.say(strings.noItemsAbove());
 	    return true;
 	}
 	hotPointX = INITIAL_HOT_POINT_X;
@@ -300,7 +300,7 @@ public class PanelArea implements Area
     {
 	if (items == null)
 	{
-	    luwrain.say(stringConstructor.inaccessibleDirectoryContent());
+	    luwrain.say(strings.inaccessibleDirectoryContent());
 	    return true;
 	}
 	if (hotPointY >= items.size())
@@ -334,7 +334,7 @@ public class PanelArea implements Area
 
 	if (items == null)
 	{
-	    luwrain.say(stringConstructor.inaccessibleDirectoryContent());
+	    luwrain.say(strings.inaccessibleDirectoryContent());
 	    return true;
 	}
 
@@ -366,7 +366,7 @@ public class PanelArea implements Area
     {
 	if (items == null)
 	{
-	    luwrain.say(stringConstructor.inaccessibleDirectoryContent());
+	    luwrain.say(strings.inaccessibleDirectoryContent());
 	    return true;
 	}
 	final int visibleHeight = luwrain.getAreaVisibleHeight(this);
@@ -388,7 +388,7 @@ public class PanelArea implements Area
     {
 	if (items == null)
 	{
-	    luwrain.say(stringConstructor.inaccessibleDirectoryContent());
+	    luwrain.say(strings.inaccessibleDirectoryContent());
 	    return true;
 	}
 	final int visibleHeight = luwrain.getAreaVisibleHeight(this);
@@ -410,7 +410,7 @@ public class PanelArea implements Area
     {
 	if (items == null)
 	{
-	    luwrain.say(stringConstructor.inaccessibleDirectoryContent());
+	    luwrain.say(strings.inaccessibleDirectoryContent());
 	    return true;
 	}
 	hotPointY = 0;
@@ -424,7 +424,7 @@ public class PanelArea implements Area
     {
 	if (items == null)
 	{
-	    luwrain.say(stringConstructor.inaccessibleDirectoryContent());
+	    luwrain.say(strings.inaccessibleDirectoryContent());
 	    return true;
 	}
 	hotPointX = hotPointY < items.size()?INITIAL_HOT_POINT_X:0;
@@ -438,7 +438,7 @@ public class PanelArea implements Area
     {
 	if (items == null)
 	{
-	    luwrain.say(stringConstructor.inaccessibleDirectoryContent());
+	    luwrain.say(strings.inaccessibleDirectoryContent());
 	    return true;
 	}
 	hotPointY = items.size();
@@ -452,7 +452,7 @@ public class PanelArea implements Area
     {
 	if (items == null)
 	{
-	    luwrain.say(stringConstructor.inaccessibleDirectoryContent());
+	    luwrain.say(strings.inaccessibleDirectoryContent());
 	    return true;
 	}
 	if (hotPointY < items.size())
@@ -472,7 +472,8 @@ public class PanelArea implements Area
     {
 	if (current == null || !current.isDirectory())
 	    return false;
-	File f = luwrain.openPopup(null, null, current);
+	//	File f = luwrain.openPopup(null, null, current);
+	File f = null;//FIXME:
 	if (f == null)
 	    return true;
 	if (f.isDirectory())
@@ -490,7 +491,7 @@ public class PanelArea implements Area
 	    luwrain.say(Langs.staticValue(Langs.EMPTY_LINE));
 	    return;
 	}
-	luwrain.say(stringConstructor.dirItemIntroduction(items.get(index), brief));
+	luwrain.say(strings.dirItemIntroduction(items.get(index), brief));
     }
 
     private void introduceLocation(File file)
@@ -499,7 +500,7 @@ public class PanelArea implements Area
 	    return;
 	if (file.getAbsolutePath().equals(ROOT_DIR))
 	{
-	    luwrain.say(stringConstructor.rootDirectory());
+	    luwrain.say(strings.rootDirectory());
 	    return;
 	}
 	luwrain.say(file.getName());

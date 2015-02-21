@@ -22,12 +22,12 @@ import org.luwrain.core.*;
 class Operations
 {
     static public void copy(Luwrain luwrain,
-			    StringConstructor stringConstructor,
+			    Strings strings,
 			    TasksArea tasks,
 			    File[] filesToCopy,
 			    File copyTo)
     {
-	Task task = new Task(stringConstructor.copying(filesToCopy));
+	Task task = new Task(strings.copying(filesToCopy));
 	tasks.addTask(task);
 	DirCopyOperation op = new DirCopyOperation(luwrain, tasks, task, filesToCopy, copyTo);
 	Thread t = new Thread(op);

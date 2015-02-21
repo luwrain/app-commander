@@ -24,17 +24,17 @@ import org.luwrain.controls.*;
 class TasksArea extends NavigateArea
 {
     private Luwrain luwrain;
-    private StringConstructor stringConstructor;
+    private Strings strings;
     private Actions actions;
     Vector<Task> tasks = new Vector<Task>();
 
     public TasksArea(Luwrain luwrain,
 		     Actions actions,
-		     StringConstructor stringConstructor)
+		     Strings strings)
     {
 	super(new DefaultControlEnvironment(luwrain));
 	this.luwrain = luwrain;
-	this.stringConstructor = stringConstructor;
+	this.strings = strings;
 	this.actions = actions;
     }
 
@@ -77,7 +77,7 @@ class TasksArea extends NavigateArea
 	    actions.close();
 	    return true;
 	case EnvironmentEvent.INTRODUCE:
-	    luwrain.say(stringConstructor.appName() + " " + stringConstructor.tasksAreaName());
+	    luwrain.say(strings.appName() + " " + strings.tasksAreaName());
 	    return true;
 	default:
 	    return super.onEnvironmentEvent(event);
@@ -86,7 +86,7 @@ class TasksArea extends NavigateArea
 
     public String getName()
     {
-	return stringConstructor.tasksAreaName();
+	return strings.tasksAreaName();
     }
 
     private void onTaskStatusUpdateEvent(TaskStatusUpdateEvent event)
@@ -104,12 +104,12 @@ class TasksArea extends NavigateArea
 	task.percent = event.getPercent();
 	if (task.state == Task.DONE)
 	{
-	    luwrain.say(stringConstructor.done());
+	    luwrain.say(strings.done());
 	    actions.refresh();
 	}
 	if (task.state == Task.FAILED)
 	{
-	    luwrain.say(stringConstructor.failed());
+	    luwrain.say(strings.failed());
 	    actions.refresh();
 	}
 	luwrain.onAreaNewContent(this);
@@ -124,9 +124,9 @@ class TasksArea extends NavigateArea
 	case Task.LAUNCHED:
 	return task.title + ": " + task.percent + "%";
 	case Task.DONE:
-	    return task.title + ": " + stringConstructor.done();
+	    return task.title + ": " + strings.done();
 	case Task.FAILED:
-	    return task.title + ": " + stringConstructor.failed();
+	    return task.title + ": " + strings.failed();
 	default:
 	    return "";
 	}

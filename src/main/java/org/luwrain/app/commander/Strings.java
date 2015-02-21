@@ -18,7 +18,7 @@ package org.luwrain.app.commander;
 
 import java.io.*;
 
-public interface StringConstructor
+public interface Strings
 {
     String appName();
     String leftPanelName(String path);

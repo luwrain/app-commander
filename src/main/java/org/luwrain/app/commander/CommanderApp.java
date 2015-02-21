@@ -22,22 +22,33 @@ import org.luwrain.popups.*;
 
 public class CommanderApp implements Application, Actions
 {
+    public static final String STRINGS_NAME = "luwrain.commander";
+
     private Luwrain luwrain;
-    private StringConstructor stringConstructor = null;
+    private Strings strings;
     private PanelArea leftPanel;
     private PanelArea rightPanel;
     private TasksArea tasks;
 
+    public CommanderApp()
+    {
+    }
+
+    public CommanderApp(String arg)
+    {
+	//FIXME:
+    }
+
     public boolean onLaunch(Luwrain luwrain)
     {
-	Object o = Langs.requestStringConstructor("commander");
-	if (o == null)
+	Object o =  luwrain.i18n().getStrings(STRINGS_NAME);
+	if (o == null || !(o instanceof Strings))
 	    return false;
 	this.luwrain = luwrain;
-	stringConstructor = (StringConstructor)o;
-	leftPanel = new PanelArea(luwrain, this, stringConstructor, PanelArea.LEFT);
-	rightPanel = new PanelArea(luwrain, this, stringConstructor, PanelArea.RIGHT);
-	tasks = new TasksArea(luwrain, this, stringConstructor);
+	strings = (Strings)o;
+	leftPanel = new PanelArea(luwrain, this, strings, PanelArea.LEFT);
+	rightPanel = new PanelArea(luwrain, this, strings, PanelArea.RIGHT);
+	tasks = new TasksArea(luwrain, this, strings);
 	return true;
     }
 
@@ -58,13 +69,13 @@ public class CommanderApp implements Application, Actions
 	    return false;
 	if (filesToCopy == null || filesToCopy.length < 1|| copyTo == null)
 	    return false;
-	FilePopup popup = new FilePopup(luwrain, stringConstructor.copyPopupName(),
-					stringConstructor.copyPopupPrefix(filesToCopy), copyTo);
+	FilePopup popup = new FilePopup(luwrain, strings.copyPopupName(),
+					strings.copyPopupPrefix(filesToCopy), copyTo);
 	luwrain.popup(popup);
 	if (popup.closing.cancelled())
 	    return true;
 	copyTo = popup.getFile();
-	Operations.copy(luwrain, stringConstructor, tasks, filesToCopy, copyTo);
+	Operations.copy(luwrain, strings, tasks, filesToCopy, copyTo);
 	return true;
     }
 
@@ -85,8 +96,8 @@ public class CommanderApp implements Application, Actions
 	    return false;
 	if (filesToMove == null || filesToMove.length < 1|| moveTo == null)
 	    return false;
-	FilePopup popup = new FilePopup(luwrain, stringConstructor.movePopupName(),
-					stringConstructor.movePopupPrefix(filesToMove), moveTo);
+	FilePopup popup = new FilePopup(luwrain, strings.movePopupName(),
+					strings.movePopupPrefix(filesToMove), moveTo);
 	luwrain.popup(popup);
 	if (popup.closing.cancelled())
 	    return true;
@@ -99,8 +110,8 @@ public class CommanderApp implements Application, Actions
 	File createIn = panelSide == PanelArea.LEFT?leftPanel.getCurrentDir():rightPanel.getCurrentDir();
 	if (createIn == null)
 	    return false;
-	FilePopup popup = new FilePopup(luwrain, stringConstructor.mkdirPopupName(),
-					stringConstructor.mkdirPopupPrefix(), createIn);
+	FilePopup popup = new FilePopup(luwrain, strings.mkdirPopupName(),
+					strings.mkdirPopupPrefix(), createIn);
 	luwrain.popup(popup);
 	if (popup.closing.cancelled())
 	    return true;
@@ -112,8 +123,8 @@ public class CommanderApp implements Application, Actions
 	File[] filesToDelete = panelSide == PanelArea.LEFT?leftPanel.getSelected():rightPanel.getSelected();
 	if (filesToDelete == null || filesToDelete.length < 1)
 	    return false;
-	YesNoPopup popup = new YesNoPopup(luwrain, stringConstructor.delPopupName(),
-					stringConstructor.delPopupPrefix(filesToDelete), false);
+	YesNoPopup popup = new YesNoPopup(luwrain, strings.delPopupName(),
+					strings.delPopupPrefix(filesToDelete), false);
 	luwrain.popup(popup);
 	if (popup.closing.cancelled())
 	    return true;
