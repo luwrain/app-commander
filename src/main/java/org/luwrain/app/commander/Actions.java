@@ -24,6 +24,8 @@ interface Actions
     void close();
     void refresh();
     void openFiles(String[] fileNames);
+    void selectLocationsLeft();
+    void selectLocationsRight();
     boolean copy(int panelSide);
     boolean move(int panelSide);
     boolean mkdir(int panelSide);

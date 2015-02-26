@@ -39,7 +39,7 @@ public class CommanderApp implements Application, Actions
 	//FIXME:
     }
 
-    public boolean onLaunch(Luwrain luwrain)
+    @Override public boolean onLaunch(Luwrain luwrain)
     {
 	Object o =  luwrain.i18n().getStrings(STRINGS_NAME);
 	if (o == null || !(o instanceof Strings))
@@ -52,19 +52,34 @@ public class CommanderApp implements Application, Actions
 	return true;
     }
 
-    public boolean copy(int panelSide)
+    @Override public String getAppName()
+    {
+	return strings.appName();
+    }
+
+    @Override public void selectLocationsLeft()
+    {
+	Popups.importantLocationsAsFile(luwrain, 0);
+    }
+
+    @Override public void selectLocationsRight()
+    {
+	Popups.importantLocationsAsFile(luwrain, 0);
+    }
+
+    @Override public boolean copy(int panelSide)
     {
 	File[] filesToCopy = null;
 	File copyTo = null;
 	if (panelSide == PanelArea.LEFT)
 	{
-	    filesToCopy = leftPanel.getSelected();
-	    copyTo= rightPanel.getCurrentDir(); 
+	    filesToCopy = leftPanel.selected();
+	    copyTo= rightPanel.opened(); 
 	} else
 	if (panelSide == PanelArea.RIGHT)
 	{
-	    filesToCopy = rightPanel.getSelected();
-	    copyTo= leftPanel.getCurrentDir(); 
+	    filesToCopy = rightPanel.selected();
+	    copyTo= leftPanel.opened(); 
 	} else
 	    return false;
 	if (filesToCopy == null || filesToCopy.length < 1|| copyTo == null)
@@ -85,13 +100,13 @@ public class CommanderApp implements Application, Actions
 	File moveTo = null;
 	if (panelSide == PanelArea.LEFT)
 	{
-	    filesToMove = leftPanel.getSelected();
-	    moveTo= rightPanel.getCurrentDir(); 
+	    filesToMove = leftPanel.selected();
+	    moveTo= rightPanel.opened(); 
 	} else
 	if (panelSide == PanelArea.RIGHT)
 	{
-	    filesToMove = rightPanel.getSelected();
-	    moveTo= leftPanel.getCurrentDir(); 
+	    filesToMove = rightPanel.selected();
+	    moveTo= leftPanel.opened(); 
 	} else
 	    return false;
 	if (filesToMove == null || filesToMove.length < 1|| moveTo == null)
@@ -107,7 +122,7 @@ public class CommanderApp implements Application, Actions
 
     public boolean mkdir(int panelSide)
     {
-	File createIn = panelSide == PanelArea.LEFT?leftPanel.getCurrentDir():rightPanel.getCurrentDir();
+	File createIn = panelSide == PanelArea.LEFT?leftPanel.opened():rightPanel.opened();
 	if (createIn == null)
 	    return false;
 	FilePopup popup = new FilePopup(luwrain, strings.mkdirPopupName(),
@@ -120,7 +135,7 @@ public class CommanderApp implements Application, Actions
 
     public boolean delete(int panelSide)
     {
-	File[] filesToDelete = panelSide == PanelArea.LEFT?leftPanel.getSelected():rightPanel.getSelected();
+	File[] filesToDelete = panelSide == PanelArea.LEFT?leftPanel.selected():rightPanel.selected();
 	if (filesToDelete == null || filesToDelete.length < 1)
 	    return false;
 	YesNoPopup popup = new YesNoPopup(luwrain, strings.delPopupName(),

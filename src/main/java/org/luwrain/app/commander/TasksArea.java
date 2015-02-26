@@ -76,9 +76,6 @@ class TasksArea extends NavigateArea
 	case EnvironmentEvent.CLOSE:
 	    actions.close();
 	    return true;
-	case EnvironmentEvent.INTRODUCE:
-	    luwrain.say(strings.appName() + " " + strings.tasksAreaName());
-	    return true;
 	default:
 	    return super.onEnvironmentEvent(event);
 	}

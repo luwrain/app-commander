@@ -21,14 +21,14 @@ import java.io.*;
 public interface Strings
 {
     String appName();
-    String leftPanelName(String path);
-    String rightPanelName(String path);
+    String leftPanel();
+    String rightPanel();
     String tasksAreaName();
     String noItemsAbove();
     String noItemsBelow();
     String inaccessibleDirectoryContent();
     String rootDirectory();
-    String dirItemIntroduction(DirItem item, boolean brief);
+    //    String dirItemIntroduction(DirItem item, boolean brief);
     String copying(File[] files);
     String done();
     String failed();

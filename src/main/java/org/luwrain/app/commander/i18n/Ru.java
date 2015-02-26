@@ -17,7 +17,7 @@
 package org.luwrain.app.commander.i18n;
 
 import java.io.*;
-import org.luwrain.app.commander.DirItem;
+//import org.luwrain.app.commander.DirItem;
 import org.luwrain.app.commander.PanelArea;
 
 public class Ru implements org.luwrain.app.commander.Strings
@@ -27,14 +27,14 @@ public class Ru implements org.luwrain.app.commander.Strings
 	return "Обзор файлов и папок";
     }
 
-    public String leftPanelName(String path)
+    @Override public String leftPanel()
     {
-	return "Левая панель " + path;
+	return "Левая панель ";
     }
 
-    public String rightPanelName(String path)
+    @Override public String rightPanel()
     {
-	return "Правая панель " + path;
+	return "Правая панель ";
     }
 
     public String tasksAreaName()
@@ -62,7 +62,7 @@ public class Ru implements org.luwrain.app.commander.Strings
 	return "Корневой каталог";
     }
 
-    public String dirItemIntroduction(DirItem item, boolean brief)
+/*    public String dirItemIntroduction(DirItem item, boolean brief)
     {
 	if (item == null)
 	    return "";
@@ -84,6 +84,7 @@ public class Ru implements org.luwrain.app.commander.Strings
 	}
 	return text;
     }
+*/
 
     public String done()
     {
