@@ -16,38 +16,7 @@
 
 package org.luwrain.app.commander;
 
-import org.luwrain.core.*;
-import org.luwrain.core.events.*;
-
-class TaskStatusUpdateEvent extends ThreadSyncEvent
+public interface Operation extends Runnable
 {
-    private Task task;
-    private int state;
-    private int percent;
-
-    public TaskStatusUpdateEvent(Area area,
-				 Task task,
-				 int state,
-				 int percent)
-    {
-	super(area);
-	this.task = task;
-	this.state = state;
-	this.percent = percent;
-    }
-
-    public Task getTask()
-    {
-	return task;
-    }
-
-    public int getState()
-    {
-	return state;
-    }
-
-    public int getPercent()
-    {
-	return percent;
-    }
+    void interrupt();
 }

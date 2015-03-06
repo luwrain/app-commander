@@ -46,7 +46,7 @@
     </javac>
   </target>
   <target name="jar-tests" depends="compile-tests">
-    <jar jarfile="jar/luwrain-tests.jar">
+    <jar jarfile="jar/luwrain-app-commander-tests.jar">
       <fileset dir="./build/tests">
         <include name="**/*.class"/>
       </fileset>
