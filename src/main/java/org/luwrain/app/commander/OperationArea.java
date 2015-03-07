@@ -151,6 +151,9 @@ class OperationArea extends NavigateArea implements OperationListener
 	    throw new NullPointerException("op may not be null");
 	if (op.isFinished())
 	    return strings.operationFinishDescr(op);
-	return op.getOperationName() + ", " + op.getPercents() + "%";
-    }
+	final int percents = op.getPercents();
+	if (percents == 0)
+	    return op.getOperationName() + "...";
+	return op.getOperationName() + ": " + percents + "%";
+}
 }

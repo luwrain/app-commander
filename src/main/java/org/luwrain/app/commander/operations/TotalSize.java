@@ -24,6 +24,8 @@ public class TotalSize
     {
 	if (f == null)
 	    throw new NullPointerException("f may not be null");
+	if (!f.isDirectory())
+	    return f.length();
 	final File[] items = f.listFiles();
 	long res = 0;
 	for(File ff: items)

@@ -43,6 +43,8 @@ public class Ru implements org.luwrain.app.commander.Strings
 	return "Действия";
     }
 
+    /*
+
     public String noItemsAbove()
     {
 	return "Элементы выше отсутствуют";
@@ -58,10 +60,11 @@ public class Ru implements org.luwrain.app.commander.Strings
 	return "Содержимое каталога недоступно";
     }
 
-    public String rootDirectory()
+    @Override public String rootDirectory()
     {
 	return "Корневой каталог";
     }
+*/
 
 /*    public String dirItemIntroduction(DirItem item, boolean brief)
     {
@@ -85,19 +88,18 @@ public class Ru implements org.luwrain.app.commander.Strings
 	}
 	return text;
     }
-*/
 
-    public String done()
+    @Override public String done()
     {
 	return "Завершено";
     }
 
-    public String failed()
+    @Override public String failed()
     {
 	return "Ошибка";
     }
 
-    public String copying(File[] files)
+    @Override public String copying(File[] files)
     {
 	if (files == null)
 	    return "";
@@ -106,12 +108,14 @@ public class Ru implements org.luwrain.app.commander.Strings
 	return "Копирование " + files + " элемента(ов)";
     }
 
-    public String copyPopupName()
+*/
+
+    @Override public String copyPopupName()
     {
 	return "Копирование";
     }
 
-    public String copyPopupPrefix(File[] files)
+    @Override public String copyPopupPrefix(File[] files)
     {
 	if (files == null || files.length < 1)
 	    return "";
@@ -120,12 +124,19 @@ public class Ru implements org.luwrain.app.commander.Strings
 	return "Копировать " + files.length + " элемента(ов) в:";
     }
 
-    public String movePopupName()
+    @Override public String copyOperationName(File[] filesToCopy, File copyTo)
+    {
+	if (filesToCopy.length == 1)
+	    return "Копирование " + filesToCopy[0].getName() + " в " + copyTo.getAbsolutePath();
+	return "Копирование " + numberOfItems(filesToCopy.length) + " в "  + copyTo.getAbsolutePath();
+    }
+
+    @Override public String movePopupName()
     {
 	return "Переместить/переименовать";
     }
 
-    public String movePopupPrefix(File[] files)
+    @Override public String movePopupPrefix(File[] files)
     {
 	if (files == null || files.length < 1)
 	    return "";
@@ -134,22 +145,22 @@ public class Ru implements org.luwrain.app.commander.Strings
 	return "Переместить " + files.length + " элемента(ов) в:";
     }
 
-    public String mkdirPopupName()
+    @Override public String mkdirPopupName()
     {
 	return "Создание каталога";
     }
 
-    public String mkdirPopupPrefix()
+    @Override public String mkdirPopupPrefix()
     {
 	return "Имя нового каталога:";
     }
 
-    public String delPopupName()
+    @Override public String delPopupName()
     {
 	return "Удаление";
     }
 
-    public String delPopupPrefix(File[] files)
+    @Override public String delPopupPrefix(File[] files)
     {
 	if (files == null || files.length < 1)
 	    return "";
@@ -164,13 +175,62 @@ public class Ru implements org.luwrain.app.commander.Strings
 
     @Override public String operationCompletedMessage(Operation op)
     {
-	return op.getOperationName() + "завершено";
+	switch (op.getFinishCode())
+	{
+	case Operation.OK:
+	    return op.getOperationName() + " успешно завершено";
+	case Operation.INTERRUPTED:
+	    return op.getOperationName() + " отменено";
+	default:
+	    return op.getOperationName() + " завершилось неуспешно";
+	}
     }
 
     @Override public String operationFinishDescr(Operation op)
     {
-	return "Завершено";
-
+	switch (op.getFinishCode())
+	{
+	case Operation.OK:
+	    return op.getOperationName() + ": Готово";
+	case Operation.INTERRUPTED:
+	    return op.getOperationName() + ": Прервано пользователем";
+	default:
+	    //FIXME:
+	    return op.getOperationName() + ": Ошибка";
+	}
     }
 
+    private String numberOfItems(int num)
+    {
+	return "" + num + " " + afterNum(num, "элементов", "элемент", "элемента");
+    }
+
+    private String numberOfFiles(int num)
+    {
+	return "" + num + " " + afterNum(num, "файлов", "файл", "файла");
+    }
+
+    private String afterNum(int num,
+				  String afterZero,
+				  String afterOne,
+				  String afterTwo)
+    {
+	if (num < 0)
+	    throw new IllegalArgumentException("num may not be negative");
+	if (afterZero == null)
+	    throw new NullPointerException("afterZero may not be null");
+	if (afterOne == null)
+	    throw new NullPointerException("afterOne may not be null");
+	if (afterTwo == null)
+	    throw new NullPointerException("afterTwo may not be null");
+	if (num == 0 || num % 10 == 0)
+	    return afterZero;
+	if (num % 100 >= 11 && num % 100 <= 19)
+	    return afterZero;
+	if (num % 10 == 1)
+	    return afterOne;
+	if (num % 10 >= 2 && num % 10 < 4)
+	    return afterTwo;
+	return afterZero;
+    }
 }

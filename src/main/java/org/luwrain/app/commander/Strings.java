@@ -32,6 +32,7 @@ public interface Strings
     //    String failed();
     String copyPopupName();
     String copyPopupPrefix(File[] files);
+    String copyOperationName(File[] filesToCopy, File copyTo);
     String movePopupName();
     String movePopupPrefix(File[] files);
     String mkdirPopupName();

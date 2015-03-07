@@ -17,8 +17,10 @@
 package org.luwrain.app.commander;
 
 import java.io.*;
+
 import org.luwrain.core.*;
 import org.luwrain.popups.*;
+import org.luwrain.app.commander.operations.*;
 
 public class CommanderApp implements Application, Actions
 {
@@ -71,26 +73,29 @@ public class CommanderApp implements Application, Actions
     {
 	File[] filesToCopy = null;
 	File copyTo = null;
-	if (panelSide == PanelArea.LEFT)
+	switch(panelSide)
 	{
+	case PanelArea.LEFT:
 	    filesToCopy = leftPanel.selected();
 	    copyTo= rightPanel.opened(); 
-	} else
-	if (panelSide == PanelArea.RIGHT)
-	{
+	    break;
+	case PanelArea.RIGHT:
 	    filesToCopy = rightPanel.selected();
 	    copyTo= leftPanel.opened(); 
-	} else
+	    break;
+	default:
 	    return false;
+	}
 	if (filesToCopy == null || filesToCopy.length < 1|| copyTo == null)
 	    return false;
-	FilePopup popup = new FilePopup(luwrain, strings.copyPopupName(),
-					strings.copyPopupPrefix(filesToCopy), copyTo);
-	luwrain.popup(popup);
-	if (popup.closing.cancelled())
+	copyTo = Popups.file(luwrain,
+			     strings.copyPopupName(),
+			     strings.copyPopupPrefix(filesToCopy),
+			     copyTo,
+			     FilePopup.ANY, 0);
+	if (copyTo == null)
 	    return true;
-	copyTo = popup.getFile();
-	//	Operations.copy(luwrain, strings, tasks, filesToCopy, copyTo);
+	operations.launch(new Copy(operations, strings.copyOperationName(filesToCopy, copyTo), filesToCopy, copyTo));
 	return true;
     }
 
