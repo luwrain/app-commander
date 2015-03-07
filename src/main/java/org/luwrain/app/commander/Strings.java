@@ -23,15 +23,13 @@ public interface Strings
     String appName();
     String leftPanel();
     String rightPanel();
-    String tasksAreaName();
-    String noItemsAbove();
-    String noItemsBelow();
-    String inaccessibleDirectoryContent();
-    String rootDirectory();
+    String operationsAreaName();
+    //    String inaccessibleDirectoryContent();
+    //    String rootDirectory();
     //    String dirItemIntroduction(DirItem item, boolean brief);
-    String copying(File[] files);
-    String done();
-    String failed();
+    //    String copying(File[] files);
+    //    String done();
+    //    String failed();
     String copyPopupName();
     String copyPopupPrefix(File[] files);
     String movePopupName();
@@ -40,4 +38,6 @@ public interface Strings
     String mkdirPopupPrefix();
     String delPopupName();
     String delPopupPrefix(File[] files);
+    String operationCompletedMessage(Operation op);
+    String operationFinishDescr(Operation op);
 }

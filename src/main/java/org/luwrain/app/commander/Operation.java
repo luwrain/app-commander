@@ -18,5 +18,18 @@ package org.luwrain.app.commander;
 
 public interface Operation extends Runnable
 {
+    public static final int OK = 0;
+    public static final int COPYING_NON_FILE_TO_FILE = 1;
+    public static final int PROBLEM_OPENING_FILE = 2;
+    public static final int PROBLEM_CREATING_FILE = 3;
+    public static final int PROBLEM_READING_FILE = 4;
+    public static final int PROBLEM_WRITING_FILE = 5;
+    public static final int INTERRUPTED = 6;
+
+    String getOperationName();
+    int getPercents();
     void interrupt();
+    boolean isFinished();
+    int getFinishCode();
+    String getExtInfo();
 }

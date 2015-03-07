@@ -28,7 +28,7 @@ public class CommanderApp implements Application, Actions
     private Strings strings;
     private PanelArea leftPanel;
     private PanelArea rightPanel;
-    private TasksArea tasks;
+    private OperationArea operations;
 
     public CommanderApp()
     {
@@ -48,7 +48,7 @@ public class CommanderApp implements Application, Actions
 	strings = (Strings)o;
 	leftPanel = new PanelArea(luwrain, this, strings, PanelArea.LEFT);
 	rightPanel = new PanelArea(luwrain, this, strings, PanelArea.RIGHT);
-	tasks = new TasksArea(luwrain, this, strings);
+	operations = new OperationArea(luwrain, this, strings);
 	return true;
     }
 
@@ -90,7 +90,7 @@ public class CommanderApp implements Application, Actions
 	if (popup.closing.cancelled())
 	    return true;
 	copyTo = popup.getFile();
-	Operations.copy(luwrain, strings, tasks, filesToCopy, copyTo);
+	//	Operations.copy(luwrain, strings, tasks, filesToCopy, copyTo);
 	return true;
     }
 
@@ -163,7 +163,7 @@ public class CommanderApp implements Application, Actions
 
     public AreaLayout getAreasToShow()
     {
-	return new AreaLayout(AreaLayout.LEFT_RIGHT_BOTTOM, leftPanel, rightPanel, tasks);
+	return new AreaLayout(AreaLayout.LEFT_RIGHT_BOTTOM, leftPanel, rightPanel, operations);
     }
 
     public void gotoLeftPanel()
@@ -178,7 +178,7 @@ public class CommanderApp implements Application, Actions
 
     public void gotoTasks()
     {
-	luwrain.setActiveArea(tasks);
+	luwrain.setActiveArea(operations);
     }
 
     public void close()

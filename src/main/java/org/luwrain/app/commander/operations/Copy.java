@@ -18,22 +18,37 @@ package org.luwrain.app.commander.operations;
 
 import java.io.*;
 
-public class Copy implements org.luwrain.app.commander.Operation
+import org.luwrain.app.commander.Operation;
+import org.luwrain.app.commander.OperationListener;
+
+public class Copy implements Operation
 {
-    public static final int COPYING_NON_FILE_TO_FILE = 1;
-    public static final int PROBLEM_OPENING_FILE = 2;
-    public static final int PROBLEM_CREATING_FILE = 3;
-    public static final int PROBLEM_READING_FILE = 4;
-    public static final int PROBLEM_WRITING_FILE = 5;
-
-
+    private OperationListener listener;
+    private String name = "";
     private File[] copyFrom;
     private File copyTo;
+    private boolean finished;
+    private int code;
+    private String extInfo = "";
+    private long totalBytes;
+    private long processedBytes;
+    private int percents;
+    private int lastPercents;
+    private boolean interrupted;
 
-    public Copy(File[] copyFrom, File copyTo)
+    public Copy(OperationListener listener,
+		String name,
+		File[] copyFrom,
+		File copyTo)
     {
+	this.listener = listener;
+	this.name = name;
 	this.copyFrom = copyFrom;
 	this.copyTo = copyTo;
+	if (listener == null)
+	    throw new NullPointerException("listener may not be null");
+	if (name == null)
+	    throw new NullPointerException("name may not be null");
 	if (copyFrom == null)
 	    throw new NullPointerException("copyFrom may not be null");
 	if (copyFrom.length < 1)
@@ -43,6 +58,14 @@ public class Copy implements org.luwrain.app.commander.Operation
 		throw new NullPointerException("copyFrom[" + i + "] may not be nul");
 	if (copyTo == null)
 	    throw new NullPointerException("copyTo may not be null");
+	finished = false;
+	code = 0;
+	totalBytes = 0;
+	processedBytes = 0;
+	percents = 0;
+	lastPercents = 0;
+	interrupted = false;
+	extInfo = "";
     }
 
     @Override public void run()
@@ -166,13 +189,52 @@ out = new FileOutputStream(toFile.getPath());
 	copyTo.mkdir();
     }
 
-    @Override public void interrupt()
-    {
-	//FIXME:
-    }
-
     private void problem(int code)
     {
 
+    }
+
+    private void onNewPortion(int bytes) throws OperationException
+    {
+	if (interrupted)
+	    throw new OperationException(INTERRUPTED);
+	processedBytes += bytes;
+	long lPercents = (processedBytes * 100) / totalBytes;
+	percents = (int)lPercents;
+	if (percents > lastPercents)
+	{
+	    listener.onOperationProgress(this);
+	    lastPercents = percents;
+	}
+    }
+
+    @Override public synchronized void interrupt()
+    {
+	interrupted = true;
+    }
+
+    @Override public synchronized  String getOperationName()
+    {
+	return name;
+    }
+
+    @Override public synchronized  int getPercents()
+    {
+	return percents;
+    }
+
+    @Override public synchronized  boolean isFinished()
+    {
+	return finished;
+    }
+
+    @Override public synchronized  int getFinishCode()
+    {
+	return code;
+    }
+
+    @Override public synchronized  String getExtInfo()
+    {
+	return extInfo != null?extInfo:"";
     }
 }

@@ -17,12 +17,13 @@
 package org.luwrain.app.commander.i18n;
 
 import java.io.*;
-//import org.luwrain.app.commander.DirItem;
+
+import org.luwrain.app.commander.Operation;
 import org.luwrain.app.commander.PanelArea;
 
 public class Ru implements org.luwrain.app.commander.Strings
 {
-    public String appName()
+    @Override public String appName()
     {
 	return "Обзор файлов и папок";
     }
@@ -37,7 +38,7 @@ public class Ru implements org.luwrain.app.commander.Strings
 	return "Правая панель ";
     }
 
-    public String tasksAreaName()
+    @Override public String operationsAreaName()
     {
 	return "Действия";
     }
@@ -160,4 +161,16 @@ public class Ru implements org.luwrain.app.commander.Strings
 	}
 	return "Вы действительно хотите удалить " + files.length + " элемента(ов)?";
     }
+
+    @Override public String operationCompletedMessage(Operation op)
+    {
+	return op.getOperationName() + "завершено";
+    }
+
+    @Override public String operationFinishDescr(Operation op)
+    {
+	return "Завершено";
+
+    }
+
 }
