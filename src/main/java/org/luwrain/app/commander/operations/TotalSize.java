@@ -16,34 +16,22 @@
 
 package org.luwrain.app.commander.operations;
 
-class OperationException extends Exception
+import java.io.*;
+
+public class TotalSize
 {
-    private int code;
-    private String extInfo;
-
-    public OperationException(int code)
+    public static long getTotalSize(File f) throws IOException
     {
-	super("");
-	this.code = code;
-	extInfo = "";
-    }
-
-    public OperationException(int code, String extInfo)
-    {
-	super(extInfo);
-	this.code = code;
-	this.extInfo = extInfo;
-	if (extInfo == null)
-	    throw new NullPointerException("extInfo may not be null");
-    }
-
-    public int code()
-    {
-	return code;
-    }
-
-    public String  extInfo()
-    {
-	return extInfo != null?extInfo:"";
+	if (f == null)
+	    throw new NullPointerException("f may not be null");
+	final File[] items = f.listFiles();
+	long res = 0;
+	for(File ff: items)
+	{
+	    if (ff.isDirectory())
+		res += getTotalSize(ff); else
+		res += ff.length();
+	}
+	return res;
     }
 }

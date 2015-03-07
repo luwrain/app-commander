@@ -13,6 +13,7 @@ public class OperationsTest extends Assert
 {
     private static final String TEST_DIR = "test-data";
     private static final String DEST_DIR = "test-dest";
+    private static final long EXPECTED_TOTAL_SIZE = 172644000;
 
     @Before public void createData()  throws IOException
     {
@@ -25,7 +26,7 @@ public class OperationsTest extends Assert
 	rmdir(new File(DEST_DIR));
     }
 
-     @Test public void copySameLevel() throws IOException
+    @Test public void copySameLevel() throws IOException
     {
 	Copy copy = new Copy(new EmptyOperationListener(), "",
 			     new File[]{new File(TEST_DIR)}, new File(DEST_DIR));
@@ -33,7 +34,7 @@ public class OperationsTest extends Assert
 	assertTrue(checkStandardTestDir(new File(DEST_DIR)));
     }
 
-     @Test public void copyNextLevel() throws IOException
+    @Test public void copyNextLevel() throws IOException
     {
 	new File(DEST_DIR).mkdir();
 	Copy copy = new Copy(new EmptyOperationListener(), "",
@@ -42,6 +43,11 @@ public class OperationsTest extends Assert
 	assertTrue(checkStandardTestDir(new File(new File(DEST_DIR), TEST_DIR)));
     }
 
+    @Test public void totalSize() throws IOException
+    {
+	final long totalSize = TotalSize.getTotalSize(new File(TEST_DIR));
+	assertTrue(totalSize == EXPECTED_TOTAL_SIZE);
+    }
 
     private void mkStandardTestDir(File f) throws IOException
     {

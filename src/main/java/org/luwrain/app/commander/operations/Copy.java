@@ -70,40 +70,79 @@ public class Copy implements Operation
 
     @Override public void run()
     {
+	//Calculating total size of source files;
+	totalBytes = 0;
+	try {
+	    for(File f: copyFrom)
+		totalBytes += TotalSize.getTotalSize(f);
+	}
+	catch (IOException e)
+	{
+	    e.printStackTrace();
+	    code = INACCESSIBLE_SOURCE;
+	    finished = true;
+	    return;
+	}
+
+	//Preparing destination directory;
 	final boolean destReady = copyTo.exists() && copyTo.isDirectory();
 	if (!destReady)
 	{
 	    if (copyTo.exists() && copyTo.isFile())
 	    {
+		//We can copy to file only a single file;
 		if (copyFrom.length != 1 || !copyFrom[0].isFile())
-		    problem(COPYING_NON_FILE_TO_FILE);
+		{
+		    code = COPYING_NON_FILE_TO_FILE;
+		    finished = true;
+		    return;
+		}
 		try {
 		    copySingleFile(copyFrom[0], copyTo);
 		}
 		catch (OperationException e)
 		{
-		    //FIXME:
+		    code = e.code();
+		    extInfo = e.extInfo();
+		    finished = true;
 		    return;
 		}
+		code = OK;
+		finished = true;
 		return;
 	    } //Copying single file;
-	    mkToFile();
-		} //Preparing destination;
-	//	System.out.println("destReady=" + destReady);
+	    try {
+		mkDestDir();
+	    }
+	    catch (OperationException e)
+	    {
+		code = e.code();
+		extInfo = e.extInfo();
+		finished = true;
+		return;
+	    }
+	} //Preparing destination;
+
+	//If destination directory didn't exist and we are copying a single directory we should put its content instead of it itself;
 	if (!destReady && copyFrom.length == 1 && copyFrom[0].isDirectory())
 	    copyFrom = copyFrom[0].listFiles();
+
 	try {
 	    copyRecurse(copyFrom, copyTo);
 	}
 	catch (OperationException e)
 	{
-	    //FIXME:
+	    code = e.code();
+	    extInfo = e.extInfo();
+	    finished = true;
+	    return;
 	}
+	code = OK;
+	finished = true;
     }
 
     private void copyRecurse(File[] fileFrom, File fileTo) throws OperationException
     {
-	//	System.out.println("copyRecurse(...," + fileTo.getPath() + ")");
 	//toFile should already exist;
 	for(File f: fileFrom)
 	    if (f.isDirectory())
@@ -124,7 +163,6 @@ public class Copy implements Operation
     {
 	InputStream in = null;
 	OutputStream out = null;
-
 	try {
 	    in = new FileInputStream(fromFile.getPath());
 	}
@@ -134,20 +172,19 @@ public class Copy implements Operation
 	    throw new OperationException(PROBLEM_OPENING_FILE, fromFile.getPath());
 	}
 	try {
-out = new FileOutputStream(toFile.getPath());
+	    out = new FileOutputStream(toFile.getPath());
 	}
 	catch(FileNotFoundException e)
 	{
 	    e.printStackTrace();
 	    throw new OperationException(PROBLEM_CREATING_FILE, toFile.getPath());
 	}
-
-	byte[] buf = new byte[4096];
+	byte[] buf = new byte[2048];
 	int length;
 	while (true)
 	{ 
 	    try {
-	    length = in.read(buf);
+		length = in.read(buf);
 	    }
 	    catch (IOException e)
 	    {
@@ -156,9 +193,9 @@ out = new FileOutputStream(toFile.getPath());
 	    }
 	    if (length <= 0)
 		break;
-	    //	    onNewData(length);
+	    onNewPortion(length);
 	    try {
-	    out.write(buf, 0, length);
+		out.write(buf, 0, length);
 	    }
 	    catch(IOException e)
 	    {
@@ -167,7 +204,7 @@ out = new FileOutputStream(toFile.getPath());
 	    }
 	}
 	try {
-	in.close();
+	    in.close();
 	}
 	catch(IOException e)
 	{
@@ -175,7 +212,7 @@ out = new FileOutputStream(toFile.getPath());
 	    throw new OperationException(PROBLEM_READING_FILE, fromFile.getPath());
 	}
 	try {
-	out.close();
+	    out.close();
 	}
 	catch(IOException e)
 	{
@@ -184,14 +221,9 @@ out = new FileOutputStream(toFile.getPath());
 	}
     }
 
-    private void mkToFile()
+    private void mkDestDir() throws OperationException
     {
 	copyTo.mkdir();
-    }
-
-    private void problem(int code)
-    {
-
     }
 
     private void onNewPortion(int bytes) throws OperationException

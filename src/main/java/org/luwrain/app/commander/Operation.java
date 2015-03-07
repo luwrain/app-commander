@@ -25,6 +25,7 @@ public interface Operation extends Runnable
     public static final int PROBLEM_READING_FILE = 4;
     public static final int PROBLEM_WRITING_FILE = 5;
     public static final int INTERRUPTED = 6;
+    public static final int INACCESSIBLE_SOURCE = 7;
 
     String getOperationName();
     int getPercents();
