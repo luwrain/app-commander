@@ -88,22 +88,30 @@ public class Ru implements org.luwrain.app.commander.Strings
 	return "Имя нового каталога:";
     }
 
+    @Override public String mkdirErrorMessage()
+    {
+	return "Каталог по указанному пути не может быть создан";
+    }
+
     @Override public String delPopupName()
     {
 	return "Удаление";
     }
 
-    @Override public String delPopupPrefix(File[] files)
+    @Override public String delPopupText(File[] files)
     {
-	if (files == null || files.length < 1)
-	    return "";
+	if (files == null)
+	    throw new NullPointerException("files may not be null");
 	if (files.length == 1)
-	{
-	    if (files[0].isDirectory())
-	    return "Вы действительно хотите удалить каталог \"" + files[0].getName() + "\"?";
-	    return "Вы действительно хотите удалить файл \"" + files[0].getName() + "\"?";
-	}
-	return "Вы действительно хотите удалить " + files.length + " элемента(ов)?";
+	    return "Вы действительно хотите удалить " + files[0] + "?";
+	return "Вы действительно хотите удалить " + numberOfItems(files.length) + "?";
+    }
+
+    @Override public String delOperationName(File[] filesToDelete)
+    {
+	if (filesToDelete.length == 1)
+	    return "Удаление " + filesToDelete[0].getName();
+	return "Удаление " + numberOfItems(filesToDelete.length);
     }
 
     @Override public String operationCompletedMessage(Operation op)
@@ -126,10 +134,25 @@ public class Ru implements org.luwrain.app.commander.Strings
 	case Operation.OK:
 	    return "Готово: " + op.getOperationName();
 	case Operation.INTERRUPTED:
-	    return op.getOperationName() + ": Прервано пользователем";
+	    return "Прервано: " + op.getOperationName();
+	case Operation.COPYING_NON_FILE_TO_FILE:
+	    return "Команда копировать не в файл в файл: " + op.getOperationName();
+	case Operation.PROBLEM_OPENING_FILE:
+	    return "Ошибка открытия файла " + op.getExtInfo() + ": " + op.getOperationName();
+	case Operation.PROBLEM_CREATING_FILE:
+	    return "Ошибка создания файла " + op.getExtInfo() + ": " + op.getOperationName();
+	case Operation.PROBLEM_READING_FILE:
+	    return "Ошибка чтения файла " + op.getExtInfo() + ": " + op.getOperationName();
+	case Operation.PROBLEM_WRITING_FILE:
+	    return "Ошибка записи файла " + op.getExtInfo() + ": " + op.getOperationName();
+	case Operation.INACCESSIBLE_SOURCE:
+	    return "Элементы для копирования недоступны в полном объёме: " + op.getOperationName();
+	case Operation.PROBLEM_CREATING_DIRECTORY:
+	    return "Невозможно создать каталог " + op.getExtInfo() + ": " + op.getOperationName();
+	case Operation.UNEXPECTED_PROBLEM:
+	    return "Неожиданная ошибка: " + op.getOperationName();
 	default:
-	    //FIXME:
-	    return op.getOperationName() + ": Ошибка";
+	    return "Неизвестная ошибка: " + op.getOperationName();
 	}
     }
 
@@ -149,9 +172,9 @@ public class Ru implements org.luwrain.app.commander.Strings
     }
 
     private String afterNum(int num,
-				  String afterZero,
-				  String afterOne,
-				  String afterTwo)
+			    String afterZero,
+			    String afterOne,
+			    String afterTwo)
     {
 	if (num < 0)
 	    throw new IllegalArgumentException("num may not be negative");

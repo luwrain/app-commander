@@ -28,6 +28,8 @@ public interface Operation extends Runnable
     public static final int INACCESSIBLE_SOURCE = 7;
     public static final int PROBLEM_CREATING_DIRECTORY = 8;
     public static final int UNEXPECTED_PROBLEM = 9;
+    public static final int PROBLEM_DELETING_DIRECTORY = 10;
+    public static final int PROBLEM_DELETING_FILE = 11;
 
     String getOperationName();
     int getPercents();

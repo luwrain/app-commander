@@ -55,7 +55,7 @@ public class Copy implements Operation
 	if (copyFrom == null)
 	    throw new NullPointerException("copyFrom may not be null");
 	if (copyFrom.length < 1)
-	    throw new NullPointerException("copyFrom may not be empty");
+	    throw new IllegalArgumentException("copyFrom may not be empty");
 	for(int i = 0;i < copyFrom.length;++i)
 	    if (copyFrom[i] == null)
 		throw new NullPointerException("copyFrom[" + i + "] may not be nul");
@@ -263,7 +263,8 @@ public class Copy implements Operation
 	    {
 		final File f = parents.get(i - 1);
 		if (!f.isDirectory())
-		    f.mkdir();
+		    if (!f.mkdir())
+			throw new OperationException(PROBLEM_CREATING_DIRECTORY, copyTo.getAbsolutePath());
 	    }
 	}
 	catch (Throwable t)

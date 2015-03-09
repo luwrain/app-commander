@@ -16,7 +16,9 @@
 
 package org.luwrain.app.commander;
 
+import java.util.*;
 import java.io.*;
+import java.nio.file.*;
 
 import org.luwrain.core.*;
 import org.luwrain.popups.*;
@@ -103,7 +105,7 @@ public class CommanderApp implements Application, Actions
 			     FilePopup.ANY, 0);
 	if (copyTo == null)
 	    return true;
-	operations.launch(new Copy(operations, strings.copyOperationName(filesToCopy, copyTo), filesToCopy, copyTo));
+ 	operations.launch(new Copy(operations, strings.copyOperationName(filesToCopy, copyTo), filesToCopy, copyTo));
 	return true;
     }
 
@@ -138,11 +140,41 @@ public class CommanderApp implements Application, Actions
 	File createIn = panelSide == PanelArea.LEFT?leftPanel.opened():rightPanel.opened();
 	if (createIn == null)
 	    return false;
-	FilePopup popup = new FilePopup(luwrain, strings.mkdirPopupName(),
-					strings.mkdirPopupPrefix(), createIn);
-	luwrain.popup(popup);
-	if (popup.closing.cancelled())
+	File f = Popups.file(luwrain,
+			     strings.mkdirPopupName(),
+			     strings.mkdirPopupPrefix(),
+			     createIn,
+			     FilePopup.ANY, 0);
+	if (f == null)
 	    return true;
+	try {
+	    Path p = f.toPath();
+	    Vector<File> parents = new Vector<File>();
+	    while (p != null)
+	    {
+		parents.add(p.toFile());
+		p = p.getParent();
+	    }
+	    if (parents.isEmpty())
+		return true;
+	    for(int i = parents.size();i > 0;--i)
+	    {
+		final File ff = parents.get(i - 1);
+		if (!ff.isDirectory())
+		    if (!ff.mkdir())
+		    {
+			luwrain.message(strings.mkdirErrorMessage(), Luwrain.MESSAGE_ERROR);
+			return true;
+		    }
+	    }
+	}
+	catch (Throwable t)
+	{
+	    t.printStackTrace();
+	    luwrain.message(strings.mkdirErrorMessage(), Luwrain.MESSAGE_ERROR);
+	    return true;
+	}
+	refreshPanels();
 	return true;
     }
 
@@ -152,10 +184,13 @@ public class CommanderApp implements Application, Actions
 	if (filesToDelete == null || filesToDelete.length < 1)
 	    return false;
 	YesNoPopup popup = new YesNoPopup(luwrain, strings.delPopupName(),
-					strings.delPopupPrefix(filesToDelete), false);
+					strings.delPopupText(filesToDelete), false);
 	luwrain.popup(popup);
 	if (popup.closing.cancelled())
 	    return true;
+	if (!popup.result())
+	    return true;
+ 	operations.launch(new Delete(operations, strings.delOperationName(filesToDelete), filesToDelete));
 	return true;
     }
 

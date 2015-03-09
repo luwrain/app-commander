@@ -175,6 +175,6 @@ class OperationArea extends NavigateArea implements OperationListener
 	final int percents = op.getPercents();
 	if (percents == 0)
 	    return op.getOperationName() + "...";
-	return op.getOperationName() + ": " + percents + "%";
+	return  percents + "%, "+ op.getOperationName();
 }
 }

@@ -31,8 +31,10 @@ public interface Strings
     String movePopupPrefix(File[] files);
     String mkdirPopupName();
     String mkdirPopupPrefix();
+    String mkdirErrorMessage();
     String delPopupName();
-    String delPopupPrefix(File[] files);
+    String delPopupText(File[] files);
+    String delOperationName(File[] filesToDelete);
     String operationCompletedMessage(Operation op);
     String operationFinishDescr(Operation op);
     String notAllOperationsFinished();
