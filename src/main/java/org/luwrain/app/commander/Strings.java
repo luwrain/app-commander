@@ -39,4 +39,6 @@ public interface Strings
     String operationCompletedMessage(Operation op);
     String operationFinishDescr(Operation op);
     String notAllOperationsFinished();
+    String cancelOperationPopupName();
+    String cancelOperationPopupText(Operation op);
 }

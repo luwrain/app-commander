@@ -85,6 +85,7 @@ public class Move implements Operation
 	    extInfo = "";
 	    finished = true;
 	}
+	listener.onOperationProgress(this);
     }
 
     private void work()
@@ -359,7 +360,9 @@ public class Move implements Operation
     private static boolean moveAtomically(File fromFile, File toFile)
     {
 	try {
-	    return fromFile.renameTo(toFile);
+	    if (!fromFile.renameTo(toFile))
+		return false;
+	    return true;
 	}
 	catch (Throwable t)
 	{

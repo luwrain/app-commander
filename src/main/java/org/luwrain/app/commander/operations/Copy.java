@@ -85,6 +85,7 @@ public class Copy implements Operation
 	    extInfo = "";
 	    finished = true;
 	}
+	listener.onOperationProgress(this);
     }
 
     private void work()

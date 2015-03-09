@@ -168,6 +168,16 @@ public class Ru implements org.luwrain.app.commander.Strings
 	return "Приложение не может быть закрыто при выполняющихся действиях";
     }
 
+    @Override public String cancelOperationPopupName()
+    {
+	return "Отмена действия";
+    }
+
+    @Override public String cancelOperationPopupText(Operation op)
+    {
+	return "Вы действительно хотите отменить действие \"" + op.getOperationName() + "\"?";
+    }
+
     private String numberOfItems(int num)
     {
 	return "" + num + " " + afterNum(num, "элементов", "элемент", "элемента");

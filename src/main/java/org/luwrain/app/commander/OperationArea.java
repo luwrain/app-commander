@@ -21,6 +21,7 @@ import java.util.*;
 import org.luwrain.core.*;
 import org.luwrain.core.events.*;
 import org.luwrain.controls.*;
+import org.luwrain.popups.*;
 
 class OperationArea extends NavigateArea implements OperationListener
 {
@@ -98,6 +99,10 @@ class OperationArea extends NavigateArea implements OperationListener
 	if (event.isCommand() && !event.isModified())
 	    switch (event.getCommand())
 	    {
+	    case KeyboardEvent.ENTER:
+		return onEnter(event);
+	    case KeyboardEvent.ESCAPE:
+		return onEscape(event);
 	    case KeyboardEvent.TAB:
 	    actions.gotoLeftPanel();
 	    return true;
@@ -145,6 +150,36 @@ class OperationArea extends NavigateArea implements OperationListener
 	for(Operation op:operations)
 	    if (!op.isFinished())
 		return false;
+	return true;
+    }
+
+    private boolean onEnter(KeyboardEvent event)
+    {
+	if (operations == null || getHotPointY() >= operations.size())
+	    return false;
+	if (!operations.get(getHotPointY()).isFinished())
+	    return false;
+	operations.remove(getHotPointY());
+	luwrain.onAreaNewContent(this);
+	return true;
+    }
+
+    private boolean onEscape(KeyboardEvent event)
+    {
+	if (operations == null || getHotPointY() >= operations.size())
+	    return false;
+	final Operation op = operations.get(getHotPointY());
+	if (op.isFinished())
+	    return false;
+	YesNoPopup popup = new YesNoPopup(luwrain, strings.cancelOperationPopupName(),
+					strings.cancelOperationPopupText(op), false);
+	luwrain.popup(popup);
+	if (popup.closing.cancelled())
+	    return true;
+	if (!popup.result())
+	    return true;
+	op.interrupt();
+	luwrain.onAreaNewContent(this);
 	return true;
     }
 
