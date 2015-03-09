@@ -39,7 +39,12 @@ public class PanelArea extends CommanderArea
 		     Strings strings,
 		     int side)
     {
-	super(new DefaultControlEnvironment(luwrain));
+	super(new DefaultControlEnvironment(luwrain),
+	      luwrain.os(),
+	      luwrain.launchContext().userHomeDirAsFile(),
+	      true,
+	      new NoHiddenCommanderFilter(),
+	      new ByNameCommanderComparator());
 	this.luwrain = luwrain;
 	this.actions = actions;
 	this.strings = strings;
@@ -82,7 +87,11 @@ public class PanelArea extends CommanderArea
 		if (side == LEFT)
 		    actions.gotoRightPanel(); else
 		    if (side == RIGHT)
-			actions.gotoTasks();
+		    {
+			if (actions.hasOperations())
+			    actions.gotoOperations(); else
+			    actions.gotoLeftPanel();
+		    }
 		return true;
 	    case KeyboardEvent.F5:
 		return actions.copy(side);
@@ -118,12 +127,10 @@ public class PanelArea extends CommanderArea
 	case EnvironmentEvent.CLOSE:
 	    actions.close();
 	    return true;
-	    /*
 	case EnvironmentEvent.OPEN:
-	    return onOpen(event);
-	    */
+	    return actions.openPopup(side);
 	default:
-	    return false;
+	    return super.onEnvironmentEvent(event);
 	}
     }
 

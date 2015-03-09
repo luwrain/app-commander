@@ -24,12 +24,6 @@ public interface Strings
     String leftPanel();
     String rightPanel();
     String operationsAreaName();
-    //    String inaccessibleDirectoryContent();
-    //    String rootDirectory();
-    //    String dirItemIntroduction(DirItem item, boolean brief);
-    //    String copying(File[] files);
-    //    String done();
-    //    String failed();
     String copyPopupName();
     String copyPopupPrefix(File[] files);
     String copyOperationName(File[] filesToCopy, File copyTo);
@@ -41,4 +35,5 @@ public interface Strings
     String delPopupPrefix(File[] files);
     String operationCompletedMessage(Operation op);
     String operationFinishDescr(Operation op);
+    String notAllOperationsFinished();
 }

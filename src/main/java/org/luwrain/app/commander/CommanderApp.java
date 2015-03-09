@@ -61,12 +61,20 @@ public class CommanderApp implements Application, Actions
 
     @Override public void selectLocationsLeft()
     {
-	Popups.importantLocationsAsFile(luwrain, 0);
+	final File f = Popups.importantLocationsAsFile(luwrain, Popup.WEAK);
+	if (f == null)
+	    return;
+	leftPanel.open(f, null);
+	luwrain.setActiveArea(leftPanel);
     }
 
     @Override public void selectLocationsRight()
     {
-	Popups.importantLocationsAsFile(luwrain, 0);
+	final File f = Popups.importantLocationsAsFile(luwrain, Popup.WEAK);
+	if (f == null)
+	    return;
+	rightPanel.open(f, null);
+	luwrain.setActiveArea(rightPanel);
     }
 
     @Override public boolean copy(int panelSide)
@@ -99,7 +107,7 @@ public class CommanderApp implements Application, Actions
 	return true;
     }
 
-    public boolean move(int panelSide)
+    @Override public boolean move(int panelSide)
     {
 	File[] filesToMove = null;
 	File moveTo = null;
@@ -125,7 +133,7 @@ public class CommanderApp implements Application, Actions
 	return true;
     }
 
-    public boolean mkdir(int panelSide)
+    @Override public boolean mkdir(int panelSide)
     {
 	File createIn = panelSide == PanelArea.LEFT?leftPanel.opened():rightPanel.opened();
 	if (createIn == null)
@@ -138,7 +146,7 @@ public class CommanderApp implements Application, Actions
 	return true;
     }
 
-    public boolean delete(int panelSide)
+    @Override public boolean delete(int panelSide)
     {
 	File[] filesToDelete = panelSide == PanelArea.LEFT?leftPanel.selected():rightPanel.selected();
 	if (filesToDelete == null || filesToDelete.length < 1)
@@ -151,43 +159,78 @@ public class CommanderApp implements Application, Actions
 	return true;
     }
 
-
-
-    public void refresh()
+    @Override public void refreshPanels()
     {
 	leftPanel.refresh();
 	rightPanel.refresh();
     }
 
-    public void openFiles(String[] fileNames)
+    @Override public boolean openPopup(int side)
     {
-	Log.debug("commander", "need to open " + fileNames.length + " files");
-	if (fileNames != null && fileNames.length > 0)
-	    luwrain.openFiles(fileNames);
+	File current = null;
+	switch(side)
+	{
+	case PanelArea.LEFT:
+	    current = leftPanel.opened();
+	    break;
+	case PanelArea.RIGHT:
+	    current = rightPanel.opened();
+	    break;
+	default:
+	    return false;
+	}
+	final File f = Popups.open(luwrain, current, Popup.WEAK);
+	if (f == null)
+	    return true;
+	if (!f.isDirectory())
+	{
+	    luwrain.openFiles(new String[]{f.getAbsolutePath()});
+	    return true;
+	}
+	if (side == PanelArea.LEFT)
+	{
+	    leftPanel.open(f, null);
+	    luwrain.setActiveArea(leftPanel);
+	} else
+	{
+	    rightPanel.open(f, null);
+	    luwrain.setActiveArea(rightPanel);
+	}
+	return true;
     }
 
-    public AreaLayout getAreasToShow()
+    @Override public AreaLayout getAreasToShow()
     {
 	return new AreaLayout(AreaLayout.LEFT_RIGHT_BOTTOM, leftPanel, rightPanel, operations);
     }
 
-    public void gotoLeftPanel()
+    @Override public void gotoLeftPanel()
     {
 	luwrain.setActiveArea(leftPanel);
     }
 
-    public void gotoRightPanel()
+    @Override public void gotoRightPanel()
     {
 	luwrain.setActiveArea(rightPanel);
     }
 
-    public void gotoTasks()
+    @Override public void gotoOperations()
     {
 	luwrain.setActiveArea(operations);
     }
 
-    public void close()
+    @Override public void close()
     {
+	if (!operations.allOperationsFinished())
+	{
+	    luwrain.message(strings.notAllOperationsFinished(), Luwrain.MESSAGE_ERROR);
+	    return;
+	}
 	luwrain.closeApp();
+    }
+
+    @Override public boolean hasOperations()
+    {
+	return operations.hasOperations();
     }
 }

@@ -81,6 +81,20 @@ class OperationArea extends NavigateArea implements OperationListener
     {
 	if (event == null)
 	    throw new NullPointerException("event may not be null");
+	if (event.isCommand() &&
+	    event.getCommand() == KeyboardEvent.F1 &&
+	    event.withLeftAltOnly())
+	{
+	    actions.selectLocationsLeft();
+	    return true;
+	}
+	if (event.isCommand() &&
+	    event.getCommand() == KeyboardEvent.F2 &&
+	    event.withLeftAltOnly())
+	{
+	    actions.selectLocationsRight();
+	    return true;
+	}
 	if (event.isCommand() && !event.isModified())
 	    switch (event.getCommand())
 	    {
@@ -121,6 +135,11 @@ class OperationArea extends NavigateArea implements OperationListener
 	luwrain.enqueueEvent(new UpdateEvent(this, operation));
     }
 
+    public boolean hasOperations()
+    {
+	return !operations.isEmpty();
+    }
+
     public boolean allOperationsFinished()
     {
 	for(Operation op:operations)
@@ -140,7 +159,7 @@ class OperationArea extends NavigateArea implements OperationListener
 	if (op.isFinished())
 	{
 	    luwrain.message(strings.operationCompletedMessage(op), op.getFinishCode() == Operation.OK?Luwrain.MESSAGE_OK:Luwrain.MESSAGE_ERROR);
-	    actions.refresh();//Update list of files on opened panels;
+	    actions.refreshPanels();//Update list of files on opened panels;
 	}
 	luwrain.onAreaNewContent(this);
     }

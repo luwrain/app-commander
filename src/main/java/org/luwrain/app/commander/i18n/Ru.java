@@ -43,73 +43,6 @@ public class Ru implements org.luwrain.app.commander.Strings
 	return "Действия";
     }
 
-    /*
-
-    public String noItemsAbove()
-    {
-	return "Элементы выше отсутствуют";
-    }
-
-    public String noItemsBelow()
-    {
-	return "Элементы ниже отсутствуют";
-    }
-
-    public String inaccessibleDirectoryContent()
-    {
-	return "Содержимое каталога недоступно";
-    }
-
-    @Override public String rootDirectory()
-    {
-	return "Корневой каталог";
-    }
-*/
-
-/*    public String dirItemIntroduction(DirItem item, boolean brief)
-    {
-	if (item == null)
-	    return "";
-	String text = item.getFileName();
-	if (text.isEmpty())
-	    return "fixme";
-	if (text.equals(PanelArea.PARENT_DIR))
-	    return "На уровень вверх";
-	if (!brief)
-	{
-	    if (item.getType() == DirItem.DIRECTORY)
-	    {
-		if (item.isSelected())
-		    text = "Выделенный каталог " + text; else
-		    text = "Каталог " + text;
-	    } else
-		if (item.selected)
-		    text = "Выделенный файл " + text;
-	}
-	return text;
-    }
-
-    @Override public String done()
-    {
-	return "Завершено";
-    }
-
-    @Override public String failed()
-    {
-	return "Ошибка";
-    }
-
-    @Override public String copying(File[] files)
-    {
-	if (files == null)
-	    return "";
-	if (files.length == 1)
-	    return "Копирование " + files[0].getName();
-	return "Копирование " + files + " элемента(ов)";
-    }
-
-*/
-
     @Override public String copyPopupName()
     {
 	return "Копирование";
@@ -117,11 +50,11 @@ public class Ru implements org.luwrain.app.commander.Strings
 
     @Override public String copyPopupPrefix(File[] files)
     {
-	if (files == null || files.length < 1)
-	    return "";
+	if (files == null)
+	    throw new NullPointerException("files may not be null");
 	if (files.length == 1)
-	    return "Копировать \"" + files[0].getName() + "\" в:";
-	return "Копировать " + files.length + " элемента(ов) в:";
+	    return "Копировать " + files[0].getName() + " в:";
+	return "Копировать " + numberOfItems(files.length) + " в:";
     }
 
     @Override public String copyOperationName(File[] filesToCopy, File copyTo)
@@ -198,6 +131,11 @@ public class Ru implements org.luwrain.app.commander.Strings
 	    //FIXME:
 	    return op.getOperationName() + ": Ошибка";
 	}
+    }
+
+    @Override public String notAllOperationsFinished()
+    {
+	return "Приложение не может быть закрыто при выполняющихся действиях";
     }
 
     private String numberOfItems(int num)

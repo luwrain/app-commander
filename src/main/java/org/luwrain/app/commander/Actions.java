@@ -20,14 +20,15 @@ interface Actions
 {
     void gotoLeftPanel();
     void gotoRightPanel();
-    void gotoTasks();
+    void gotoOperations();
     void close();
-    void refresh();
-    void openFiles(String[] fileNames);
+    void refreshPanels();
+    boolean openPopup(int side);
     void selectLocationsLeft();
     void selectLocationsRight();
     boolean copy(int panelSide);
     boolean move(int panelSide);
     boolean mkdir(int panelSide);
     boolean delete(int panelSide);
+    boolean hasOperations();
 }
