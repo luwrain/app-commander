@@ -113,25 +113,29 @@ public class CommanderApp implements Application, Actions
     {
 	File[] filesToMove = null;
 	File moveTo = null;
-	if (panelSide == PanelArea.LEFT)
+	switch(panelSide)
 	{
+	case PanelArea.LEFT:
 	    filesToMove = leftPanel.selected();
 	    moveTo= rightPanel.opened(); 
-	} else
-	if (panelSide == PanelArea.RIGHT)
-	{
+	    break;
+	case PanelArea.RIGHT:
 	    filesToMove = rightPanel.selected();
 	    moveTo= leftPanel.opened(); 
-	} else
+	    break;
+	default:
 	    return false;
+	}
 	if (filesToMove == null || filesToMove.length < 1|| moveTo == null)
 	    return false;
-	FilePopup popup = new FilePopup(luwrain, strings.movePopupName(),
-					strings.movePopupPrefix(filesToMove), moveTo);
-	luwrain.popup(popup);
-	if (popup.closing.cancelled())
+	moveTo = Popups.file(luwrain,
+			     strings.movePopupName(),
+			     strings.movePopupPrefix(filesToMove),
+			     moveTo,
+			     FilePopup.ANY, 0);
+	if (moveTo == null)
 	    return true;
-	moveTo = popup.getFile();
+ 	operations.launch(new Move(operations, strings.moveOperationName(filesToMove, moveTo), filesToMove, moveTo));
 	return true;
     }
 

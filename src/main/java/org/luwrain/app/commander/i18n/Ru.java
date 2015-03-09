@@ -66,16 +66,23 @@ public class Ru implements org.luwrain.app.commander.Strings
 
     @Override public String movePopupName()
     {
-	return "Переместить/переименовать";
+	return "Переименование/перемещение";
     }
 
     @Override public String movePopupPrefix(File[] files)
     {
-	if (files == null || files.length < 1)
-	    return "";
+	if (files == null)
+	    throw new NullPointerException("files may not be null");
 	if (files.length == 1)
-	    return "Переместить/переименовать \"" + files[0].getName() + "\" в:";
-	return "Переместить " + files.length + " элемента(ов) в:";
+	    return "Переименовать/переместить " + files[0].getName() + " в:";
+	return "Переименовать/переместить " + numberOfItems(files.length) + " в:";
+    }
+
+    @Override public String moveOperationName(File[] filesToMove, File moveTo)
+    {
+	if (filesToMove.length == 1)
+	    return "Переименование/перемещение " + filesToMove[0].getName() + " в " + moveTo.getAbsolutePath();
+	return "Переименование/перемещение " + numberOfItems(filesToMove.length) + " в "  + moveTo.getAbsolutePath();
     }
 
     @Override public String mkdirPopupName()

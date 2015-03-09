@@ -72,6 +72,9 @@ public class Delete implements Operation
 	    extInfo = "";
 	    finished = true;
 	}
+	code = OK;
+	finished = true;
+	listener.onOperationProgress(this);
     }
 
     private void work()

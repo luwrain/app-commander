@@ -31,6 +31,8 @@ public interface Operation extends Runnable
     public static final int PROBLEM_DELETING_DIRECTORY = 10;
     public static final int PROBLEM_DELETING_FILE = 11;
 
+    public static final int MOVING_NON_FILE_TO_FILE = 12;
+
     String getOperationName();
     int getPercents();
     void interrupt();

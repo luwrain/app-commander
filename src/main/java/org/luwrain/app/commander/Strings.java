@@ -29,6 +29,7 @@ public interface Strings
     String copyOperationName(File[] filesToCopy, File copyTo);
     String movePopupName();
     String movePopupPrefix(File[] files);
+    String moveOperationName(File[] moveToCopy, File moveTo);
     String mkdirPopupName();
     String mkdirPopupPrefix();
     String mkdirErrorMessage();
