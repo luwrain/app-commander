@@ -17,6 +17,8 @@
 package org.luwrain.app.commander.operations;
 
 import java.io.*;
+import java.nio.file.*;
+import java.util.*;
 
 import org.luwrain.app.commander.Operation;
 import org.luwrain.app.commander.OperationListener;
@@ -27,7 +29,8 @@ public class Copy implements Operation
     private String name = "";
     private File[] copyFrom;
     private File copyTo;
-    private boolean finished;
+    private boolean finished = false;
+    private boolean finishingAccepted = false ;
     private int code;
     private String extInfo = "";
     private long totalBytes;
@@ -69,6 +72,22 @@ public class Copy implements Operation
     }
 
     @Override public void run()
+    {
+	finished = false;
+	finishingAccepted = false;
+	try {
+	    work();
+	    }
+	catch (Throwable t)
+	{
+	    t.printStackTrace();
+	    code = UNEXPECTED_PROBLEM;
+	    extInfo = "";
+	    finished = true;
+	}
+    }
+
+    private void work()
     {
 	//Calculating total size of source files;
 	totalBytes = 0;
@@ -148,7 +167,14 @@ public class Copy implements Operation
 	    if (f.isDirectory())
 	    {
 		File newDest = new File(fileTo, f.getName());
-		newDest.mkdir();
+		try {
+		    newDest.mkdir();
+		}
+		catch (Throwable t)
+		{
+		    t.printStackTrace();
+		    throw new OperationException(PROBLEM_CREATING_DIRECTORY, newDest.getAbsolutePath());
+		}
 		copyRecurse(f.listFiles(), newDest);
 	    } else
 		copyFileToDir(f, fileTo);
@@ -166,7 +192,7 @@ public class Copy implements Operation
 	try {
 	    in = new FileInputStream(fromFile.getPath());
 	}
-	catch(FileNotFoundException e)
+	catch(Throwable e)
 	{
 	    e.printStackTrace();
 	    throw new OperationException(PROBLEM_OPENING_FILE, fromFile.getPath());
@@ -174,7 +200,7 @@ public class Copy implements Operation
 	try {
 	    out = new FileOutputStream(toFile.getPath());
 	}
-	catch(FileNotFoundException e)
+	catch(Throwable e)
 	{
 	    e.printStackTrace();
 	    throw new OperationException(PROBLEM_CREATING_FILE, toFile.getPath());
@@ -186,7 +212,7 @@ public class Copy implements Operation
 	    try {
 		length = in.read(buf);
 	    }
-	    catch (IOException e)
+	    catch (Throwable e)
 	    {
 		e.printStackTrace();
 		throw new OperationException(PROBLEM_READING_FILE, fromFile.getPath());
@@ -197,7 +223,7 @@ public class Copy implements Operation
 	    try {
 		out.write(buf, 0, length);
 	    }
-	    catch(IOException e)
+	    catch(Throwable e)
 	    {
 		e.printStackTrace();
 		throw new OperationException(PROBLEM_WRITING_FILE, toFile.getPath());
@@ -206,7 +232,7 @@ public class Copy implements Operation
 	try {
 	    in.close();
 	}
-	catch(IOException e)
+	catch(Throwable e)
 	{
 	    e.printStackTrace();
 	    throw new OperationException(PROBLEM_READING_FILE, fromFile.getPath());
@@ -214,7 +240,7 @@ public class Copy implements Operation
 	try {
 	    out.close();
 	}
-	catch(IOException e)
+	catch(Throwable e)
 	{
 	    e.printStackTrace();
 	    throw new OperationException(PROBLEM_WRITING_FILE, toFile.getPath());
@@ -223,7 +249,28 @@ public class Copy implements Operation
 
     private void mkDestDir() throws OperationException
     {
-	copyTo.mkdir();
+	try {
+	    Path p = copyTo.toPath();
+	    Vector<File> parents = new Vector<File>();
+	    while (p != null)
+	    {
+		parents.add(p.toFile());
+		p = p.getParent();
+	    }
+	    if (parents.isEmpty())
+		return;
+	    for(int i = parents.size();i > 0;--i)
+	    {
+		final File f = parents.get(i - 1);
+		if (!f.isDirectory())
+		    f.mkdir();
+	    }
+	}
+	catch (Throwable t)
+	{
+	    t.printStackTrace();
+	    throw new OperationException(PROBLEM_CREATING_DIRECTORY, copyTo.getAbsolutePath());
+	}
     }
 
     private void onNewPortion(int bytes) throws OperationException
@@ -268,5 +315,13 @@ public class Copy implements Operation
     @Override public synchronized  String getExtInfo()
     {
 	return extInfo != null?extInfo:"";
+    }
+
+    @Override public boolean finishingAccepted()
+    {
+	if (finishingAccepted)
+	    return true;
+	finishingAccepted = true;
+	return false;
     }
 }

@@ -158,6 +158,8 @@ class OperationArea extends NavigateArea implements OperationListener
 	final Operation op = event.operation;
 	if (op.isFinished())
 	{
+	    if (op.finishingAccepted())
+		return;
 	    luwrain.message(strings.operationCompletedMessage(op), op.getFinishCode() == Operation.OK?Luwrain.MESSAGE_OK:Luwrain.MESSAGE_ERROR);
 	    actions.refreshPanels();//Update list of files on opened panels;
 	}

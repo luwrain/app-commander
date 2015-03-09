@@ -26,6 +26,8 @@ public interface Operation extends Runnable
     public static final int PROBLEM_WRITING_FILE = 5;
     public static final int INTERRUPTED = 6;
     public static final int INACCESSIBLE_SOURCE = 7;
+    public static final int PROBLEM_CREATING_DIRECTORY = 8;
+    public static final int UNEXPECTED_PROBLEM = 9;
 
     String getOperationName();
     int getPercents();
@@ -33,4 +35,5 @@ public interface Operation extends Runnable
     boolean isFinished();
     int getFinishCode();
     String getExtInfo();
+    boolean finishingAccepted();
 }

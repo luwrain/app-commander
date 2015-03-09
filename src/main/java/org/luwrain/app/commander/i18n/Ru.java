@@ -124,7 +124,7 @@ public class Ru implements org.luwrain.app.commander.Strings
 	switch (op.getFinishCode())
 	{
 	case Operation.OK:
-	    return op.getOperationName() + ": Готово";
+	    return "Готово: " + op.getOperationName();
 	case Operation.INTERRUPTED:
 	    return op.getOperationName() + ": Прервано пользователем";
 	default:
