@@ -144,8 +144,12 @@ public class Move implements Operation
 	} //Preparing destination;
 
 	//If destination directory didn't exist and we are copying a single directory we should put its content instead of it itself;
+	File srcBeforeReplace = null;
 	if (!destReady && moveFrom.length == 1 && moveFrom[0].isDirectory())
+	{
+	    srcBeforeReplace = moveFrom[0];
 	    moveFrom = moveFrom[0].listFiles();
+	}
 
 	try {
 	    moveRecurse(moveFrom, moveTo);
@@ -157,6 +161,25 @@ public class Move implements Operation
 	    finished = true;
 	    return;
 	}
+	try {
+	    if (srcBeforeReplace != null)
+		if (!srcBeforeReplace.delete())
+		{
+		    code = PROBLEM_DELETING_DIRECTORY;
+		    extInfo = srcBeforeReplace.getAbsolutePath();
+		    finished = true;
+		    return;
+		}
+	}
+	catch (Throwable t)
+	{
+	    t.printStackTrace();
+		    code = PROBLEM_DELETING_DIRECTORY;
+		    extInfo = srcBeforeReplace.getAbsolutePath();
+		    finished = true;
+		    return;
+	}
+
 	code = OK;
 	finished = true;
     }

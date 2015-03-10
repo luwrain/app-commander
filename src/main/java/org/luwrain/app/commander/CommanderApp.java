@@ -33,14 +33,18 @@ public class CommanderApp implements Application, Actions
     private PanelArea leftPanel;
     private PanelArea rightPanel;
     private OperationArea operations;
+    private File startFrom;
 
     public CommanderApp()
     {
+	startFrom = null;
     }
 
     public CommanderApp(String arg)
     {
-	//FIXME:
+	if (arg == null)
+	    throw new NullPointerException("arg may not be null");
+	this.startFrom = new File(arg);
     }
 
     @Override public boolean onLaunch(Luwrain luwrain)
@@ -50,8 +54,12 @@ public class CommanderApp implements Application, Actions
 	    return false;
 	this.luwrain = luwrain;
 	strings = (Strings)o;
-	leftPanel = new PanelArea(luwrain, this, strings, PanelArea.LEFT);
-	rightPanel = new PanelArea(luwrain, this, strings, PanelArea.RIGHT);
+	leftPanel = new PanelArea(luwrain, this, strings, 
+				  startFrom != null?startFrom:luwrain.launchContext().userHomeDirAsFile(),
+				  PanelArea.LEFT);
+	rightPanel = new PanelArea(luwrain, this, strings, 
+				   startFrom != null?startFrom:luwrain.launchContext().userHomeDirAsFile(),
+				   PanelArea.RIGHT);
 	operations = new OperationArea(luwrain, this, strings);
 	return true;
     }

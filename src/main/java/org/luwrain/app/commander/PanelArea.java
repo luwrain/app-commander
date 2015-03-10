@@ -37,11 +37,12 @@ public class PanelArea extends CommanderArea
     public PanelArea(Luwrain luwrain,
 		     Actions actions,
 		     Strings strings,
+		     File startFrom,
 		     int side)
     {
 	super(new DefaultControlEnvironment(luwrain),
 	      luwrain.os(),
-	      luwrain.launchContext().userHomeDirAsFile(),
+	      startFrom,
 	      true,
 	      new NoHiddenCommanderFilter(),
 	      new ByNameCommanderComparator());
@@ -59,16 +60,34 @@ public class PanelArea extends CommanderArea
 
     @Override protected boolean onClick(File current, File[] selected)
     {
-	//FIXM :
-	return false;
+	if (selected == null)
+	    return false;
+	System.out.println("click " + selected.length);
+	final String fileNames[] = new String[selected.length];
+	for(int i = 0;i < selected.length;++i)
+	    fileNames[i] = selected[i].getAbsolutePath();
+							luwrain.openFiles(fileNames);
+	return true;
     }
 
     @Override public boolean onKeyboardEvent(KeyboardEvent event)
     {
 	if (event == null)
 	    throw new NullPointerException("event may not be null");
-	if (!event.isCommand())
-	    return super.onKeyboardEvent(event);
+	if (!event.isCommand() && !event.isModified())
+	    switch(event.getCharacter())
+	    {
+	    case '=':
+		setFilter(new AllFilesCommanderFilter());
+		refresh();
+		return true;
+	    case '-':
+		setFilter(new NoHiddenCommanderFilter());
+		refresh();
+		return true;
+	    default:
+		return super.onKeyboardEvent(event);
+	    }
 	if (event.getCommand() == KeyboardEvent.F1 && event.withLeftAltOnly())
 	{
 	    actions.selectLocationsLeft();
