@@ -41,4 +41,5 @@ public interface Strings
     String notAllOperationsFinished();
     String cancelOperationPopupName();
     String cancelOperationPopupText(Operation op);
+    String bytesNum(long num);
 }

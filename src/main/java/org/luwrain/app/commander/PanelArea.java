@@ -24,6 +24,8 @@ import org.luwrain.core.events.*;
 import org.luwrain.controls.*;
 import org.luwrain.core.Registry;
 
+import org.luwrain.app.commander.operations.TotalSize;
+
 public class PanelArea extends CommanderArea
 {
     public static final int LEFT = 1;
@@ -88,6 +90,8 @@ public class PanelArea extends CommanderArea
 	    default:
 		return super.onKeyboardEvent(event);
 	    }
+	if (!event.isCommand())
+	    return super.onKeyboardEvent(event);
 	if (event.getCommand() == KeyboardEvent.F1 && event.withLeftAltOnly())
 	{
 	    actions.selectLocationsLeft();
@@ -98,6 +102,8 @@ public class PanelArea extends CommanderArea
 	    actions.selectLocationsRight();
 	    return true;
 	}
+	if (event.getCommand() == KeyboardEvent.ENTER && event.withControlOnly())
+	    return onShortInfo(event);
 	if (event.isModified())
 	    return super.onKeyboardEvent(event);
 	switch(event.getCommand())
@@ -153,19 +159,23 @@ public class PanelArea extends CommanderArea
 	}
     }
 
-    /*
-    private boolean onOpen(EnvironmentEvent event)
+    private boolean onShortInfo(KeyboardEvent event)
     {
-	if (current == null || !current.isDirectory())
-	    return false;
-	//	File f = luwrain.openPopup(null, null, current);
-	File f = null;//FIXME:
+	final File[] f = selected();
 	if (f == null)
-	    return true;
-	if (f.isDirectory())
-	    openByFile(f); else
-	    luwrain.openFile(f.getAbsolutePath());
+	    return false;
+	long res = 0;
+	try {
+	    for(File ff: f)
+		res += TotalSize.getTotalSize(ff);
+	}
+	catch (Throwable e)
+	{
+	    e.printStackTrace();
+	    return false;
+	}
+	luwrain.message(strings.bytesNum(res));
 	return true;
     }
-    */
+
 }

@@ -211,4 +211,33 @@ public class Ru implements org.luwrain.app.commander.Strings
 	    return afterTwo;
 	return afterZero;
     }
+
+    @Override public String bytesNum(long num)
+    {
+	if (num > 1024 * 1024 * 1024)
+	{
+	    final long g = num / (1024 * 1024 * 1024);
+	    long rest = num - (g * 1024 * 1024 * 1024);
+	    rest /= (102 * 1024 * 1024);
+	    return g + "," + rest + "ГБ";
+	}
+	if (num > 1024 * 1024)
+	{
+	    final long m = num / (1024 * 1024);
+	    long rest = num - (m * 1024 * 1024);
+	    rest /= (102 * 1024);
+	    return m + "," + rest + "МБ";
+	}
+	if (num > 1024)
+	{
+	    final long k = num / 1024;
+	    long rest = num - (k * 1024);
+	    rest /= 102;
+	    return k + "," + rest + "КБ";
+	}
+	return "" + num + "Б";
+    }
+
+
+
 }
