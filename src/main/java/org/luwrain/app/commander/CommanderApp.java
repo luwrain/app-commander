@@ -187,6 +187,7 @@ public class CommanderApp implements Application, Actions
 	    return true;
 	}
 	refreshPanels();
+	luwrain.message(strings.mkdirOkMessage(), Luwrain.MESSAGE_OK);
 	return true;
     }
 

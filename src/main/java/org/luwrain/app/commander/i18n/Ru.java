@@ -100,6 +100,11 @@ public class Ru implements org.luwrain.app.commander.Strings
 	return "Каталог по указанному пути не может быть создан";
     }
 
+    @Override public String mkdirOkMessage()
+    {
+	return "Каталог успешно создан";
+    }
+
     @Override public String delPopupName()
     {
 	return "Удаление";
