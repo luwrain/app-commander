@@ -128,7 +128,7 @@ class OperationArea extends NavigateArea implements OperationListener
 	}
     }
 
-    @Override public String getName()
+    @Override public String getAreaName()
     {
 	return strings.operationsAreaName();
     }

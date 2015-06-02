@@ -142,10 +142,10 @@ public class PanelArea extends CommanderArea
 	    switch (side)
 	    {
 	    case LEFT:
-		luwrain.say(strings.leftPanel() + " " + getName());
+		luwrain.say(strings.leftPanel() + " " + getAreaName());
 		break;
 	    case RIGHT:
-		luwrain.say(strings.rightPanel() + " " + getName());
+		luwrain.say(strings.rightPanel() + " " + getAreaName());
 		break;
 	    }
     return true;
