@@ -1,14 +1,14 @@
 /*
-   Copyright 2012-2015 Michael Pozhidaev <msp@altlinux.org>
+   Copyright 2012-2015 Michael Pozhidaev <michael.pozhidaev@gmail.com>
 
-   This file is part of the Luwrain.
+   This file is part of the LUWRAIN.
 
-   Luwrain is free software; you can redistribute it and/or
+   LUWRAIN is free software; you can redistribute it and/or
    modify it under the terms of the GNU General Public
    License as published by the Free Software Foundation; either
    version 3 of the License, or (at your option) any later version.
 
-   Luwrain is distributed in the hope that it will be useful,
+   LUWRAIN is distributed in the hope that it will be useful,
    but WITHOUT ANY WARRANTY; without even the implied warranty of
    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
    General Public License for more details.
@@ -24,11 +24,12 @@ import org.luwrain.core.*;
 import org.luwrain.popups.*;
 import org.luwrain.app.commander.operations.*;
 
-public class CommanderApp implements Application, Actions
+class CommanderApp implements Application, Actions
 {
-    public static final String STRINGS_NAME = "luwrain.commander";
+    static private final String STRINGS_NAME = "luwrain.commander";
 
     private Luwrain luwrain;
+    private final Base base = new Base();
     private Strings strings;
     private PanelArea leftPanel;
     private PanelArea rightPanel;
@@ -49,11 +50,13 @@ public class CommanderApp implements Application, Actions
 
     @Override public boolean onLaunch(Luwrain luwrain)
     {
-	Object o =  luwrain.i18n().getStrings(STRINGS_NAME);
+	final Object o =  luwrain.i18n().getStrings(STRINGS_NAME);
 	if (o == null || !(o instanceof Strings))
 	    return false;
-	this.luwrain = luwrain;
 	strings = (Strings)o;
+	this.luwrain = luwrain;
+	if (!base.init(luwrain, strings))
+	    return false;
 	leftPanel = new PanelArea(luwrain, this, strings, 
 				  startFrom != null?startFrom:luwrain.launchContext().userHomeDirAsFile(),
 				  PanelArea.LEFT);
@@ -149,45 +152,12 @@ public class CommanderApp implements Application, Actions
 
     @Override public boolean mkdir(int panelSide)
     {
-	File createIn = panelSide == PanelArea.LEFT?leftPanel.opened():rightPanel.opened();
+	final File createIn = panelSide == PanelArea.LEFT?leftPanel.opened():rightPanel.opened();
 	if (createIn == null)
 	    return false;
-	File f = Popups.file(luwrain,
-			     strings.mkdirPopupName(),
-			     strings.mkdirPopupPrefix(),
-			     createIn,
-			     FilePopup.ANY, 0);
-	if (f == null)
+	if (!base.mkdir(createIn))
 	    return true;
-	try {
-	    Path p = f.toPath();
-	    Vector<File> parents = new Vector<File>();
-	    while (p != null)
-	    {
-		parents.add(p.toFile());
-		p = p.getParent();
-	    }
-	    if (parents.isEmpty())
-		return true;
-	    for(int i = parents.size();i > 0;--i)
-	    {
-		final File ff = parents.get(i - 1);
-		if (!ff.isDirectory())
-		    if (!ff.mkdir())
-		    {
-			luwrain.message(strings.mkdirErrorMessage(), Luwrain.MESSAGE_ERROR);
-			return true;
-		    }
-	    }
-	}
-	catch (Throwable t)
-	{
-	    t.printStackTrace();
-	    luwrain.message(strings.mkdirErrorMessage(), Luwrain.MESSAGE_ERROR);
-	    return true;
-	}
 	refreshPanels();
-	luwrain.message(strings.mkdirOkMessage(), Luwrain.MESSAGE_OK);
 	return true;
     }
 
@@ -213,40 +183,6 @@ public class CommanderApp implements Application, Actions
 	rightPanel.refresh();
     }
 
-    @Override public boolean openPopup(int side)
-    {
-	File current = null;
-	switch(side)
-	{
-	case PanelArea.LEFT:
-	    current = leftPanel.opened();
-	    break;
-	case PanelArea.RIGHT:
-	    current = rightPanel.opened();
-	    break;
-	default:
-	    return false;
-	}
-	final File f = Popups.open(luwrain, current, Popup.WEAK);
-	if (f == null)
-	    return true;
-	if (!f.isDirectory())
-	{
-	    luwrain.openFiles(new String[]{f.getAbsolutePath()});
-	    return true;
-	}
-	if (side == PanelArea.LEFT)
-	{
-	    leftPanel.open(f, null);
-	    luwrain.setActiveArea(leftPanel);
-	} else
-	{
-	    rightPanel.open(f, null);
-	    luwrain.setActiveArea(rightPanel);
-	}
-	return true;
-    }
-
     @Override public AreaLayout getAreasToShow()
     {
 	return new AreaLayout(AreaLayout.LEFT_RIGHT_BOTTOM, leftPanel, rightPanel, operations);
@@ -267,7 +203,7 @@ public class CommanderApp implements Application, Actions
 	luwrain.setActiveArea(operations);
     }
 
-    @Override public void close()
+    @Override public void closeApp()
     {
 	if (!operations.allOperationsFinished())
 	{
