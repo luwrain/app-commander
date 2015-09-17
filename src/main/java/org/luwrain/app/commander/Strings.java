@@ -33,7 +33,7 @@ public interface Strings
     String mkdirPopupName();
     String mkdirPopupPrefix();
     String mkdirErrorMessage();
-    String mkdirOkMessage();
+    String mkdirOkMessage(String dirName);
     String delPopupName();
     String delPopupText(File[] files);
     String delOperationName(File[] filesToDelete);

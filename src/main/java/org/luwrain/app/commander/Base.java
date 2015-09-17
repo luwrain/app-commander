@@ -71,7 +71,7 @@ class Base
 	    luwrain.message(strings.mkdirErrorMessage(), Luwrain.MESSAGE_ERROR);
 	    return false;
 	}
-	luwrain.playSound(Sounds.MESSAGE_OK);
+	luwrain.message(strings.mkdirOkMessage(f.getName()), Luwrain.MESSAGE_OK);
 	return true;
     }
 }
