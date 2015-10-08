@@ -74,4 +74,49 @@ class Base
 	luwrain.message(strings.mkdirOkMessage(f.getName()), Luwrain.MESSAGE_OK);
 	return true;
     }
+
+    boolean openReader(File[] files)
+    {
+	NullCheck.notNull(files, "files");
+	for(File f: files)
+	    if (f.isDirectory())
+	{
+	    luwrain.message("Просмотр не применим к каталогам", Luwrain.MESSAGE_ERROR);
+	    return false;
+	}
+	final Object  o = luwrain.getSharedObject("luwrain.reader.formats");
+	if (!(o instanceof String[]))
+	    return false;
+	final String[] formats = (String[])o;
+	final String[] formatsStr = new String[formats.length];
+	for(int i = 0;i < formats.length;++i)
+	{
+	    final int pos = formats[i].indexOf(":");
+	    if (pos < 0 || pos + 1 >= formats[i].length())
+	    {
+		formatsStr[i] = formats[i];
+		continue;
+	    }
+	    formatsStr[i] = formats[i].substring(pos + 1);
+	}
+	final Object selected = Popups.fixedList(luwrain, "Выберите формат для просмотра:", formatsStr, 0);//FIXME:
+	if (selected == null)
+	    return false;
+	String format = null;
+	for(int i = 0;i < formatsStr.length;++i)
+	    if (selected == formatsStr[i])
+		format = formats[i];
+	if (format == null)
+	    return false;
+	final int pos = format.indexOf(":");
+	if (pos < 1)
+	    return false;
+	final String id = format.substring(0, pos);
+	for(File f: files)
+	    luwrain.launchApp("reader", new String[]{
+		    f.getAbsolutePath(),
+		    id,
+		});
+	return true;
+    }
 }

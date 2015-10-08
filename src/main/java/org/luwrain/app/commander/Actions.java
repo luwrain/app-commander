@@ -22,6 +22,7 @@ interface Actions
     void gotoRightPanel();
     void gotoOperations();
     void closeApp();
+    boolean openReader(int panelSide);
     void refreshPanels();
     void selectLocationsLeft();
     void selectLocationsRight();

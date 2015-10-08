@@ -152,9 +152,25 @@ public class PanelArea extends CommanderArea
 	case EnvironmentEvent.CLOSE:
 	    actions.closeApp();
 	    return true;
+	case EnvironmentEvent.ACTION:
+	    if (ActionEvent.isAction(event, "read"))
+	    {
+		actions.openReader(side);
+		return true;
+	    }
+	    return false;
+
 	default:
 	    return super.onEnvironmentEvent(event);
 	}
+    }
+
+    @Override public Action[] getAreaActions()
+    {
+	return new Action[]{
+	    new Action("open", "Открыть"),
+	    new Action("read", "Просмотреть с указанием формата"),
+	};
     }
 
     private boolean onShortInfo(KeyboardEvent event)

@@ -90,6 +90,26 @@ class CommanderApp implements Application, Actions
 	luwrain.setActiveArea(rightPanel);
     }
 
+    @Override public boolean openReader(int panelSide)
+    {
+	File[] files = null;
+	switch(panelSide)
+	{
+	case PanelArea.LEFT:
+	    files = leftPanel.selected();
+	    break;
+	case PanelArea.RIGHT:
+	    files = rightPanel.selected();
+	    break;
+	default:
+	    return false;
+	}
+	if (files == null || files.length < 1)
+	    return false;
+	base.openReader(files);
+	return true;
+    }
+
     @Override public boolean copy(int panelSide)
     {
 	File[] filesToCopy = null;
