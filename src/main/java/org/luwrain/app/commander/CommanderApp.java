@@ -74,7 +74,7 @@ class CommanderApp implements Application, Actions
 
     @Override public void selectLocationsLeft()
     {
-	final File f = Popups.importantLocationsAsFile(luwrain, Popup.WEAK);
+	final File f = Popups.mountedPartitionsAsFile(luwrain, Popup.WEAK);
 	if (f == null)
 	    return;
 	leftPanel.open(f, null);
@@ -83,7 +83,7 @@ class CommanderApp implements Application, Actions
 
     @Override public void selectLocationsRight()
     {
-	final File f = Popups.importantLocationsAsFile(luwrain, Popup.WEAK);
+	final File f = Popups.mountedPartitionsAsFile(luwrain, Popup.WEAK);
 	if (f == null)
 	    return;
 	rightPanel.open(f, null);
