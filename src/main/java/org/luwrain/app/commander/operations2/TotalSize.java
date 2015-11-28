@@ -14,13 +14,14 @@
    General Public License for more details.
 */
 
-package org.luwrain.app.commander;
+package org.luwrain.app.commander.operations2;
 
-import java.nio.file.Path;
+import java.nio.file.*;
 
-public interface OperationListener
+class TotalSize
 {
-    void onOperationProgress(Operation operation);
-    boolean confirmOverwrite(Path path);
-    boolean confirmOverwrite();
+    static long getTotalSize(Path f) throws OperationException
+    {
+	return 0;
+    }
 }

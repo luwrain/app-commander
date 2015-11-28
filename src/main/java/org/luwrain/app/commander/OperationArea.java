@@ -17,6 +17,7 @@
 package org.luwrain.app.commander;
 
 import java.util.*;
+import java.nio.file.*;
 
 import org.luwrain.core.*;
 import org.luwrain.core.events.*;
@@ -212,4 +213,16 @@ class OperationArea extends NavigateArea implements OperationListener
 	    return op.getOperationName() + "...";
 	return  percents + "%, "+ op.getOperationName();
 }
+
+    @Override public boolean confirmOverwrite(Path path)
+    {
+	return true;
+    }
+
+    @Override public boolean confirmOverwrite()
+    {
+	return true;
+    }
+
+
 }

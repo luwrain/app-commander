@@ -33,6 +33,12 @@ public interface Operation extends Runnable
 
     public static final int MOVING_NON_FILE_TO_FILE = 12;
 
+    public static final int DEST_EXISTS_NOT_REGULAR = 20;
+    public static final int DEST_EXISTS = 21;
+    public static final int DEST_EXISTS_NOT_DIR = 22;
+
+    public static final int NOT_CONFIRMED_OVERWRITE = 25;
+
     String getOperationName();
     int getPercents();
     void interrupt();
