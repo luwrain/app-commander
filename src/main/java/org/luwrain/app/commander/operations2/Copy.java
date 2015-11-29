@@ -22,14 +22,19 @@ import java.nio.file.Path;
 import org.luwrain.core.NullCheck;
 import org.luwrain.app.commander.OperationListener;
 
-/*
- * Overwrites only regular files
- * Symlinks are always saved
- * Files of other types silently skipped*/
-
-
-
-
+/**
+ * Implementation of the files copying procedure. To make its behaviour
+ * more predictable, impose three simple rules, which this algorithm must
+ * always follow:
+ *
+ * <ul>
+ * <li>Only regular files may be overwritten if they are exist</li>
+ * <li>Symlinks are always copied as symlinks (their copying never led to
+ * creating of regular files or directories)</li>
+ * <li>Files of other types than regular files, directories or symlinks are
+ * silently skipped</li>
+ * </ul>
+ */
 class Copy extends Base
 {
     private Path[] copyFrom;
@@ -41,7 +46,7 @@ class Copy extends Base
     private boolean overwriteApproved = false;
 
     Copy(OperationListener listener, String opName,
-		Path[] copyFrom, Path copyTo)
+	 Path[] copyFrom, Path copyTo)
     {
 	super(listener, opName);
 	this.copyFrom = copyFrom;
@@ -138,7 +143,7 @@ class Copy extends Base
 	copySingleFile(file, destDir.resolve(file.getFileName()));
     }
 
-//Saves the symlinks and asks confirmation if overriteApproved is false
+    //Saves the symlinks and asks confirmation if overriteApproved is false
     private void copySingleFile(Path fromFile, Path toFile) throws OperationException
     {
 	if (isSymlink(fromFile))

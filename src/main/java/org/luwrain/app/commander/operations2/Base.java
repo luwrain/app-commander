@@ -1,8 +1,25 @@
+/*
+   Copyright 2012-2015 Michael Pozhidaev <michael.pozhidaev@gmail.com>
+
+   This file is part of the LUWRAIN.
+
+   LUWRAIN is free software; you can redistribute it and/or
+   modify it under the terms of the GNU General Public
+   License as published by the Free Software Foundation; either
+   version 3 of the License, or (at your option) any later version.
+
+   LUWRAIN is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+   General Public License for more details.
+*/
 
 package org.luwrain.app.commander.operations2;
 
+import java.util.*;
 import java.io.*;
 import java.nio.file.*;
+import java.nio.file.attribute.*;
 
 import org.luwrain.core.NullCheck;
 import org.luwrain.app.commander.Operation;
@@ -40,7 +57,7 @@ abstract class Base implements Operation
 	    work();
 	    opCode = OK;
 	    finished = true;
-	    }
+	}
 	catch (OperationException e)
 	{
 	    e.printStackTrace();
@@ -117,7 +134,6 @@ abstract class Base implements Operation
     {
 	try {
 	    stream.write(buf, 0, len);
-
 	}
 	catch(Throwable e)
 	{
@@ -171,7 +187,7 @@ abstract class Base implements Operation
     {
 	return extInfo != null?extInfo:"";
     }
-    
+
     @Override public boolean finishingAccepted()
     {
 	if (finishingAccepted)
@@ -182,41 +198,92 @@ abstract class Base implements Operation
 
     protected boolean isDirectory(Path path, boolean followSymlinks) throws OperationException
     {
-	//FIXME:
-	return true;
+	try {
+	    if (followSymlinks)
+		return Files.isDirectory(path); else
+		return Files.isDirectory(path, LinkOption.NOFOLLOW_LINKS);
+	}
+	catch(Throwable e)
+	{
+	    throw new OperationException(UNEXPECTED_PROBLEM, path.toString());
+	}
     }
 
     protected Path[] getDirContent(Path path) throws OperationException
     {
-	//FIXME:
-	return null;
+	final LinkedList<Path> res = new LinkedList<Path>();
+	final FileVisitor visitor = new SimpleFileVisitor<Path>() {
+	    @Override public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException
+	    {
+		res.add(file);
+		return FileVisitResult.CONTINUE;
+	    }
+	    @Override public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attr) throws IOException
+	    {
+		res.add(dir);
+		return FileVisitResult.SKIP_SUBTREE;
+	    }
+	};
+	//         Files.walkFileTree(start, new SimpleFileVisitor<Path>() {
+	return res.toArray(new Path[res.size()]);
     }
 
     protected boolean isSymlink(Path path) throws OperationException
     {
-	//FIXME:
-	return false;
+	try {
+	    return Files.isSymbolicLink(path);
+	}
+	catch (Throwable e)
+	{
+	    throw new OperationException(UNEXPECTED_PROBLEM, path.toString());
+	}
     }
 
     protected boolean isRegularFile(Path path, boolean followSymlinks) throws OperationException
     {
-	//FIXME:
-	return false;
+	try {
+	    if (followSymlinks)
+		return Files.isRegularFile(path); else
+		return Files.isRegularFile(path, LinkOption.NOFOLLOW_LINKS);
+	}
+	catch(Throwable  e)
+	{
+	    throw new OperationException(UNEXPECTED_PROBLEM, path.toString());
+	}
     }
 
     protected boolean exists(Path path, boolean followSymlinks) throws OperationException
     {
-	//FIXME:
-	return false;
+	try {
+	    if (followSymlinks)
+		return Files.exists(path); else
+		return Files.exists(path, LinkOption.NOFOLLOW_LINKS);
+	}
+	catch(Throwable e)
+	{
+	    throw new OperationException(UNEXPECTED_PROBLEM, path.toString());
+	}
     }
 
     protected void createSymlink(Path symlink, Path dest) throws OperationException
     {
-	//FIXME:
+	try {
+	    Files.createSymbolicLink(symlink, dest);
+	}
+	catch(Throwable e)
+	{
+	    throw new OperationException(PROBLEM_CREATING_SYMLINK, symlink.toString(), e);
+	}
     }
 
     protected Path readSymlink(Path path) throws OperationException
     { 
-	return null;
+	try {
+	    return Files.readSymbolicLink(path);
+	}
+	catch(Throwable e)
+	{
+	    throw new OperationException(PROBLEM_READING_SYMLINK, path.toString(), e);
+	}
     }
 }

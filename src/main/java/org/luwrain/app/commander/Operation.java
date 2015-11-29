@@ -39,6 +39,10 @@ public interface Operation extends Runnable
 
     public static final int NOT_CONFIRMED_OVERWRITE = 25;
 
+    public static final int PROBLEM_READING_SYMLINK = 30;
+    public static final int PROBLEM_CREATING_SYMLINK = 31;
+
+
     String getOperationName();
     int getPercents();
     void interrupt();
