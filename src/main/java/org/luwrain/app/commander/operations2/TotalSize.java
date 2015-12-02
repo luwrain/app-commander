@@ -16,12 +16,27 @@
 
 package org.luwrain.app.commander.operations2;
 
+import java.io.*;
 import java.nio.file.*;
+import java.nio.file.attribute.*;
 
-class TotalSize
+public class TotalSize
 {
-    static long getTotalSize(Path f) throws OperationException
+    static private class Visitor extends SimpleFileVisitor<Path>
     {
-	return 0;
+	long res = 0;
+
+	@Override public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException
+	{
+	    res += Files.size(file);
+		return FileVisitResult.CONTINUE;
+	}
+    }
+
+    static public long getTotalSize(Path f) throws IOException
+    {
+	final Visitor visitor = new Visitor();
+	Files.walkFileTree(f, visitor);
+	return visitor.res;
     }
 }

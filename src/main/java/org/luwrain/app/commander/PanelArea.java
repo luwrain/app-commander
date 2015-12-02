@@ -74,11 +74,12 @@ public class PanelArea extends CommanderArea
 
     @Override public boolean onKeyboardEvent(KeyboardEvent event)
     {
-	if (event == null)
-	    throw new NullPointerException("event may not be null");
+	NullCheck.notNull(event, "event");
 	if (!event.isCommand() && !event.isModified())
 	    switch(event.getCharacter())
 	    {
+	    case ' ':
+		return calcSize();
 	    case '=':
 		setFilter(new AllFilesCommanderFilter());
 		refresh();
@@ -189,6 +190,26 @@ public class PanelArea extends CommanderArea
 	    return false;
 	}
 	luwrain.message(strings.bytesNum(res));
+	return true;
+    }
+
+    private boolean calcSize()
+    {
+	final File[] f = selected();
+	if (f == null || f.length < 1)
+	    return false;
+	long res = 0;
+	try {
+	    for(File ff: f)
+		res += org.luwrain.app.commander.operations2.TotalSize.getTotalSize(ff.toPath());
+	}
+	catch (Throwable e)
+	{
+	    e.printStackTrace();
+	    luwrain.message("Невозможно получить необходимый доступ к файлам, возможно, недостаточно прав доступа", Luwrain.MESSAGE_ERROR);
+	    return true;
+	}
+	luwrain.message(strings.bytesNum(res), Luwrain.MESSAGE_DONE);
 	return true;
     }
 

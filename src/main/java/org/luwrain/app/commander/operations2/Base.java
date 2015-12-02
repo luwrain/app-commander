@@ -22,6 +22,7 @@ import java.nio.file.*;
 import java.nio.file.attribute.*;
 
 import org.luwrain.core.NullCheck;
+import org.luwrain.core.Log;
 import org.luwrain.app.commander.Operation;
 import org.luwrain.app.commander.OperationListener;
 
@@ -209,8 +210,9 @@ abstract class Base implements Operation
 	}
     }
 
-    protected Path[] getDirContent(Path path) throws OperationException
+    protected Path[] getDirContent(final Path path) throws OperationException
     {
+	status("enumerating items in " + path);
 	final LinkedList<Path> res = new LinkedList<Path>();
 	final FileVisitor visitor = new SimpleFileVisitor<Path>() {
 	    @Override public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException
@@ -220,11 +222,24 @@ abstract class Base implements Operation
 	    }
 	    @Override public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attr) throws IOException
 	    {
+		if (dir.equals(path))
+		return FileVisitResult.CONTINUE;
 		res.add(dir);
 		return FileVisitResult.SKIP_SUBTREE;
 	    }
 	};
-	//         Files.walkFileTree(start, new SimpleFileVisitor<Path>() {
+	try {
+	    Files.walkFileTree(path, visitor);
+	}
+	catch(Throwable e)
+	{
+	    throw new OperationException(INACCESSIBLE_SOURCE, path.toString(), e);
+	}
+	status("" + path + " contains " + res.size() + " items");
+	/*
+	for(Path p: res)
+	    status("" + p);
+	*/
 	return res.toArray(new Path[res.size()]);
     }
 
@@ -285,5 +300,10 @@ abstract class Base implements Operation
 	{
 	    throw new OperationException(PROBLEM_READING_SYMLINK, path.toString(), e);
 	}
+    }
+
+    protected void status(String message)
+    {
+	Log.debug("commander", message);
     }
 }

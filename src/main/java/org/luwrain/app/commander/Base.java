@@ -22,6 +22,7 @@ import java.nio.file.*;
 
 import org.luwrain.core.*;
 import org.luwrain.popups.*;
+import org.luwrain.app.commander.operations2.Operations;
 
 class Base
 {
@@ -117,6 +118,27 @@ class Base
 		    f.getAbsolutePath(),
 		    id,
 		});
+	return true;
+    }
+
+	//returns true if copying begings;
+    boolean copy(OperationArea operations,
+	      File[] filesToCopy, File copyTo)
+    {
+	NullCheck.notNull(operations, "operations");
+	NullCheck.notNull(filesToCopy, "filesToCopy");
+	NullCheck.notNull(copyTo, "copyTo");
+	final File dest = Popups.file(luwrain,
+				      strings.copyPopupName(), strings.copyPopupPrefix(filesToCopy),
+			     copyTo, FilePopup.ANY, 0);
+	if (dest == null)
+	    return false;
+	final Path[] pathFilesToCopy = new Path[filesToCopy.length];
+	for(int i = 0;i < filesToCopy.length;++i)
+	    pathFilesToCopy[i] = filesToCopy[i].toPath();
+	final Path pathDest = dest.toPath();
+ 	operations.launch(Operations.copy(operations, strings.copyOperationName(filesToCopy, dest), 
+				   pathFilesToCopy, pathDest));
 	return true;
     }
 }

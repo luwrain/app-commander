@@ -127,16 +127,10 @@ class CommanderApp implements Application, Actions
 	default:
 	    return false;
 	}
-	if (filesToCopy == null || filesToCopy.length < 1|| copyTo == null)
+	if (filesToCopy == null || filesToCopy.length < 1|| 
+	    copyTo == null)
 	    return false;
-	copyTo = Popups.file(luwrain,
-			     strings.copyPopupName(),
-			     strings.copyPopupPrefix(filesToCopy),
-			     copyTo,
-			     FilePopup.ANY, 0);
-	if (copyTo == null)
-	    return true;
- 	operations.launch(new Copy(operations, strings.copyOperationName(filesToCopy, copyTo), filesToCopy, copyTo));
+	base.copy(operations, filesToCopy, copyTo);
 	return true;
     }
 
