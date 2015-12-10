@@ -33,6 +33,8 @@ import org.luwrain.app.commander.OperationListener;
  * creating of regular files or directories)</li>
  * <li>Files of other types than regular files, directories or symlinks are
  * silently skipped</li>
+ * <li>Source files may not be given by relative pathes</li>
+ * <li>If the destination is given by a relative pathe, the parent of the first source used to resolve it</li>
  * </ul>
  */
 class Copy extends Base
@@ -77,9 +79,20 @@ class Copy extends Base
 		throw new OperationException(INACCESSIBLE_SOURCE, f.toString(), e);
 	    }
 	status("total size is " + totalBytes);
+	for(Path p: copyFrom)
+	    if (!p.isAbsolute())
+		throw new OperationException(RELATIVE_SOURCE_PATH, p.toString());
+	Path dest = copyTo;
+	if (!dest.isAbsolute())
+	{
+	    final Path parent = copyFrom[0].getParent();
+	    if (parent == null)
+		throw new OperationException(PROBLEM_CREATING_DIRECTORY, dest.toString());
+	    dest = parent.resolve(dest);
+	}
 	if (copyFrom.length == 1)
-	    singleSource(copyFrom[0], copyTo); else
-	    multipleSource(copyFrom, copyTo);
+	    singleSource(copyFrom[0], dest); else
+	    multipleSource(copyFrom, dest);
     }
 
     private void singleSource(Path fileFrom, Path fileTo) throws OperationException

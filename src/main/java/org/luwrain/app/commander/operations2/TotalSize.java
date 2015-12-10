@@ -28,7 +28,8 @@ public class TotalSize
 
 	@Override public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException
 	{
-	    res += Files.size(file);
+	    if (Files.isRegularFile(file, LinkOption.NOFOLLOW_LINKS))
+		res += Files.size(file);
 		return FileVisitResult.CONTINUE;
 	}
     }
