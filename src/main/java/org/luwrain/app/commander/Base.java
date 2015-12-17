@@ -126,7 +126,7 @@ class Base
 	      File[] filesToCopy, File copyTo)
     {
 	NullCheck.notNull(operations, "operations");
-	NullCheck.notNull(filesToCopy, "filesToCopy");
+	NullCheck.notNullItems(filesToCopy, "filesToCopy");
 	NullCheck.notNull(copyTo, "copyTo");
 	final File dest = Popups.file(luwrain,
 				      strings.copyPopupName(), strings.copyPopupPrefix(filesToCopy),

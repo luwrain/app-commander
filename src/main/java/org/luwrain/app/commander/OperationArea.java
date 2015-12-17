@@ -26,44 +26,26 @@ import org.luwrain.popups.*;
 
 class OperationArea extends NavigateArea implements OperationListener
 {
-    class UpdateEvent extends ThreadSyncEvent
-    {
-	public Operation operation;
-
-	public UpdateEvent(Area destArea, Operation operation)
-	{
-	    super(destArea);
-	    this.operation = operation;
-	    if (operation == null)
-		throw new NullPointerException("operation may not be null");
-	}
-    }
-
     private Luwrain luwrain;
     private Strings strings;
     private Actions actions;
-    Vector<Operation> operations = new Vector<Operation>();
+    private final Vector<Operation> operations = new Vector<Operation>();
 
-    public OperationArea(Luwrain luwrain,
-		     Actions actions,
-		     Strings strings)
+    OperationArea(Luwrain luwrain,
+		     Actions actions, Strings strings)
     {
 	super(new DefaultControlEnvironment(luwrain));
 	this.luwrain = luwrain;
 	this.strings = strings;
 	this.actions = actions;
-	if (luwrain == null)
-	    throw new NullPointerException("luwrain may not be null");
-	if (strings == null)
-	    throw new NullPointerException("strings may not be null");
-	if (actions == null)
-	    throw new NullPointerException("actions may not be null");
+	NullCheck.notNull(luwrain, "luwrain");
+	NullCheck.notNull(strings, "strings");
+	NullCheck.notNull(luwrain, "luwrain");
     }
 
-    public void launch(Operation op)
+void launch(Operation op)
     {
-	if (op == null)
-	    throw new NullPointerException("op may not be null");
+	NullCheck.notNull(op, "op");
 	operations.add(op);
 	luwrain.onAreaNewContent(this);
 	new Thread(op).start();
@@ -81,8 +63,7 @@ class OperationArea extends NavigateArea implements OperationListener
 
     @Override public boolean onKeyboardEvent(KeyboardEvent event)
     {
-	if (event == null)
-	    throw new NullPointerException("event may not be null");
+	NullCheck.notNull(event, "event");
 	if (event.isCommand() &&
 	    event.getCommand() == KeyboardEvent.F1 &&
 	    event.withLeftAltOnly())
@@ -113,14 +94,9 @@ class OperationArea extends NavigateArea implements OperationListener
 
     @Override public boolean onEnvironmentEvent(EnvironmentEvent event)
     {
-	if (event == null)
-	    throw new NullPointerException("event may not be null");
+	NullCheck.notNull(event, "event");
 	switch(event.getCode())
 	{
-	case EnvironmentEvent.THREAD_SYNC:
-	    if (event instanceof UpdateEvent)
-		onUpdate((UpdateEvent)event);
-	    return true;
 	case EnvironmentEvent.CLOSE:
 	    actions.closeApp();
 	    return true;
@@ -134,19 +110,12 @@ class OperationArea extends NavigateArea implements OperationListener
 	return strings.operationsAreaName();
     }
 
-    @Override public synchronized  void onOperationProgress(Operation operation)
-    {
-	if (operation == null)
-	    throw new NullPointerException("operation may not be null");
-	luwrain.enqueueEvent(new UpdateEvent(this, operation));
-    }
-
-    public boolean hasOperations()
+    boolean hasOperations()
     {
 	return !operations.isEmpty();
     }
 
-    public boolean allOperationsFinished()
+    boolean allOperationsFinished()
     {
 	for(Operation op:operations)
 	    if (!op.isFinished())
@@ -184,19 +153,18 @@ class OperationArea extends NavigateArea implements OperationListener
 	return true;
     }
 
-    private void onUpdate(UpdateEvent event)
+    private void onUpdate(Operation issuer)
     {
 	int index = 0;
-	while(index < operations.size() && operations.get(index) != event.operation)
+	while(index < operations.size() && operations.get(index) != issuer)
 	    ++index;
 	if (index >= operations.size())
-	    throw new IllegalArgumentException("event addresses an unknown operation");
-	final Operation op = event.operation;
-	if (op.isFinished())
+	    return;
+	if (issuer.isFinished())
 	{
-	    if (op.finishingAccepted())
+	    if (issuer.finishingAccepted())
 		return;
-	    luwrain.message(strings.operationCompletedMessage(op), op.getFinishCode() == Operation.OK?Luwrain.MESSAGE_OK:Luwrain.MESSAGE_ERROR);
+	    luwrain.message(strings.operationCompletedMessage(issuer), issuer.getFinishCode() == Operation.OK?Luwrain.MESSAGE_OK:Luwrain.MESSAGE_ERROR);
 	    actions.refreshPanels();//Update list of files on opened panels;
 	}
 	luwrain.onAreaNewContent(this);
@@ -212,7 +180,13 @@ class OperationArea extends NavigateArea implements OperationListener
 	if (percents == 0)
 	    return op.getOperationName() + "...";
 	return  percents + "%, "+ op.getOperationName();
-}
+    }
+
+    @Override public void onOperationProgress(Operation operation)
+    {
+	NullCheck.notNull(operation, "operation");
+	luwrain.runInMainThread(()->onUpdate(operation));
+    }
 
     @Override public boolean confirmOverwrite(Path path)
     {
@@ -223,6 +197,4 @@ class OperationArea extends NavigateArea implements OperationListener
     {
 	return true;
     }
-
-
 }
