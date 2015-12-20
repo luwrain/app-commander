@@ -59,17 +59,12 @@ class CommanderApp implements Application, Actions
 	    return false;
 	leftPanel = new PanelArea(luwrain, this, strings, 
 				  startFrom != null?startFrom:luwrain.launchContext().userHomeDirAsFile(),
-				  PanelArea.LEFT);
+				  PanelArea.Side.LEFT);
 	rightPanel = new PanelArea(luwrain, this, strings, 
 				   startFrom != null?startFrom:luwrain.launchContext().userHomeDirAsFile(),
-				   PanelArea.RIGHT);
+				   PanelArea.Side.RIGHT);
 	operations = new OperationArea(luwrain, this, strings);
 	return true;
-    }
-
-    @Override public String getAppName()
-    {
-	return strings.appName();
     }
 
     @Override public void selectLocationsLeft()
@@ -77,7 +72,7 @@ class CommanderApp implements Application, Actions
 	final File f = Popups.mountedPartitionsAsFile(luwrain, Popup.WEAK);
 	if (f == null)
 	    return;
-	leftPanel.open(f, null);
+	leftPanel.open(f.toPath(), null);
 	luwrain.setActiveArea(leftPanel);
     }
 
@@ -86,20 +81,20 @@ class CommanderApp implements Application, Actions
 	final File f = Popups.mountedPartitionsAsFile(luwrain, Popup.WEAK);
 	if (f == null)
 	    return;
-	rightPanel.open(f, null);
+	rightPanel.open(f.toPath(), null);
 	luwrain.setActiveArea(rightPanel);
     }
 
-    @Override public boolean openReader(int panelSide)
+    @Override public boolean openReader(PanelArea.Side panelSide)
     {
 	File[] files = null;
 	switch(panelSide)
 	{
-	case PanelArea.LEFT:
-	    files = leftPanel.selected();
+	case LEFT:
+	    files = leftPanel.selectedAsFiles();
 	    break;
-	case PanelArea.RIGHT:
-	    files = rightPanel.selected();
+	case RIGHT:
+	    files = rightPanel.selectedAsFiles();
 	    break;
 	default:
 	    return false;
@@ -110,43 +105,35 @@ class CommanderApp implements Application, Actions
 	return true;
     }
 
-    @Override public boolean copy(int panelSide)
+    @Override public boolean copy(PanelArea.Side panelSide)
     {
-	File[] filesToCopy = null;
-	File copyTo = null;
-	switch(panelSide)
-	{
-	case PanelArea.LEFT:
-	    filesToCopy = leftPanel.selected();
-	    copyTo= rightPanel.opened(); 
-	    break;
-	case PanelArea.RIGHT:
-	    filesToCopy = rightPanel.selected();
-	    copyTo= leftPanel.opened(); 
-	    break;
-	default:
-	    return false;
-	}
+	final PanelArea fromPanel = getPanel(panelSide);
+	final PanelArea toPanel = getAnotherPanel(panelSide);
+	final Path copyFromDir = fromPanel.opened();
+	final Path[] filesToCopy = fromPanel.selected();
+	final Path copyTo = toPanel.opened();
 	if (filesToCopy == null || filesToCopy.length < 1|| 
-	    copyTo == null)
+	    copyFromDir == null || copyTo == null)
 	    return false;
-	base.copy(operations, filesToCopy, copyTo);
+	base.copy(operations, copyFromDir, filesToCopy, copyTo);
 	return true;
     }
 
-    @Override public boolean move(int panelSide)
+    @Override public boolean move(PanelArea.Side panelSide)
     {
+	return false;
+	/*
 	File[] filesToMove = null;
 	File moveTo = null;
 	switch(panelSide)
 	{
-	case PanelArea.LEFT:
-	    filesToMove = leftPanel.selected();
-	    moveTo= rightPanel.opened(); 
+	case LEFT:
+	    filesToMove = leftPanel.selectedAsFiles();
+	    moveTo= rightPanel.openedAsFile(); 
 	    break;
-	case PanelArea.RIGHT:
-	    filesToMove = rightPanel.selected();
-	    moveTo= leftPanel.opened(); 
+	case RIGHT:
+	    filesToMove = rightPanel.selectedAsFiles();
+	    moveTo= leftPanel.openedAsFile(); 
 	    break;
 	default:
 	    return false;
@@ -162,22 +149,27 @@ class CommanderApp implements Application, Actions
 	    return true;
  	operations.launch(new Move(operations, strings.moveOperationName(filesToMove, moveTo), filesToMove, moveTo));
 	return true;
+	*/
     }
 
-    @Override public boolean mkdir(int panelSide)
+    @Override public boolean mkdir(PanelArea.Side panelSide)
     {
-	final File createIn = panelSide == PanelArea.LEFT?leftPanel.opened():rightPanel.opened();
+	final PanelArea area = getPanel(panelSide);
+	final Path createIn = area.opened();
 	if (createIn == null)
 	    return false;
-	if (!base.mkdir(createIn))
+	final Path created = base.mkdir(createIn);
+	if (created == null)
 	    return true;
 	refreshPanels();
+	area.find(created.getFileName().toString(), false);
 	return true;
     }
 
-    @Override public boolean delete(int panelSide)
+
+    @Override public boolean delete(PanelArea.Side panelSide)
     {
-	File[] filesToDelete = panelSide == PanelArea.LEFT?leftPanel.selected():rightPanel.selected();
+	File[] filesToDelete = panelSide == PanelArea.Side.LEFT?leftPanel.selectedAsFiles():rightPanel.selectedAsFiles();
 	if (filesToDelete == null || filesToDelete.length < 1)
 	    return false;
 	YesNoPopup popup = new YesNoPopup(luwrain, strings.delPopupName(),
@@ -196,6 +188,34 @@ class CommanderApp implements Application, Actions
 	leftPanel.refresh();
 	rightPanel.refresh();
     }
+
+    private PanelArea getPanel(PanelArea.Side side)
+    {
+	switch(side)
+	{
+	case LEFT:
+	    return leftPanel;
+	case RIGHT:
+	    return rightPanel;
+	default:
+	    throw new IllegalArgumentException("Unknown panel side");
+	}
+    }
+
+    private PanelArea getAnotherPanel(PanelArea.Side side)
+    {
+	switch(side)
+	{
+	case LEFT:
+	    return rightPanel;
+	case RIGHT:
+	    return leftPanel;
+	default:
+	    throw new IllegalArgumentException("Unknown panel side");
+	}
+    }
+
+
 
     @Override public AreaLayout getAreasToShow()
     {
@@ -217,6 +237,11 @@ class CommanderApp implements Application, Actions
 	luwrain.setActiveArea(operations);
     }
 
+    @Override public String getAppName()
+    {
+	return strings.appName();
+    }
+
     @Override public void closeApp()
     {
 	if (!operations.allOperationsFinished())
@@ -230,5 +255,11 @@ class CommanderApp implements Application, Actions
     @Override public boolean hasOperations()
     {
 	return operations.hasOperations();
+    }
+
+
+    @Override public Settings settings()
+    {
+	return base.settings();
     }
 }

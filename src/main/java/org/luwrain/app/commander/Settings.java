@@ -16,20 +16,7 @@
 
 package org.luwrain.app.commander;
 
-interface Actions
+interface Settings
 {
-    void gotoLeftPanel();
-    void gotoRightPanel();
-    void gotoOperations();
-    void closeApp();
-    boolean openReader(PanelArea.Side panelSide);
-    void refreshPanels();
-    void selectLocationsLeft();
-    void selectLocationsRight();
-    boolean copy(PanelArea.Side panelSide);
-    boolean move(PanelArea.Side panelSide);
-    boolean mkdir(PanelArea.Side panelSide);
-    boolean delete(PanelArea.Side panelSide);
-    boolean hasOperations();
-    Settings settings();
+    String getZipFilesEncoding(String defValue);
 }

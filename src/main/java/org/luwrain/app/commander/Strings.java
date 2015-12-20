@@ -17,6 +17,7 @@
 package org.luwrain.app.commander;
 
 import java.io.*;
+import java.nio.file.*;
 
 public interface Strings
 {
@@ -24,9 +25,11 @@ public interface Strings
     String leftPanel();
     String rightPanel();
     String operationsAreaName();
+
     String copyPopupName();
-    String copyPopupPrefix(File[] files);
-    String copyOperationName(File[] filesToCopy, File copyTo);
+    String copyPopupPrefix(Path[] files);
+    String copyOperationName(Path[] filesToCopy, Path copyTo);
+
     String movePopupName();
     String movePopupPrefix(File[] files);
     String moveOperationName(File[] moveToCopy, File moveTo);

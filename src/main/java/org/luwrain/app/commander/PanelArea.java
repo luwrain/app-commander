@@ -17,58 +17,70 @@
 package org.luwrain.app.commander;
 
 import java.io.*;
+import java.net.*;
+import java.nio.file.*;
 import java.util.*;
 
 import org.luwrain.core.*;
 import org.luwrain.core.events.*;
 import org.luwrain.controls.*;
 import org.luwrain.core.Registry;
-
 import org.luwrain.app.commander.operations.TotalSize;
 
-public class PanelArea extends CommanderArea
+public class PanelArea extends CommanderArea implements CommanderArea.ClickHandler
 {
+    /*
     public static final int LEFT = 1;
     public static final int RIGHT = 2;
+    */
+
+    enum Side{LEFT, RIGHT};
 
     private Luwrain luwrain;
     private Actions actions;
     private Strings strings;
-    private int side = LEFT;
+    private Side side = Side.LEFT;
 
-    public PanelArea(Luwrain luwrain,
-		     Actions actions,
-		     Strings strings,
-		     File startFrom,
-		     int side)
+    static private CommanderArea.Params createParams(Luwrain luwrain, Path startFrom)
     {
-	super(new DefaultControlEnvironment(luwrain),
-	      luwrain.os(),
-	      startFrom,
-	      true,
-	      new NoHiddenCommanderFilter(),
-	      new ByNameCommanderComparator());
+	final CommanderArea.Params params = new CommanderArea.Params();
+	params.environment = new DefaultControlEnvironment(luwrain);
+	params.selecting = true;
+	params.filter = new CommanderFilters.NoHidden();
+	params.comparator = new ByNameCommanderComparator();
+	params.clickHandler = null;
+	params.appearance = new DefaultCommanderAppearance(params.environment);
+	return params;
+    }
+
+    PanelArea(Luwrain luwrain, Actions actions, Strings strings, 
+	      File startFrom, Side side)
+    {
+	super(createParams(luwrain, startFrom.toPath()), startFrom.toPath());
 	this.luwrain = luwrain;
 	this.actions = actions;
 	this.strings = strings;
 	this.side = side;
-	if (luwrain == null)
-	    throw new NullPointerException("luwrain may not be null");
-	if (actions == null)
-	    throw new NullPointerException("actions may not be null");
-	if (strings == null)
-	    throw new NullPointerException("strings may not be null");
+	NullCheck.notNull(luwrain, "luwrain");
+	NullCheck.notNull(strings, "strings");
+	NullCheck.notNull(actions, "actions");
+	setClickHandler(this);
     }
 
-    @Override protected boolean onClick(File current, File[] selected)
+@Override public boolean onCommanderClick(Path current, Path[] selected)
     {
 	if (selected == null)
 	    return false;
-	System.out.println("click " + selected.length);
-	final String fileNames[] = new String[selected.length];
+	if (selected != null && selected.length == 1 && 
+	    selected[0].toString().toLowerCase().endsWith(".zip"))
+	{
+	    if (openZip(selected[0]))
+		return true;
+	}
+    	final String fileNames[] = new String[selected.length];
 	for(int i = 0;i < selected.length;++i)
-	    fileNames[i] = selected[i].getAbsolutePath();
-							luwrain.openFiles(fileNames);
+	    fileNames[i] = selected[i].toString();
+	luwrain.openFiles(fileNames);
 	return true;
     }
 
@@ -81,11 +93,11 @@ public class PanelArea extends CommanderArea
 	    case ' ':
 		return calcSize();
 	    case '=':
-		setFilter(new AllFilesCommanderFilter());
+		setFilter(new CommanderFilters.AllFiles());
 		refresh();
 		return true;
 	    case '-':
-		setFilter(new NoHiddenCommanderFilter());
+		setFilter(new CommanderFilters.NoHidden());
 		refresh();
 		return true;
 	    default:
@@ -108,36 +120,48 @@ public class PanelArea extends CommanderArea
 	if (event.isModified())
 	    return super.onKeyboardEvent(event);
 	switch(event.getCommand())
-	    {
-	    case KeyboardEvent.TAB:
-		if (side == LEFT)
-		    actions.gotoRightPanel(); else
-		    if (side == RIGHT)
-		    {
-			if (actions.hasOperations())
-			    actions.gotoOperations(); else
-			    actions.gotoLeftPanel();
-		    }
-		return true;
-	    case KeyboardEvent.F5:
-		return actions.copy(side);
-	    case KeyboardEvent.F6:
-		return actions.move(side);
-	    case KeyboardEvent.F7:
-		return actions.mkdir(side);
-	    case KeyboardEvent.F8:
-		return actions.delete(side);
-	    case KeyboardEvent.DELETE:
-		return actions.delete(side);
-	    default:
-		return super.onKeyboardEvent(event);
-	    }
+	{
+	case KeyboardEvent.TAB:
+	    if (side == Side.LEFT)
+		actions.gotoRightPanel(); else
+		if (side == Side.RIGHT)
+		{
+		    if (actions.hasOperations())
+			actions.gotoOperations(); else
+			actions.gotoLeftPanel();
+		}
+	    return true;
+	case KeyboardEvent.F5:
+	    return actions.copy(side);
+	case KeyboardEvent.F6:
+	    return actions.move(side);
+	case KeyboardEvent.F7:
+	    return actions.mkdir(side);
+	case KeyboardEvent.F8:
+	    return actions.delete(side);
+	case KeyboardEvent.DELETE:
+	    return actions.delete(side);
+	default:
+	    return super.onKeyboardEvent(event);
+	}
     }
 
     @Override public boolean onEnvironmentEvent(EnvironmentEvent event)
     {
 	switch(event.getCode())
 	{
+	case EnvironmentEvent.OPEN:
+	    if (event instanceof OpenEvent)
+	    {
+		final Path path = ((OpenEvent)event).path();
+		if (Files.isDirectory(path))
+		{
+		    open(path, null);
+	    return true;
+		}
+		return false;
+	    }
+	    return false;
 	case EnvironmentEvent.INTRODUCE:
 	    luwrain.playSound(Sounds.INTRO_REGULAR);
 	    switch (side)
@@ -149,7 +173,7 @@ public class PanelArea extends CommanderArea
 		luwrain.say(strings.rightPanel() + " " + getAreaName());
 		break;
 	    }
-    return true;
+	    return true;
 	case EnvironmentEvent.CLOSE:
 	    actions.closeApp();
 	    return true;
@@ -160,7 +184,6 @@ public class PanelArea extends CommanderArea
 		return true;
 	    }
 	    return false;
-
 	default:
 	    return super.onEnvironmentEvent(event);
 	}
@@ -176,7 +199,7 @@ public class PanelArea extends CommanderArea
 
     private boolean onShortInfo(KeyboardEvent event)
     {
-	final File[] f = selected();
+	final File[] f = selectedAsFiles();
 	if (f == null)
 	    return false;
 	long res = 0;
@@ -195,7 +218,7 @@ public class PanelArea extends CommanderArea
 
     private boolean calcSize()
     {
-	final File[] f = selected();
+	final File[] f = selectedAsFiles();
 	if (f == null || f.length < 1)
 	    return false;
 	long res = 0;
@@ -213,4 +236,32 @@ public class PanelArea extends CommanderArea
 	return true;
     }
 
+    private boolean openZip(Path path)
+    {
+	final Map<String, String> prop = new HashMap<String, String>();
+	prop.put("encoding", actions.settings().getZipFilesEncoding("UTF-8"));
+	try {
+	    final URI zipfile = URI.create("jar:file:" + path.toString().replaceAll(" ", "%20"));
+	    final FileSystem fs = FileSystems.newFileSystem(zipfile, prop);
+	    open(fs.getPath("/"), null);
+	    return true;
+	}
+	catch(IOException e)
+	{
+	    e.printStackTrace();
+	    return false;
+	}
+    }
+
+    File[] selectedAsFiles()
+    {
+	return null;
+    }
+
+
+    
+    File openedAsFile()
+    {
+	return null;
+    }
 }
