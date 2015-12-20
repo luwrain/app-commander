@@ -17,23 +17,27 @@
 package org.luwrain.app.commander.operations;
 
 import java.io.*;
+import java.nio.file.*;
+import java.nio.file.attribute.*;
 
 public class TotalSize
 {
-    public static long getTotalSize(File f) throws IOException
+    static private class Visitor extends SimpleFileVisitor<Path>
     {
-	if (f == null)
-	    throw new NullPointerException("f may not be null");
-	if (!f.isDirectory())
-	    return f.length();
-	final File[] items = f.listFiles();
 	long res = 0;
-	for(File ff: items)
+
+	@Override public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException
 	{
-	    if (ff.isDirectory())
-		res += getTotalSize(ff); else
-		res += ff.length();
+	    if (Files.isRegularFile(file, LinkOption.NOFOLLOW_LINKS))
+		res += Files.size(file);
+		return FileVisitResult.CONTINUE;
 	}
-	return res;
+    }
+
+    static public long getTotalSize(Path f) throws IOException
+    {
+	final Visitor visitor = new Visitor();
+	Files.walkFileTree(f, visitor);
+	return visitor.res;
     }
 }

@@ -18,38 +18,28 @@ package org.luwrain.app.commander;
 
 public interface Operation extends Runnable
 {
-    public static final int OK = 0;
-    public static final int COPYING_NON_FILE_TO_FILE = 1;
-    public static final int PROBLEM_OPENING_FILE = 2;
-    public static final int PROBLEM_CREATING_FILE = 3;
-    public static final int PROBLEM_READING_FILE = 4;
-    public static final int PROBLEM_WRITING_FILE = 5;
-    public static final int INTERRUPTED = 6;
-    public static final int INACCESSIBLE_SOURCE = 7;
-    public static final int PROBLEM_CREATING_DIRECTORY = 8;
-    public static final int UNEXPECTED_PROBLEM = 9;
-    public static final int PROBLEM_DELETING_DIRECTORY = 10;
-    public static final int PROBLEM_DELETING_FILE = 11;
-
-    public static final int MOVING_NON_FILE_TO_FILE = 12;
-
-    public static final int DEST_EXISTS_NOT_REGULAR = 20;
-    public static final int DEST_EXISTS = 21;
-    public static final int DEST_EXISTS_NOT_DIR = 22;
-
-    public static final int NOT_CONFIRMED_OVERWRITE = 25;
-
-    public static final int PROBLEM_READING_SYMLINK = 30;
-    public static final int PROBLEM_CREATING_SYMLINK = 31;
-
-    public static final int RELATIVE_SOURCE_PATH = 40;
-
+    enum Result {
+	OK,
+	INTERRUPTED,
+	UNEXPECTED_PROBLEM,
+	PROBLEM_CREATING_DIRECTORY,
+	PROBLEM_READING_FILE,
+	PROBLEM_WRITING_FILE,
+	INACCESSIBLE_SOURCE,
+	PROBLEM_CREATING_SYMLINK,
+	PROBLEM_READING_SYMLINK,
+	PROBLEM_DELETING,
+	DEST_EXISTS_NOT_REGULAR,
+	NOT_CONFIRMED_OVERWRITE,
+	DEST_EXISTS_NOT_DIR,
+	DEST_EXISTS,
+    };
 
     String getOperationName();
     int getPercents();
     void interrupt();
     boolean isFinished();
-    int getFinishCode();
+    Result getFinishCode();
     String getExtInfo();
     boolean finishingAccepted();
 }

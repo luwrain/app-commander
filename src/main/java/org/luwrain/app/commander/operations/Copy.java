@@ -14,7 +14,7 @@
    General Public License for more details.
 */
 
-package org.luwrain.app.commander.operations2;
+package org.luwrain.app.commander.operations;
 
 import java.io.*;
 import java.nio.file.Path;
@@ -76,18 +76,20 @@ class Copy extends Base
 	    }
 	    catch (IOException e)
 	    {
-		throw new OperationException(INACCESSIBLE_SOURCE, f.toString(), e);
+		throw new OperationException(Result.INACCESSIBLE_SOURCE, f, e);
 	    }
 	status("total size is " + totalBytes);
+	/*
 	for(Path p: copyFrom)
 	    if (!p.isAbsolute())
 		throw new OperationException(RELATIVE_SOURCE_PATH, p.toString());
+	*/
 	Path dest = copyTo;
 	if (!dest.isAbsolute())
 	{
 	    final Path parent = copyFrom[0].getParent();
 	    if (parent == null)
-		throw new OperationException(PROBLEM_CREATING_DIRECTORY, dest.toString());
+		throw new OperationException(Result.PROBLEM_CREATING_DIRECTORY, dest);
 	    dest = parent.resolve(dest);
 	}
 	if (copyFrom.length == 1)
@@ -112,7 +114,7 @@ class Copy extends Base
 	    //If fileTo points to a non-directory item, these operations will fail
 	    createDirectories(fileTo);
 	    if (!isDirectory(fileTo, false))//It cannot be a symlink, we have just created it
-		throw new OperationException(PROBLEM_CREATING_DIRECTORY, fileTo.toString());
+		throw new OperationException(Result.PROBLEM_CREATING_DIRECTORY, fileTo);
 	    status("ensured that " + fileTo + "exists and is a directory");
 	    copyRecurse(getDirContent(fileFrom), fileTo);
 	    return;
@@ -128,10 +130,10 @@ class Copy extends Base
 	    status("" + fileTo + " exists");
 	    //We may overwrite only a regular file
 	    if (!isRegularFile(fileTo, false))
-		throw new OperationException(DEST_EXISTS_NOT_REGULAR, fileTo.toString());
+		throw new OperationException(Result.DEST_EXISTS_NOT_REGULAR, fileTo);
 	    status("" + fileTo + "is a regular file, requesting confirmation to overwrite");
 	    if (!listener.confirmOverwrite(fileTo))
-		throw new OperationException(NOT_CONFIRMED_OVERWRITE, fileTo.toString());
+		throw new OperationException(Result.NOT_CONFIRMED_OVERWRITE, fileTo);
 	    overwriteApproved = true;
 	    status("overwriting approved");
 	}
@@ -146,7 +148,7 @@ class Copy extends Base
 	    status("" + fileTo + "does not exist or not a a directory");
 	    createDirectories(fileTo);
 	    if (!isDirectory(fileTo, true))
-		throw new OperationException(PROBLEM_CREATING_DIRECTORY, fileTo.toString());
+		throw new OperationException(Result.PROBLEM_CREATING_DIRECTORY, fileTo);
 	    status("ensured that " + fileTo + " exists and is a directory");
 	}
 	copyRecurse(filesFrom, fileTo);
@@ -165,12 +167,12 @@ class Copy extends Base
 		{
 		    status("" + newDest + " already exists");
 		    if (!isDirectory(newDest, true))
-			throw new OperationException(DEST_EXISTS_NOT_DIR, newDest.toString());
+			throw new OperationException(Result.DEST_EXISTS_NOT_DIR, newDest);
 		    status("" + newDest + " is a directory");
 		} else
 		    createDirectory(newDest);
 		if (!isDirectory(newDest, true))
-		    throw new OperationException(PROBLEM_CREATING_DIRECTORY, newDest.toString());
+		    throw new OperationException(Result.PROBLEM_CREATING_DIRECTORY, newDest);
 		status("" + newDest + " prepared");
 		copyRecurse(getDirContent(f), newDest);
 	    } else
@@ -190,7 +192,7 @@ class Copy extends Base
 	{
 	    status("" + fromFile + "is a symlink");
 	    if (exists(toFile, false))
-		throw new OperationException(DEST_EXISTS, toFile.toString());
+		throw new OperationException(Result.DEST_EXISTS, toFile);
 	    createSymlink(toFile, readSymlink(fromFile));
 	    status("new symlink " + toFile + " is created");
 	    return;
@@ -199,10 +201,10 @@ class Copy extends Base
 	{
 	    status("" + toFile + " already exists");
 	    if (!isRegularFile(toFile, false))
-		throw new OperationException(DEST_EXISTS_NOT_REGULAR, toFile.toString());
+		throw new OperationException(Result.DEST_EXISTS_NOT_REGULAR, toFile);
 	    status("" + toFile + " is a regular file, need a confirmation, overwriteApproved=" + overwriteApproved);
 	    if (!overwriteApproved && !listener.confirmOverwrite())
-		throw new OperationException(NOT_CONFIRMED_OVERWRITE, toFile.toString());
+		throw new OperationException(Result.NOT_CONFIRMED_OVERWRITE, toFile);
 	    overwriteApproved = true;
 	}
 	status("opening streams and copying data");
@@ -226,7 +228,7 @@ class Copy extends Base
     private void onNewPortion(int bytes) throws OperationException
     {
 	if (interrupted)
-	    throw new OperationException(INTERRUPTED, "");
+	    throw new OperationException(Result.INTERRUPTED);
 	processedBytes += bytes;
 	long lPercents = (processedBytes * 100) / totalBytes;
 	percents = (int)lPercents;

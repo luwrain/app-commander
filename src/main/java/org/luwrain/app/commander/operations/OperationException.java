@@ -16,33 +16,42 @@
 
 package org.luwrain.app.commander.operations;
 
+import java.nio.file.*;
+import org.luwrain.app.commander.Operation;
+
 class OperationException extends Exception
 {
-    private int code;
-    private String extInfo;
+    private Operation.Result code;
+    private String extInfo = "";
 
-    public OperationException(int code)
+    OperationException(Operation.Result code, Path extInfo, 
+Throwable cause)
     {
-	super("");
+	super(cause);
 	this.code = code;
-	extInfo = "";
+	if (extInfo != null)
+	    this.extInfo = extInfo.toString();
     }
 
-    public OperationException(int code, String extInfo)
+    OperationException(Operation.Result code, Path extInfo)
     {
-	super(extInfo);
 	this.code = code;
-	this.extInfo = extInfo;
-	if (extInfo == null)
-	    throw new NullPointerException("extInfo may not be null");
+	if (extInfo != null)
+	    this.extInfo = extInfo.toString();
     }
 
-    public int code()
+    OperationException(Operation.Result code)
+    {
+	this.code = code;
+    }
+
+
+    Operation.Result code()
     {
 	return code;
     }
 
-    public String  extInfo()
+    String  extInfo()
     {
 	return extInfo != null?extInfo:"";
     }

@@ -14,7 +14,7 @@
    General Public License for more details.
 */
 
-package org.luwrain.app.commander.operations2;
+package org.luwrain.app.commander.operations;
 
 import java.util.*;
 import java.io.*;
@@ -32,7 +32,7 @@ abstract class Base implements Operation
     protected String opName = "";
     protected boolean finished = false;
     protected boolean finishingAccepted = false ;
-    protected int opCode;
+    protected Result opCode;
     protected String extInfo = "";
     protected boolean interrupted;
 
@@ -46,7 +46,7 @@ abstract class Base implements Operation
 	    throw new IllegalArgumentException("opName may not be empty");
 	interrupted = false;
 	finished = false;
-	opCode = 0;
+	opCode = Result.OK;
 	extInfo = "";
     }
 
@@ -56,7 +56,7 @@ abstract class Base implements Operation
     {
 	try {
 	    work();
-	    opCode = OK;
+	    opCode = Result.OK;
 	    finished = true;
 	}
 	catch (OperationException e)
@@ -66,10 +66,10 @@ abstract class Base implements Operation
 	    extInfo = e.extInfo();
 	    finished = true;
 	}
-	catch (Throwable e)
+	catch (Exception e)
 	{
 	    e.printStackTrace();
-	    opCode = UNEXPECTED_PROBLEM;
+	    opCode = Result.UNEXPECTED_PROBLEM;
 	    extInfo = "";
 	    finished = true;
 	}
@@ -81,9 +81,9 @@ abstract class Base implements Operation
 	try {
 	    Files.createDirectories(path);
 	}
-	catch(Throwable e)
+	catch(Exception e)
 	{
-	    throw new OperationException(PROBLEM_CREATING_DIRECTORY, path.toString(), e);
+	    throw new OperationException(Result.PROBLEM_CREATING_DIRECTORY, path, e);
 	}
     }
 
@@ -92,9 +92,9 @@ abstract class Base implements Operation
 	try {
 	    Files.createDirectory(path);
 	}
-	catch(Throwable e)
+	catch(Exception e)
 	{
-	    throw new OperationException(PROBLEM_CREATING_DIRECTORY, path.toString(), e);
+	    throw new OperationException(Result.PROBLEM_CREATING_DIRECTORY, path, e);
 	}
     }
 
@@ -103,9 +103,9 @@ abstract class Base implements Operation
 	try {
 	    return Files.newInputStream(path);
 	}
-	catch(Throwable e)
+	catch(Exception e)
 	{
-	    throw new OperationException(PROBLEM_READING_FILE, path.toString(), e);
+	    throw new OperationException(Result.PROBLEM_READING_FILE, path, e);
 	}
     }
 
@@ -114,9 +114,9 @@ abstract class Base implements Operation
 	try {
 	    return Files.newOutputStream(path);
 	}
-	catch(Throwable e)
+	catch(Exception e)
 	{
-	    throw new OperationException(PROBLEM_WRITING_FILE, path.toString(), e);
+	    throw new OperationException(Result.PROBLEM_WRITING_FILE, path, e);
 	}
     }
 
@@ -125,9 +125,9 @@ abstract class Base implements Operation
 	try {
 	    return stream.read(buf);
 	}
-	catch(Throwable e)
+	catch(Exception e)
 	{
-	    throw new OperationException(PROBLEM_READING_FILE, "", e);
+	    throw new OperationException(Result.PROBLEM_READING_FILE, null, e);
 	}
     }
 
@@ -136,9 +136,9 @@ abstract class Base implements Operation
 	try {
 	    stream.write(buf, 0, len);
 	}
-	catch(Throwable e)
+	catch(Exception e)
 	{
-	    throw new OperationException(PROBLEM_WRITING_FILE, "", e);
+	    throw new OperationException(Result.PROBLEM_WRITING_FILE, null, e);
 	}
     }
 
@@ -179,7 +179,7 @@ abstract class Base implements Operation
 	return finished;
     }
 
-    @Override public synchronized  int getFinishCode()
+    @Override public synchronized Result getFinishCode()
     {
 	return opCode;
     }
@@ -204,9 +204,9 @@ abstract class Base implements Operation
 		return Files.isDirectory(path); else
 		return Files.isDirectory(path, LinkOption.NOFOLLOW_LINKS);
 	}
-	catch(Throwable e)
+	catch(Exception e)
 	{
-	    throw new OperationException(UNEXPECTED_PROBLEM, path.toString());
+	    throw new OperationException(Result.UNEXPECTED_PROBLEM, path);
 	}
     }
 
@@ -214,32 +214,15 @@ abstract class Base implements Operation
     {
 	status("enumerating items in " + path);
 	final LinkedList<Path> res = new LinkedList<Path>();
-	final FileVisitor visitor = new SimpleFileVisitor<Path>() {
-	    @Override public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException
-	    {
-		res.add(file);
-		return FileVisitResult.CONTINUE;
-	    }
-	    @Override public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attr) throws IOException
-	    {
-		if (dir.equals(path))
-		return FileVisitResult.CONTINUE;
-		res.add(dir);
-		return FileVisitResult.SKIP_SUBTREE;
-	    }
-	};
-	try {
-	    Files.walkFileTree(path, visitor);
-	}
-	catch(Throwable e)
+        try (DirectoryStream<Path> directoryStream = Files.newDirectoryStream(path)) {
+		for (Path p : directoryStream) 
+		    res.add(p);
+	    } 
+	catch(Exception e)
 	{
-	    throw new OperationException(INACCESSIBLE_SOURCE, path.toString(), e);
+	    throw new OperationException(Result.INACCESSIBLE_SOURCE, path, e);
 	}
 	status("" + path + " contains " + res.size() + " items");
-	/*
-	for(Path p: res)
-	    status("" + p);
-	*/
 	return res.toArray(new Path[res.size()]);
     }
 
@@ -248,9 +231,9 @@ abstract class Base implements Operation
 	try {
 	    return Files.isSymbolicLink(path);
 	}
-	catch (Throwable e)
+	catch (Exception e)
 	{
-	    throw new OperationException(UNEXPECTED_PROBLEM, path.toString());
+	    throw new OperationException(Result.UNEXPECTED_PROBLEM, path);
 	}
     }
 
@@ -261,9 +244,9 @@ abstract class Base implements Operation
 		return Files.isRegularFile(path); else
 		return Files.isRegularFile(path, LinkOption.NOFOLLOW_LINKS);
 	}
-	catch(Throwable  e)
+	catch(Exception  e)
 	{
-	    throw new OperationException(UNEXPECTED_PROBLEM, path.toString());
+	    throw new OperationException(Result.UNEXPECTED_PROBLEM, path);
 	}
     }
 
@@ -274,9 +257,9 @@ abstract class Base implements Operation
 		return Files.exists(path); else
 		return Files.exists(path, LinkOption.NOFOLLOW_LINKS);
 	}
-	catch(Throwable e)
+	catch(Exception e)
 	{
-	    throw new OperationException(UNEXPECTED_PROBLEM, path.toString());
+	    throw new OperationException(Result.UNEXPECTED_PROBLEM, path);
 	}
     }
 
@@ -285,9 +268,9 @@ abstract class Base implements Operation
 	try {
 	    Files.createSymbolicLink(symlink, dest);
 	}
-	catch(Throwable e)
+	catch(Exception e)
 	{
-	    throw new OperationException(PROBLEM_CREATING_SYMLINK, symlink.toString(), e);
+	    throw new OperationException(Result.PROBLEM_CREATING_SYMLINK, symlink, e);
 	}
     }
 
@@ -296,9 +279,20 @@ abstract class Base implements Operation
 	try {
 	    return Files.readSymbolicLink(path);
 	}
-	catch(Throwable e)
+	catch(Exception e)
 	{
-	    throw new OperationException(PROBLEM_READING_SYMLINK, path.toString(), e);
+	    throw new OperationException(Result.PROBLEM_READING_SYMLINK, path, e);
+	}
+    }
+
+    protected void delete(Path path) throws OperationException
+    {
+	try {
+	    Files.delete(path);
+	}
+	catch (Exception e)
+	{
+	    throw new OperationException(Result.PROBLEM_DELETING, path);
 	}
     }
 
@@ -306,4 +300,6 @@ abstract class Base implements Operation
     {
 	Log.debug("commander", message);
     }
+
+
 }

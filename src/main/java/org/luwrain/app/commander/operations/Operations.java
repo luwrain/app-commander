@@ -14,30 +14,24 @@
    General Public License for more details.
 */
 
-package org.luwrain.app.commander.operations2;
+package org.luwrain.app.commander.operations;
 
-import java.io.*;
 import java.nio.file.*;
-import java.nio.file.attribute.*;
 
-public class TotalSize
+import org.luwrain.app.commander.Operation;
+import org.luwrain.app.commander.OperationListener;
+
+public class Operations
 {
-    static private class Visitor extends SimpleFileVisitor<Path>
+    static public Operation copy(OperationListener listener, String opName,
+				 Path[] copyFrom, Path copyTo)
     {
-	long res = 0;
-
-	@Override public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException
-	{
-	    if (Files.isRegularFile(file, LinkOption.NOFOLLOW_LINKS))
-		res += Files.size(file);
-		return FileVisitResult.CONTINUE;
-	}
+	return new Copy(listener, opName, copyFrom, copyTo);
     }
 
-    static public long getTotalSize(Path f) throws IOException
+    static public Operation delete(OperationListener listener, String opName,
+				 Path[] deleteWhat)
     {
-	final Visitor visitor = new Visitor();
-	Files.walkFileTree(f, visitor);
-	return visitor.res;
+	return new Delete(listener, opName, deleteWhat);
     }
 }

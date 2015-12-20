@@ -22,7 +22,7 @@ import java.nio.file.*;
 
 import org.luwrain.core.*;
 import org.luwrain.popups.*;
-import org.luwrain.app.commander.operations2.Operations;
+import org.luwrain.app.commander.operations.Operations;
 
 class Base
 {

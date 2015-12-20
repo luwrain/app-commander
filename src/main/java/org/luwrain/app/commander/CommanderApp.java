@@ -22,7 +22,7 @@ import java.nio.file.*;
 
 import org.luwrain.core.*;
 import org.luwrain.popups.*;
-import org.luwrain.app.commander.operations.*;
+//import org.luwrain.app.commander.operations.*;
 
 class CommanderApp implements Application, Actions
 {
@@ -169,6 +169,7 @@ class CommanderApp implements Application, Actions
 
     @Override public boolean delete(PanelArea.Side panelSide)
     {
+	/*
 	File[] filesToDelete = panelSide == PanelArea.Side.LEFT?leftPanel.selectedAsFiles():rightPanel.selectedAsFiles();
 	if (filesToDelete == null || filesToDelete.length < 1)
 	    return false;
@@ -179,7 +180,9 @@ class CommanderApp implements Application, Actions
 	    return true;
 	if (!popup.result())
 	    return true;
- 	operations.launch(new Delete(operations, strings.delOperationName(filesToDelete), filesToDelete));
+ 	operations.launch(Operations.delete(operations, strings.delOperationName(filesToDelete), 
+filesToDelete));
+	*/
 	return true;
     }
 

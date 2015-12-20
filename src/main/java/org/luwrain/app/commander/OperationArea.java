@@ -164,7 +164,7 @@ void launch(Operation op)
 	{
 	    if (issuer.finishingAccepted())
 		return;
-	    luwrain.message(strings.operationCompletedMessage(issuer), issuer.getFinishCode() == Operation.OK?Luwrain.MESSAGE_OK:Luwrain.MESSAGE_ERROR);
+	    luwrain.message(strings.operationCompletedMessage(issuer), issuer.getFinishCode() == Operation.Result.OK?Luwrain.MESSAGE_OK:Luwrain.MESSAGE_ERROR);
 	    actions.refreshPanels();//Update list of files on opened panels;
 	}
 	luwrain.onAreaNewContent(this);

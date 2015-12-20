@@ -25,7 +25,7 @@ import org.luwrain.core.*;
 import org.luwrain.core.events.*;
 import org.luwrain.controls.*;
 import org.luwrain.core.Registry;
-import org.luwrain.app.commander.operations.TotalSize;
+//import org.luwrain.app.commander.operations.TotalSize;
 
 public class PanelArea extends CommanderArea implements CommanderArea.ClickHandler
 {
@@ -199,6 +199,7 @@ public class PanelArea extends CommanderArea implements CommanderArea.ClickHandl
 
     private boolean onShortInfo(KeyboardEvent event)
     {
+	/*
 	final File[] f = selectedAsFiles();
 	if (f == null)
 	    return false;
@@ -213,6 +214,7 @@ public class PanelArea extends CommanderArea implements CommanderArea.ClickHandl
 	    return false;
 	}
 	luwrain.message(strings.bytesNum(res));
+	*/
 	return true;
     }
 
@@ -224,7 +226,7 @@ public class PanelArea extends CommanderArea implements CommanderArea.ClickHandl
 	long res = 0;
 	try {
 	    for(File ff: f)
-		res += org.luwrain.app.commander.operations2.TotalSize.getTotalSize(ff.toPath());
+		res += org.luwrain.app.commander.operations.TotalSize.getTotalSize(ff.toPath());
 	}
 	catch (Throwable e)
 	{
