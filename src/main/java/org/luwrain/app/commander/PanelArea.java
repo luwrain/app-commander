@@ -153,7 +153,7 @@ public class PanelArea extends CommanderArea implements CommanderArea.ClickHandl
 	case EnvironmentEvent.OPEN:
 	    if (event instanceof OpenEvent)
 	    {
-		final Path path = ((OpenEvent)event).path();
+		final Path path = Paths.get(((OpenEvent)event).path());
 		if (Files.isDirectory(path))
 		{
 		    open(path, null);
