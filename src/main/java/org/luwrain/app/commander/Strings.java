@@ -22,27 +22,23 @@ import java.nio.file.*;
 public interface Strings
 {
     String appName();
-    String leftPanel();
-    String rightPanel();
+    String leftPanelName();
+    String rightPanelName();
+    String infoAreaName();
     String operationsAreaName();
-
     String copyPopupName();
     String copyPopupPrefix(Path[] files);
     String copyOperationName(Path[] filesToCopy, Path copyTo);
-
     String movePopupName();
     String movePopupPrefix(File[] files);
     String moveOperationName(File[] moveToCopy, File moveTo);
-
     String mkdirPopupName();
     String mkdirPopupPrefix();
     String mkdirErrorMessage();
     String mkdirOkMessage(String dirName);
-
     String delPopupName();
     String delPopupText(File[] files);
     String delOperationName(File[] filesToDelete);
-
     String operationCompletedMessage(Operation op);
     String operationFinishDescr(Operation op);
     String notAllOperationsFinished();

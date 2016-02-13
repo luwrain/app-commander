@@ -16,6 +16,8 @@
 
 package org.luwrain.app.commander;
 
+import org.luwrain.controls.*;
+
 interface Actions
 {
     void gotoLeftPanel();
@@ -32,4 +34,5 @@ interface Actions
     boolean delete(PanelArea.Side panelSide);
     boolean hasOperations();
     Settings settings();
+    boolean showInfoArea(CommanderArea.Entry entry);
 }

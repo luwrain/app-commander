@@ -21,20 +21,27 @@ import java.io.*;
 import java.nio.file.*;
 
 import org.luwrain.core.*;
+import org.luwrain.core.events.*;
+import org.luwrain.controls.*;
 import org.luwrain.popups.*;
-//import org.luwrain.app.commander.operations.*;
 
 class CommanderApp implements Application, Actions
 {
     static private final String STRINGS_NAME = "luwrain.commander";
+
+    static private final int NORMAL_LAYOUT_INDEX = 0;
+    static private final int OPERATIONS_LAYOUT_INDEX = 1;
+    static private final int INFo_LAYOUT_INDEX = 2;
 
     private Luwrain luwrain;
     private final Base base = new Base();
     private Strings strings;
     private PanelArea leftPanel;
     private PanelArea rightPanel;
-    private OperationArea operations;
-    private File startFrom;
+    private OperationArea operationsArea;
+    private SimpleArea infoArea;
+    private AreaLayoutSwitch layouts;
+    private Path startFrom;
 
     public CommanderApp()
     {
@@ -43,9 +50,10 @@ class CommanderApp implements Application, Actions
 
     public CommanderApp(String arg)
     {
-	if (arg == null)
-	    throw new NullPointerException("arg may not be null");
-	this.startFrom = new File(arg);
+	NullCheck.notNull(arg, "arg");
+	if (!arg.isEmpty())
+	    this.startFrom = Paths.get(arg); else
+	    this.startFrom = null;
     }
 
     @Override public boolean onLaunch(Luwrain luwrain)
@@ -57,14 +65,45 @@ class CommanderApp implements Application, Actions
 	this.luwrain = luwrain;
 	if (!base.init(luwrain, strings))
 	    return false;
+	createAreas();
+	layouts = new AreaLayoutSwitch(luwrain);
+	layouts.add(new AreaLayout(AreaLayout.LEFT_RIGHT, leftPanel, rightPanel));
+	layouts.add(new AreaLayout(AreaLayout.LEFT_RIGHT_BOTTOM, leftPanel, rightPanel, operationsArea));
+	layouts.add(new AreaLayout(infoArea));
+	return true;
+    }
+
+    private void createAreas()
+    {
+	final Actions actions = this;
+
 	leftPanel = new PanelArea(luwrain, this, strings, 
-				  startFrom != null?startFrom:luwrain.launchContext().userHomeDirAsFile(),
+				  startFrom != null?startFrom:luwrain.launchContext().userHomeDirAsPath(),
 				  PanelArea.Side.LEFT);
 	rightPanel = new PanelArea(luwrain, this, strings, 
-				   startFrom != null?startFrom:luwrain.launchContext().userHomeDirAsFile(),
+				   startFrom != null?startFrom:luwrain.launchContext().userHomeDirAsPath(),
 				   PanelArea.Side.RIGHT);
-	operations = new OperationArea(luwrain, this, strings);
-	return true;
+	operationsArea = new OperationArea(luwrain, this, strings);
+
+	infoArea = new SimpleArea(new DefaultControlEnvironment(luwrain), strings.infoAreaName()){
+		@Override public boolean onKeyboardEvent(KeyboardEvent event)
+		{
+		    NullCheck.notNull(event, "event");
+		    return super.onKeyboardEvent(event);
+		}
+		@Override public boolean onEnvironmentEvent(EnvironmentEvent event)
+		{
+		    NullCheck.notNull(event, "event");
+		    switch(event.getCode())
+		    {
+		    case CLOSE:
+			actions.closeApp();
+			return true;
+		    default:
+			return super.onEnvironmentEvent(event);
+		    }
+		}
+	    };
     }
 
     @Override public void selectLocationsLeft()
@@ -115,7 +154,7 @@ class CommanderApp implements Application, Actions
 	if (filesToCopy == null || filesToCopy.length < 1|| 
 	    copyFromDir == null || copyTo == null)
 	    return false;
-	base.copy(operations, copyFromDir, filesToCopy, copyTo);
+	base.copy(operationsArea, copyFromDir, filesToCopy, copyTo);
 	return true;
     }
 
@@ -165,7 +204,6 @@ class CommanderApp implements Application, Actions
 	area.find(created.getFileName().toString(), false);
 	return true;
     }
-
 
     @Override public boolean delete(PanelArea.Side panelSide)
     {
@@ -218,11 +256,9 @@ filesToDelete));
 	}
     }
 
-
-
     @Override public AreaLayout getAreasToShow()
     {
-	return new AreaLayout(AreaLayout.LEFT_RIGHT_BOTTOM, leftPanel, rightPanel, operations);
+	return layouts.getCurrentLayout();
     }
 
     @Override public void gotoLeftPanel()
@@ -237,7 +273,7 @@ filesToDelete));
 
     @Override public void gotoOperations()
     {
-	luwrain.setActiveArea(operations);
+	luwrain.setActiveArea(operationsArea);
     }
 
     @Override public String getAppName()
@@ -247,7 +283,7 @@ filesToDelete));
 
     @Override public void closeApp()
     {
-	if (!operations.allOperationsFinished())
+	if (!operationsArea.allOperationsFinished())
 	{
 	    luwrain.message(strings.notAllOperationsFinished(), Luwrain.MESSAGE_ERROR);
 	    return;
@@ -257,9 +293,16 @@ filesToDelete));
 
     @Override public boolean hasOperations()
     {
-	return operations.hasOperations();
+	return operationsArea.hasOperations();
     }
 
+    @Override public boolean showInfoArea(CommanderArea.Entry entry)
+    {
+	if (entry == null || entry.parent())
+	    return false;
+	luwrain.message(entry.path().toString());
+	return true;
+    }
 
     @Override public Settings settings()
     {

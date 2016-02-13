@@ -29,11 +29,6 @@ import org.luwrain.core.Registry;
 
 public class PanelArea extends CommanderArea implements CommanderArea.ClickHandler
 {
-    /*
-    public static final int LEFT = 1;
-    public static final int RIGHT = 2;
-    */
-
     enum Side{LEFT, RIGHT};
 
     private Luwrain luwrain;
@@ -54,9 +49,9 @@ public class PanelArea extends CommanderArea implements CommanderArea.ClickHandl
     }
 
     PanelArea(Luwrain luwrain, Actions actions, Strings strings, 
-	      File startFrom, Side side)
+	      Path startFrom, Side side)
     {
-	super(createParams(luwrain, startFrom.toPath()), startFrom.toPath());
+	super(createParams(luwrain, startFrom), startFrom);
 	this.luwrain = luwrain;
 	this.actions = actions;
 	this.strings = strings;
@@ -100,25 +95,28 @@ public class PanelArea extends CommanderArea implements CommanderArea.ClickHandl
 		setFilter(new CommanderFilters.NoHidden());
 		refresh();
 		return true;
-	    default:
-		return super.onKeyboardEvent(event);
 	    }
-	if (!event.isCommand())
-	    return super.onKeyboardEvent(event);
-	if (event.getCommand() == KeyboardEvent.F1 && event.withLeftAltOnly())
+	if (event.isCommand() && event.withShiftOnly())
+	    switch(event.getCommand())
 	{
+	case KeyboardEvent.ENTER:
+	    return actions.showInfoArea(cursorAtEntry());
+	}
+	if (event.isCommand() && event.withLeftAltOnly())
+	    switch(event.getCommand())
+	    {
+	    case KeyboardEvent.F1:
 	    actions.selectLocationsLeft();
 	    return true;
-	}
-	if (event.getCommand() == KeyboardEvent.F2 && event.withLeftAltOnly())
-	{
+	    case KeyboardEvent.F2:
 	    actions.selectLocationsRight();
 	    return true;
-	}
+	    }
+	/*
 	if (event.getCommand() == KeyboardEvent.ENTER && event.withControlOnly())
 	    return onShortInfo(event);
-	if (event.isModified())
-	    return super.onKeyboardEvent(event);
+	*/
+	if (event.isCommand()  && !event.isModified())
 	switch(event.getCommand())
 	{
 	case KeyboardEvent.TAB:
@@ -138,19 +136,17 @@ public class PanelArea extends CommanderArea implements CommanderArea.ClickHandl
 	case KeyboardEvent.F7:
 	    return actions.mkdir(side);
 	case KeyboardEvent.F8:
-	    return actions.delete(side);
 	case KeyboardEvent.DELETE:
 	    return actions.delete(side);
-	default:
-	    return super.onKeyboardEvent(event);
 	}
+	    return super.onKeyboardEvent(event);
     }
 
     @Override public boolean onEnvironmentEvent(EnvironmentEvent event)
     {
 	switch(event.getCode())
 	{
-	case EnvironmentEvent.OPEN:
+	case OPEN:
 	    if (event instanceof OpenEvent)
 	    {
 		final Path path = Paths.get(((OpenEvent)event).path());
@@ -162,22 +158,22 @@ public class PanelArea extends CommanderArea implements CommanderArea.ClickHandl
 		return false;
 	    }
 	    return false;
-	case EnvironmentEvent.INTRODUCE:
+	case INTRODUCE:
 	    luwrain.playSound(Sounds.INTRO_REGULAR);
 	    switch (side)
 	    {
 	    case LEFT:
-		luwrain.say(strings.leftPanel() + " " + getAreaName());
+		luwrain.say(strings.leftPanelName() + " " + getAreaName());
 		break;
 	    case RIGHT:
-		luwrain.say(strings.rightPanel() + " " + getAreaName());
+		luwrain.say(strings.rightPanelName() + " " + getAreaName());
 		break;
 	    }
 	    return true;
-	case EnvironmentEvent.CLOSE:
+	case CLOSE:
 	    actions.closeApp();
 	    return true;
-	case EnvironmentEvent.ACTION:
+	case ACTION:
 	    if (ActionEvent.isAction(event, "read"))
 	    {
 		actions.openReader(side);

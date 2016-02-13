@@ -97,7 +97,7 @@ void launch(Operation op)
 	NullCheck.notNull(event, "event");
 	switch(event.getCode())
 	{
-	case EnvironmentEvent.CLOSE:
+	case CLOSE:
 	    actions.closeApp();
 	    return true;
 	default:
