@@ -64,28 +64,28 @@ void launch(Operation op)
     @Override public boolean onKeyboardEvent(KeyboardEvent event)
     {
 	NullCheck.notNull(event, "event");
-	if (event.isCommand() &&
-	    event.getCommand() == KeyboardEvent.F1 &&
+	if (event.isSpecial() &&
+	    event.getSpecial() == KeyboardEvent.Special.F1 &&
 	    event.withLeftAltOnly())
 	{
 	    actions.selectLocationsLeft();
 	    return true;
 	}
-	if (event.isCommand() &&
-	    event.getCommand() == KeyboardEvent.F2 &&
+	if (event.isSpecial() &&
+	    event.getSpecial() == KeyboardEvent.Special.F2 &&
 	    event.withLeftAltOnly())
 	{
 	    actions.selectLocationsRight();
 	    return true;
 	}
-	if (event.isCommand() && !event.isModified())
-	    switch (event.getCommand())
+	if (event.isSpecial() && !event.isModified())
+	    switch (event.getSpecial())
 	    {
-	    case KeyboardEvent.ENTER:
+	    case ENTER:
 		return onEnter(event);
-	    case KeyboardEvent.ESCAPE:
+	    case ESCAPE:
 		return onEscape(event);
-	    case KeyboardEvent.TAB:
+	    case TAB:
 	    actions.gotoLeftPanel();
 	    return true;
 	    }

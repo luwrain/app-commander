@@ -82,8 +82,8 @@ public class PanelArea extends CommanderArea implements CommanderArea.ClickHandl
     @Override public boolean onKeyboardEvent(KeyboardEvent event)
     {
 	NullCheck.notNull(event, "event");
-	if (!event.isCommand() && !event.isModified())
-	    switch(event.getCharacter())
+	if (!event.isSpecial() && !event.isModified())
+	    switch(event.getChar())
 	    {
 	    case ' ':
 		return calcSize();
@@ -96,19 +96,19 @@ public class PanelArea extends CommanderArea implements CommanderArea.ClickHandl
 		refresh();
 		return true;
 	    }
-	if (event.isCommand() && event.withShiftOnly())
-	    switch(event.getCommand())
+	if (event.isSpecial() && event.withShiftOnly())
+	    switch(event.getSpecial())
 	{
-	case KeyboardEvent.ENTER:
+	case ENTER:
 	    return actions.showInfoArea(cursorAtEntry());
 	}
-	if (event.isCommand() && event.withLeftAltOnly())
-	    switch(event.getCommand())
+	if (event.isSpecial() && event.withLeftAltOnly())
+	    switch(event.getSpecial())
 	    {
-	    case KeyboardEvent.F1:
+	    case F1:
 	    actions.selectLocationsLeft();
 	    return true;
-	    case KeyboardEvent.F2:
+	    case F2:
 	    actions.selectLocationsRight();
 	    return true;
 	    }
@@ -116,10 +116,10 @@ public class PanelArea extends CommanderArea implements CommanderArea.ClickHandl
 	if (event.getCommand() == KeyboardEvent.ENTER && event.withControlOnly())
 	    return onShortInfo(event);
 	*/
-	if (event.isCommand()  && !event.isModified())
-	switch(event.getCommand())
+	if (event.isSpecial()  && !event.isModified())
+	switch(event.getSpecial())
 	{
-	case KeyboardEvent.TAB:
+	case TAB:
 	    if (side == Side.LEFT)
 		actions.gotoRightPanel(); else
 		if (side == Side.RIGHT)
@@ -129,14 +129,14 @@ public class PanelArea extends CommanderArea implements CommanderArea.ClickHandl
 			actions.gotoLeftPanel();
 		}
 	    return true;
-	case KeyboardEvent.F5:
+	case F5:
 	    return actions.copy(side);
-	case KeyboardEvent.F6:
+	case F6:
 	    return actions.move(side);
-	case KeyboardEvent.F7:
+	case F7:
 	    return actions.mkdir(side);
-	case KeyboardEvent.F8:
-	case KeyboardEvent.DELETE:
+	case F8:
+	case DELETE:
 	    return actions.delete(side);
 	}
 	    return super.onKeyboardEvent(event);
