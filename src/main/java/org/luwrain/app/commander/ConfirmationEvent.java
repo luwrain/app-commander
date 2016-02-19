@@ -27,7 +27,6 @@ class ConfirmationEvent extends Event
 
     ConfirmationEvent(Path path)
     {
-	super(100);
 	this.path = path;
     }
 

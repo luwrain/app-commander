@@ -62,7 +62,7 @@ public class PanelArea extends CommanderArea implements CommanderArea.ClickHandl
 	setClickHandler(this);
     }
 
-@Override public boolean onCommanderClick(Path current, Path[] selected)
+    @Override public boolean onCommanderClick(Path current, Path[] selected)
     {
 	if (selected == null)
 	    return false;
@@ -82,64 +82,33 @@ public class PanelArea extends CommanderArea implements CommanderArea.ClickHandl
     @Override public boolean onKeyboardEvent(KeyboardEvent event)
     {
 	NullCheck.notNull(event, "event");
-	if (!event.isSpecial() && !event.isModified())
-	    switch(event.getChar())
-	    {
-	    case ' ':
-		return calcSize();
-	    case '=':
-		setFilter(new CommanderFilters.AllFiles());
-		refresh();
-		return true;
-	    case '-':
-		setFilter(new CommanderFilters.NoHidden());
-		refresh();
-		return true;
-	    }
 	if (event.isSpecial() && event.withShiftOnly())
-	    switch(event.getSpecial())
-	{
-	case ENTER:
-	    return actions.showInfoArea(cursorAtEntry());
-	}
-	if (event.isSpecial() && event.withLeftAltOnly())
 	    switch(event.getSpecial())
 	    {
 	    case F1:
-	    actions.selectLocationsLeft();
-	    return true;
+		actions.selectLocationsLeft();
+		return true;
 	    case F2:
-	    actions.selectLocationsRight();
-	    return true;
+		actions.selectLocationsRight();
+		return true;
 	    }
-	/*
-	if (event.getCommand() == KeyboardEvent.ENTER && event.withControlOnly())
-	    return onShortInfo(event);
-	*/
 	if (event.isSpecial()  && !event.isModified())
-	switch(event.getSpecial())
-	{
-	case TAB:
-	    if (side == Side.LEFT)
-		actions.gotoRightPanel(); else
-		if (side == Side.RIGHT)
-		{
-		    if (actions.hasOperations())
-			actions.gotoOperations(); else
-			actions.gotoLeftPanel();
-		}
-	    return true;
-	case F5:
-	    return actions.copy(side);
-	case F6:
-	    return actions.move(side);
-	case F7:
-	    return actions.mkdir(side);
-	case F8:
-	case DELETE:
-	    return actions.delete(side);
-	}
-	    return super.onKeyboardEvent(event);
+	    switch(event.getSpecial())
+	    {
+	    case TAB:
+		if (side == Side.LEFT)
+		    actions.gotoRightPanel(); else
+		    if (side == Side.RIGHT)
+		    {
+			if (actions.hasOperations())
+			    actions.gotoOperations(); else
+			    actions.gotoLeftPanel();
+		    }
+		return true;
+	    case DELETE:
+		return actions.delete(side);
+	    }
+	return super.onKeyboardEvent(event);
     }
 
     @Override public boolean onEnvironmentEvent(EnvironmentEvent event)
@@ -153,7 +122,7 @@ public class PanelArea extends CommanderArea implements CommanderArea.ClickHandl
 		if (Files.isDirectory(path))
 		{
 		    open(path, null);
-	    return true;
+		    return true;
 		}
 		return false;
 	    }
@@ -174,11 +143,31 @@ public class PanelArea extends CommanderArea implements CommanderArea.ClickHandl
 	    actions.closeApp();
 	    return true;
 	case ACTION:
-	    if (ActionEvent.isAction(event, "read"))
+	    if (ActionEvent.isAction(event, "preview"))
 	    {
 		actions.openReader(side);
 		return true;
 	    }
+	    if (ActionEvent.isAction(event, "hidden-show"))
+	    {
+		setFilter(new CommanderFilters.AllFiles());
+		refresh();
+		return true;
+	    }
+	    if (ActionEvent.isAction(event, "hidden-hide"))
+	    {
+		setFilter(new CommanderFilters.NoHidden());
+		refresh();
+		return true;
+	    }
+	    if (ActionEvent.isAction(event, "info"))
+		return actions.showInfoArea(cursorAtEntry());
+	    if (ActionEvent.isAction(event, "copy"))
+		return actions.copy(side);
+	    if (ActionEvent.isAction(event, "move"))
+		return actions.move(side);
+	    if (ActionEvent.isAction(event, "mkdir"))
+		return actions.mkdir(side);
 	    return false;
 	default:
 	    return super.onEnvironmentEvent(event);
@@ -189,29 +178,17 @@ public class PanelArea extends CommanderArea implements CommanderArea.ClickHandl
     {
 	return new Action[]{
 	    new Action("open", "Открыть"),
-	    new Action("read", "Просмотреть с указанием формата"),
+	    new Action("edit-text", "Редактировать как текст"),
+	    new Action("preview", "Просмотр"),
+	    new Action("preview-another-format", "Просмотр с указанием формата"),
+	    new Action("copy", "Копировать", new KeyboardEvent(KeyboardEvent.Special.F5)),
+	    new Action("move", "Переименовать/переместить", new KeyboardEvent(KeyboardEvent.Special.F6)),
+	    new Action("mkdir", "Создать каталог", new KeyboardEvent(KeyboardEvent.Special.F7)),
+	    new Action("delete", "Удалить", new KeyboardEvent(KeyboardEvent.Special.F8)),
+	    new Action("hidden-show", "Показать скрытые файлы"), 
+	    new Action("hidden-hide", "Не показывать скрытые файлы"), 
+	    new Action("info", "Информация об объекте(ах)"),
 	};
-    }
-
-    private boolean onShortInfo(KeyboardEvent event)
-    {
-	/*
-	final File[] f = selectedAsFiles();
-	if (f == null)
-	    return false;
-	long res = 0;
-	try {
-	    for(File ff: f)
-		res += TotalSize.getTotalSize(ff);
-	}
-	catch (Throwable e)
-	{
-	    e.printStackTrace();
-	    return false;
-	}
-	luwrain.message(strings.bytesNum(res));
-	*/
-	return true;
     }
 
     private boolean calcSize()
@@ -256,8 +233,6 @@ public class PanelArea extends CommanderArea implements CommanderArea.ClickHandl
 	return null;
     }
 
-
-    
     File openedAsFile()
     {
 	return null;
