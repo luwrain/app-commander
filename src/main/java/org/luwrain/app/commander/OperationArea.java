@@ -64,20 +64,14 @@ void launch(Operation op)
     @Override public boolean onKeyboardEvent(KeyboardEvent event)
     {
 	NullCheck.notNull(event, "event");
-	if (event.isSpecial() &&
-	    event.getSpecial() == KeyboardEvent.Special.F1 &&
-	    event.withLeftAltOnly())
-	{
-	    actions.selectLocationsLeft();
-	    return true;
-	}
-	if (event.isSpecial() &&
-	    event.getSpecial() == KeyboardEvent.Special.F2 &&
-	    event.withLeftAltOnly())
-	{
-	    actions.selectLocationsRight();
-	    return true;
-	}
+	if (event.isSpecial() && event.withAltOnly())
+	    switch(event.getSpecial())
+	    {
+	    case F1:
+		return actions.selectLocations(PanelArea.Side.LEFT);
+	    case F2:
+		return actions.selectLocations(PanelArea.Side.RIGHT);
+	    }
 	if (event.isSpecial() && !event.isModified())
 	    switch (event.getSpecial())
 	    {
@@ -86,8 +80,8 @@ void launch(Operation op)
 	    case ESCAPE:
 		return onEscape(event);
 	    case TAB:
-	    actions.gotoLeftPanel();
-	    return true;
+		actions.gotoLeftPanel();
+		return true;
 	    }
 	return super.onKeyboardEvent(event);
     }

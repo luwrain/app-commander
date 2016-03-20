@@ -19,6 +19,7 @@ package org.luwrain.app.commander;
 import java.util.*;
 import java.io.*;
 import java.nio.file.*;
+import java.nio.file.attribute.*;
 
 import org.luwrain.core.*;
 import org.luwrain.popups.*;
@@ -132,5 +133,116 @@ class Base
 		    id,
 		});
 	return true;
+    }
+
+    boolean onClickInFiles(Path[] selected)
+    {
+    	final String fileNames[] = new String[selected.length];
+	for(int i = 0;i < selected.length;++i)
+	    fileNames[i] = selected[i].toString();
+	luwrain.openFiles(fileNames);
+	return true;
+
+    }
+
+    /*
+    private boolean calcSize()
+    {
+	final File[] f = selectedAsFiles();
+	if (f == null || f.length < 1)
+	    return false;
+	long res = 0;
+	try {
+	    for(File ff: f)
+		res += org.luwrain.app.commander.operations.TotalSize.getTotalSize(ff.toPath());
+	}
+	catch (Throwable e)
+	{
+	    e.printStackTrace();
+	    luwrain.message("Невозможно получить необходимый доступ к файлам, возможно, недостаточно прав доступа", Luwrain.MESSAGE_ERROR);
+	    return true;
+	}
+	luwrain.message(strings.bytesNum(res), Luwrain.MESSAGE_DONE);
+	return true;
+    }
+
+    private boolean openZip(Path path)
+    {
+	final Map<String, String> prop = new HashMap<String, String>();
+	prop.put("encoding", actions.settings().getZipFilesEncoding("UTF-8"));
+	try {
+	    final URI zipfile = URI.create("jar:file:" + path.toString().replaceAll(" ", "%20"));
+	    final FileSystem fs = FileSystems.newFileSystem(zipfile, prop);
+	    open(fs.getPath("/"), null);
+	    return true;
+	}
+	catch(IOException e)
+	{
+	    e.printStackTrace();
+	    return false;
+	}
+    }
+    */
+
+    void fillInfo(MutableLines lines, Path[] items)
+    {
+	NullCheck.notNull(lines, "lines");
+	NullCheck.notNullItems(items, "items");
+	for(Path p: items)
+	{
+	    try {
+		final StringBuilder b = new StringBuilder();
+		b.append(p.getFileName().toString());
+		if (Files.isDirectory(p))
+		    b.append(FileSystems.getDefault().getSeparator());
+		b.append(" ");
+		boolean symlink = false;
+		boolean directory = false;
+		final BasicFileAttributeView basic = Files.getFileAttributeView(p, BasicFileAttributeView.class, LinkOption.NOFOLLOW_LINKS);
+		if (basic != null)
+		{
+		    final BasicFileAttributes attr = basic.readAttributes();
+		    if (attr.isDirectory())
+			b.append(luwrain.i18n().staticStr(LangStatic.COMMANDER_DIRECTORY) + " "); else 
+			if (attr.isSymbolicLink())
+			    b.append(luwrain.i18n().staticStr(LangStatic.COMMANDER_SYMLINK) + " "); else 
+			    if (attr.isOther())
+				b.append(luwrain.i18n().staticStr(LangStatic.COMMANDER_SYMLINK) + " ");
+		    symlink = attr.isSymbolicLink();
+		    directory = attr.isDirectory();
+		}
+		final PosixFileAttributeView posix = Files.getFileAttributeView(p, PosixFileAttributeView.class, LinkOption.NOFOLLOW_LINKS);
+		if (posix != null && !symlink)
+		{
+		    final PosixFileAttributes attr = posix.readAttributes();
+		    final Set<PosixFilePermission> perm = attr.permissions();
+		    b.append(perm.contains(PosixFilePermission.OWNER_READ)?"r":"-");
+		    b.append(perm.contains(PosixFilePermission.OWNER_WRITE)?"w":"-");
+		    b.append(perm.contains(PosixFilePermission.OWNER_EXECUTE)?"x":"-");
+		    b.append(perm.contains(PosixFilePermission.GROUP_READ)?"r":"-");
+		    b.append(perm.contains(PosixFilePermission.GROUP_WRITE)?"w":"-");
+		    b.append(perm.contains(PosixFilePermission.GROUP_EXECUTE)?"x":"-");
+		    b.append(perm.contains(PosixFilePermission.OTHERS_READ)?"r":"-");
+		    b.append(perm.contains(PosixFilePermission.OTHERS_WRITE)?"w":"-");
+		    b.append(perm.contains(PosixFilePermission.OTHERS_EXECUTE)?"x":"-");
+		    b.append(" ");
+		    b.append(attr.owner() + " ");
+		    b.append(attr.group() + " ");
+		}
+		if (basic != null && !symlink)
+		{
+		    final BasicFileAttributes attr = basic.readAttributes();
+		    b.append(directory?attr.creationTime():attr.lastModifiedTime() + " ");
+		}
+		lines.addLine(new String(b));
+	    }
+	    catch (Exception e)
+	    {
+		lines.addLine(p.getFileName().toString() + ":FIXME:ERROR:" + e.getMessage());
+		Log.error("commander", p.toString() + ":" + e.getMessage());
+		e.printStackTrace();
+	    }
+	}
+	lines.addLine("");
     }
 }

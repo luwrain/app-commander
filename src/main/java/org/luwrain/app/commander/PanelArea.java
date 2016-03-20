@@ -52,61 +52,39 @@ public class PanelArea extends CommanderArea implements CommanderArea.ClickHandl
 	      Path startFrom, Side side)
     {
 	super(createParams(luwrain, startFrom), startFrom);
+	NullCheck.notNull(luwrain, "luwrain");
+	NullCheck.notNull(strings, "strings");
+	NullCheck.notNull(actions, "actions");
+	NullCheck.notNull(side, "side");
 	this.luwrain = luwrain;
 	this.actions = actions;
 	this.strings = strings;
 	this.side = side;
-	NullCheck.notNull(luwrain, "luwrain");
-	NullCheck.notNull(strings, "strings");
-	NullCheck.notNull(actions, "actions");
 	setClickHandler(this);
     }
 
     @Override public boolean onCommanderClick(Path current, Path[] selected)
     {
-	if (selected == null)
-	    return false;
-	if (selected != null && selected.length == 1 && 
-	    selected[0].toString().toLowerCase().endsWith(".zip"))
-	{
-	    if (openZip(selected[0]))
-		return true;
-	}
-    	final String fileNames[] = new String[selected.length];
-	for(int i = 0;i < selected.length;++i)
-	    fileNames[i] = selected[i].toString();
-	luwrain.openFiles(fileNames);
-	return true;
+	NullCheck.notNull(selected, "selected");
+	return actions.onClickInPanel(selected);
     }
 
     @Override public boolean onKeyboardEvent(KeyboardEvent event)
     {
 	NullCheck.notNull(event, "event");
-	if (event.isSpecial() && event.withShiftOnly())
+	if (event.isSpecial() && event.withAltOnly())
 	    switch(event.getSpecial())
 	    {
 	    case F1:
-		actions.selectLocationsLeft();
-		return true;
+		return actions.selectLocations(Side.LEFT);
 	    case F2:
-		actions.selectLocationsRight();
-		return true;
+		return actions.selectLocations(Side.RIGHT);
 	    }
 	if (event.isSpecial()  && !event.isModified())
 	    switch(event.getSpecial())
 	    {
 	    case TAB:
-		if (side == Side.LEFT)
-		    actions.gotoRightPanel(); else
-		    if (side == Side.RIGHT)
-		    {
-			if (actions.hasOperations())
-			    actions.gotoOperations(); else
-			    actions.gotoLeftPanel();
-		    }
-		return true;
-	    case DELETE:
-		return actions.delete(side);
+		return actions.onTabInPanel(side);
 	    }
 	return super.onKeyboardEvent(event);
     }
@@ -124,7 +102,6 @@ public class PanelArea extends CommanderArea implements CommanderArea.ClickHandl
 		    open(path, null);
 		    return true;
 		}
-		return false;
 	    }
 	    return false;
 	case INTRODUCE:
@@ -143,32 +120,7 @@ public class PanelArea extends CommanderArea implements CommanderArea.ClickHandl
 	    actions.closeApp();
 	    return true;
 	case ACTION:
-	    if (ActionEvent.isAction(event, "preview"))
-	    {
-		actions.openReader(side);
-		return true;
-	    }
-	    if (ActionEvent.isAction(event, "hidden-show"))
-	    {
-		setFilter(new CommanderFilters.AllFiles());
-		refresh();
-		return true;
-	    }
-	    if (ActionEvent.isAction(event, "hidden-hide"))
-	    {
-		setFilter(new CommanderFilters.NoHidden());
-		refresh();
-		return true;
-	    }
-	    if (ActionEvent.isAction(event, "info"))
-		return actions.showInfoArea(cursorAtEntry());
-	    if (ActionEvent.isAction(event, "copy"))
-		return actions.copy(side);
-	    if (ActionEvent.isAction(event, "move"))
-		return actions.move(side);
-	    if (ActionEvent.isAction(event, "mkdir"))
-		return actions.mkdir(side);
-	    return false;
+	    return actions.onPanelAction(event, side, selected());
 	default:
 	    return super.onEnvironmentEvent(event);
 	}
@@ -176,65 +128,6 @@ public class PanelArea extends CommanderArea implements CommanderArea.ClickHandl
 
     @Override public Action[] getAreaActions()
     {
-	return new Action[]{
-	    new Action("open", "Открыть"),
-	    new Action("edit-text", "Редактировать как текст"),
-	    new Action("preview", "Просмотр"),
-	    new Action("preview-another-format", "Просмотр с указанием формата"),
-	    new Action("copy", "Копировать", new KeyboardEvent(KeyboardEvent.Special.F5)),
-	    new Action("move", "Переименовать/переместить", new KeyboardEvent(KeyboardEvent.Special.F6)),
-	    new Action("mkdir", "Создать каталог", new KeyboardEvent(KeyboardEvent.Special.F7)),
-	    new Action("delete", "Удалить", new KeyboardEvent(KeyboardEvent.Special.F8)),
-	    new Action("hidden-show", "Показать скрытые файлы"), 
-	    new Action("hidden-hide", "Не показывать скрытые файлы"), 
-	    new Action("info", "Информация об объекте(ах)"),
-	};
-    }
-
-    private boolean calcSize()
-    {
-	final File[] f = selectedAsFiles();
-	if (f == null || f.length < 1)
-	    return false;
-	long res = 0;
-	try {
-	    for(File ff: f)
-		res += org.luwrain.app.commander.operations.TotalSize.getTotalSize(ff.toPath());
-	}
-	catch (Throwable e)
-	{
-	    e.printStackTrace();
-	    luwrain.message("Невозможно получить необходимый доступ к файлам, возможно, недостаточно прав доступа", Luwrain.MESSAGE_ERROR);
-	    return true;
-	}
-	luwrain.message(strings.bytesNum(res), Luwrain.MESSAGE_DONE);
-	return true;
-    }
-
-    private boolean openZip(Path path)
-    {
-	final Map<String, String> prop = new HashMap<String, String>();
-	prop.put("encoding", actions.settings().getZipFilesEncoding("UTF-8"));
-	try {
-	    final URI zipfile = URI.create("jar:file:" + path.toString().replaceAll(" ", "%20"));
-	    final FileSystem fs = FileSystems.newFileSystem(zipfile, prop);
-	    open(fs.getPath("/"), null);
-	    return true;
-	}
-	catch(IOException e)
-	{
-	    e.printStackTrace();
-	    return false;
-	}
-    }
-
-    File[] selectedAsFiles()
-    {
-	return null;
-    }
-
-    File openedAsFile()
-    {
-	return null;
+	return actions.getPanelAreaActions(selected());
     }
 }

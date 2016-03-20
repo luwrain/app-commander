@@ -31,7 +31,7 @@ class CommanderApp implements Application, Actions
 
     static private final int NORMAL_LAYOUT_INDEX = 0;
     static private final int OPERATIONS_LAYOUT_INDEX = 1;
-    static private final int INFo_LAYOUT_INDEX = 2;
+    static private final int INFO_LAYOUT_INDEX = 2;
 
     private Luwrain luwrain;
     private final Base base = new Base();
@@ -43,12 +43,12 @@ class CommanderApp implements Application, Actions
     private AreaLayoutSwitch layouts;
     private Path startFrom;
 
-    public CommanderApp()
+CommanderApp()
     {
 	startFrom = null;
     }
 
-    public CommanderApp(String arg)
+    CommanderApp(String arg)
     {
 	NullCheck.notNull(arg, "arg");
 	if (!arg.isEmpty())
@@ -86,11 +86,19 @@ class CommanderApp implements Application, Actions
 	operationsArea = new OperationArea(luwrain, this, strings);
 
 	infoArea = new SimpleArea(new DefaultControlEnvironment(luwrain), strings.infoAreaName()){
+		/*
 		@Override public boolean onKeyboardEvent(KeyboardEvent event)
 		{
 		    NullCheck.notNull(event, "event");
+		    if (event.isSpecial() && !event.isModified())
+			switch(event.getSpecial())
+			{
+			case ESCAPE:
+			    return actions.exitFromInfoArea();
+			}
 		    return super.onKeyboardEvent(event);
 		}
+		*/
 		@Override public boolean onEnvironmentEvent(EnvironmentEvent event)
 		{
 		    NullCheck.notNull(event, "event");
@@ -99,33 +107,114 @@ class CommanderApp implements Application, Actions
 		    case CLOSE:
 			actions.closeApp();
 			return true;
+		    case ACTION:
+			if (ActionEvent.isAction(event, "close-info"))
+			    return actions.exitFromInfoArea();
 		    default:
 			return super.onEnvironmentEvent(event);
 		    }
 		}
+		@Override public Action[] getAreaActions()
+		{
+		    return new Action[]{
+			new Action("close-info", strings.infoActionTitle("close-info"), new KeyboardEvent(KeyboardEvent.Special.ESCAPE))
+		    };
+		}
 	    };
     }
 
-    @Override public void selectLocationsLeft()
+    @Override public Action[] getPanelAreaActions(Path[] selected)
     {
-	final File f = Popups.mountedPartitionsAsFile(luwrain, Popup.WEAK);
-	if (f == null)
-	    return;
-	leftPanel.open(f.toPath(), null);
-	luwrain.setActiveArea(leftPanel);
+	NullCheck.notNullItems(selected, "selected");
+	if (selected.length < 1)
+	    return new Action[]{
+		new Action("hidden-show", strings.panelActionTitle("hidden-show", false)), 
+		new Action("hidden-hide", strings.panelActionTitle("hidden-hide", false)), 
+	    };
+	return new Action[]{
+	    new Action("open", strings.panelActionTitle("open", false)),
+	    new Action("edit-text", strings.panelActionTitle("edit-as-text", false)),
+	    new Action("preview", strings.panelActionTitle("preview", false)),
+	    new Action("preview-another-format", strings.panelActionTitle("preview-another-format", false)),
+	    new Action("copy", strings.panelActionTitle("copy", false), new KeyboardEvent(KeyboardEvent.Special.F5)),
+	    new Action("move", strings.panelActionTitle("move", false), new KeyboardEvent(KeyboardEvent.Special.F6)),
+	    new Action("mkdir", strings.panelActionTitle("mkdir", false), new KeyboardEvent(KeyboardEvent.Special.F7)),
+	    new Action("delete", strings.panelActionTitle("delete", false), new KeyboardEvent(KeyboardEvent.Special.F8)),
+	    new Action("hidden-show", strings.panelActionTitle("hidden-show", false)), 
+	    new Action("hidden-hide", strings.panelActionTitle("hidden-hide", false)), 
+	    new Action("info", strings.panelActionTitle("info", selected.length > 1)),
+	};
     }
 
-    @Override public void selectLocationsRight()
+    @Override public boolean onPanelAction(Event event, PanelArea.Side side, Path[] selected)
     {
-	final File f = Popups.mountedPartitionsAsFile(luwrain, Popup.WEAK);
+	if (ActionEvent.isAction(event, "preview"))
+	    return openReader(side);
+	if (ActionEvent.isAction(event, "hidden-show"))
+	{
+	    //		setFilter(new CommanderFilters.AllFiles());
+	    //		refresh();
+	    return true;
+	}
+	if (ActionEvent.isAction(event, "hidden-hide"))
+	{
+	    //		setFilter(new CommanderFilters.NoHidden());
+	    //		refresh();
+	    return true;
+	}
+	if (ActionEvent.isAction(event, "info"))
+	    return showInfoArea(selected);
+	if (ActionEvent.isAction(event, "copy"))
+	    return copy(side);
+	if (ActionEvent.isAction(event, "move"))
+	    return move(side);
+	if (ActionEvent.isAction(event, "mkdir"))
+	    return mkdir(side);
+	return false;
+    }
+
+    @Override public boolean onClickInPanel(Path[] selected)
+    {
+	NullCheck.notNullItems(selected, "selected");
+	//FIXME:
+	return false;
+    }
+
+@Override public boolean onTabInPanel(PanelArea.Side side)
+    {
+	NullCheck.notNull(side, "side");
+	//FIXME:
+	return false;
+    }
+
+    @Override public boolean selectLocations(PanelArea.Side side)
+    {
+	NullCheck.notNull(side, "side");
+	File f = null;
+	switch(side)
+	{
+	case LEFT:
+f = Popups.mountedPartitionsAsFile(luwrain, Popup.WEAK);
 	if (f == null)
-	    return;
+	    return true;
+	leftPanel.open(f.toPath(), null);
+	luwrain.setActiveArea(leftPanel);
+	return true;
+	case RIGHT:
+f = Popups.mountedPartitionsAsFile(luwrain, Popup.WEAK);
+	if (f == null)
+	    return true;
 	rightPanel.open(f.toPath(), null);
 	luwrain.setActiveArea(rightPanel);
+	return true;
+	default:
+	    return false;
+	}
     }
 
     @Override public boolean openReader(PanelArea.Side panelSide)
     {
+	/*
 	File[] files = null;
 	switch(panelSide)
 	{
@@ -141,11 +230,17 @@ class CommanderApp implements Application, Actions
 	if (files == null || files.length < 1)
 	    return false;
 	base.openReader(files);
+	*/
 	return true;
+	
     }
 
-    @Override public boolean copy(PanelArea.Side panelSide)
+private boolean copy(PanelArea.Side panelSide)
     {
+	NullCheck.notNull(panelSide, "panelSide");
+	luwrain.message("copy");
+	return true;
+	/*
 	final PanelArea fromPanel = getPanel(panelSide);
 	final PanelArea toPanel = getAnotherPanel(panelSide);
 	final Path copyFromDir = fromPanel.opened();
@@ -156,9 +251,10 @@ class CommanderApp implements Application, Actions
 	    return false;
 	base.copy(operationsArea, copyFromDir, filesToCopy, copyTo);
 	return true;
+	*/
     }
 
-    @Override public boolean move(PanelArea.Side panelSide)
+    private boolean move(PanelArea.Side panelSide)
     {
 	return false;
 	/*
@@ -191,8 +287,9 @@ class CommanderApp implements Application, Actions
 	*/
     }
 
-    @Override public boolean mkdir(PanelArea.Side panelSide)
+private boolean mkdir(PanelArea.Side panelSide)
     {
+	NullCheck.notNull(panelSide, "panelSide");
 	final PanelArea area = getPanel(panelSide);
 	final Path createIn = area.opened();
 	if (createIn == null)
@@ -201,11 +298,11 @@ class CommanderApp implements Application, Actions
 	if (created == null)
 	    return true;
 	refreshPanels();
-	area.find(created.getFileName().toString(), false);
+	area.find(created, false);
 	return true;
     }
 
-    @Override public boolean delete(PanelArea.Side panelSide)
+    private boolean delete(PanelArea.Side panelSide)
     {
 	/*
 	File[] filesToDelete = panelSide == PanelArea.Side.LEFT?leftPanel.selectedAsFiles():rightPanel.selectedAsFiles();
@@ -296,11 +393,22 @@ filesToDelete));
 	return operationsArea.hasOperations();
     }
 
-    @Override public boolean showInfoArea(CommanderArea.Entry entry)
+    private boolean showInfoArea(Path[] selected)
     {
-	if (entry == null || entry.parent())
-	    return false;
-	luwrain.message(entry.path().toString());
+	NullCheck.notNullItems(selected, "selected");
+	infoArea.clear();
+	base.fillInfo(infoArea, selected);
+	layouts.show(INFO_LAYOUT_INDEX);
+	//FIXME:add introduction
+	return true;
+    }
+
+    @Override public boolean exitFromInfoArea()
+    {
+	if (hasOperations())
+	    layouts.show(OPERATIONS_LAYOUT_INDEX); else
+	    layouts.show(NORMAL_LAYOUT_INDEX);
+	//FIXME:add introduction
 	return true;
     }
 

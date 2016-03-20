@@ -16,7 +16,10 @@
 
 package org.luwrain.app.commander;
 
+import java.nio.file.*;
+import org.luwrain.core.*;
 import org.luwrain.controls.*;
+
 
 interface Actions
 {
@@ -26,13 +29,12 @@ interface Actions
     void closeApp();
     boolean openReader(PanelArea.Side panelSide);
     void refreshPanels();
-    void selectLocationsLeft();
-    void selectLocationsRight();
-    boolean copy(PanelArea.Side panelSide);
-    boolean move(PanelArea.Side panelSide);
-    boolean mkdir(PanelArea.Side panelSide);
-    boolean delete(PanelArea.Side panelSide);
+    boolean selectLocations(PanelArea.Side side);
     boolean hasOperations();
     Settings settings();
-    boolean showInfoArea(CommanderArea.Entry entry);
+    boolean exitFromInfoArea();
+    Action[] getPanelAreaActions(Path[] selected);
+    boolean onClickInPanel(Path[] selected);
+    boolean onTabInPanel(PanelArea.Side side);
+    boolean onPanelAction(Event event, PanelArea.Side side, Path[] selected);
 }

@@ -26,6 +26,8 @@ public interface Strings
     String rightPanelName();
     String infoAreaName();
     String operationsAreaName();
+    String panelActionTitle(String actionName, boolean multiple);
+    String infoActionTitle(String actionName);
     String copyPopupName();
     String copyPopupPrefix(Path[] files);
     String copyOperationName(Path[] filesToCopy, Path copyTo);
