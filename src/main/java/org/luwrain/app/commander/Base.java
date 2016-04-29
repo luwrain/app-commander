@@ -245,4 +245,12 @@ class Base
 	}
 	lines.addLine("");
     }
+
+    boolean runWithShortcut(Path[] selected)
+    {
+	NullCheck.notNullItems(selected, "selected");
+	final String[] shortcuts = luwrain.getAllShortcutNames();
+	Popups.fixedList(luwrain, "Выберите приложение:", shortcuts, 0);
+	return true;
+    }
 }

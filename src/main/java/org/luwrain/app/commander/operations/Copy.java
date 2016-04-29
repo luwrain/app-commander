@@ -21,6 +21,7 @@ import java.nio.file.Path;
 
 import org.luwrain.core.NullCheck;
 import org.luwrain.app.commander.OperationListener;
+import org.luwrain.app.commander.TotalSize;
 
 /**
  * Implementation of the files copying procedure. To make its behaviour

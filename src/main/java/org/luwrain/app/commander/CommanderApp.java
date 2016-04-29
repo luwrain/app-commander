@@ -43,7 +43,7 @@ class CommanderApp implements Application, Actions
     private AreaLayoutSwitch layouts;
     private Path startFrom;
 
-CommanderApp()
+    CommanderApp()
     {
 	startFrom = null;
     }
@@ -86,19 +86,6 @@ CommanderApp()
 	operationsArea = new OperationArea(luwrain, this, strings);
 
 	infoArea = new SimpleArea(new DefaultControlEnvironment(luwrain), strings.infoAreaName()){
-		/*
-		@Override public boolean onKeyboardEvent(KeyboardEvent event)
-		{
-		    NullCheck.notNull(event, "event");
-		    if (event.isSpecial() && !event.isModified())
-			switch(event.getSpecial())
-			{
-			case ESCAPE:
-			    return actions.exitFromInfoArea();
-			}
-		    return super.onKeyboardEvent(event);
-		}
-		*/
 		@Override public boolean onEnvironmentEvent(EnvironmentEvent event)
 		{
 		    NullCheck.notNull(event, "event");
@@ -136,12 +123,14 @@ CommanderApp()
 	    new Action("edit-text", strings.panelActionTitle("edit-as-text", false)),
 	    new Action("preview", strings.panelActionTitle("preview", false)),
 	    new Action("preview-another-format", strings.panelActionTitle("preview-another-format", false)),
+	    new Action("open-choosing-app", strings.panelActionTitle("open-choosing-app", false)),
 	    new Action("copy", strings.panelActionTitle("copy", false), new KeyboardEvent(KeyboardEvent.Special.F5)),
 	    new Action("move", strings.panelActionTitle("move", false), new KeyboardEvent(KeyboardEvent.Special.F6)),
 	    new Action("mkdir", strings.panelActionTitle("mkdir", false), new KeyboardEvent(KeyboardEvent.Special.F7)),
 	    new Action("delete", strings.panelActionTitle("delete", false), new KeyboardEvent(KeyboardEvent.Special.F8)),
 	    new Action("hidden-show", strings.panelActionTitle("hidden-show", false)), 
 	    new Action("hidden-hide", strings.panelActionTitle("hidden-hide", false)), 
+	    new Action("size", strings.panelActionTitle("size", false), new KeyboardEvent('?')),
 	    new Action("info", strings.panelActionTitle("info", selected.length > 1)),
 	};
     }
@@ -170,6 +159,8 @@ CommanderApp()
 	    return move(side);
 	if (ActionEvent.isAction(event, "mkdir"))
 	    return mkdir(side);
+	if (ActionEvent.isAction(event, "size"))
+	    return calcSize(selected);
 	return false;
     }
 
@@ -180,7 +171,7 @@ CommanderApp()
 	return false;
     }
 
-@Override public boolean onTabInPanel(PanelArea.Side side)
+    @Override public boolean onTabInPanel(PanelArea.Side side)
     {
 	NullCheck.notNull(side, "side");
 	//FIXME:
@@ -194,19 +185,19 @@ CommanderApp()
 	switch(side)
 	{
 	case LEFT:
-f = Popups.mountedPartitionsAsFile(luwrain, Popup.WEAK);
-	if (f == null)
+	    f = Popups.mountedPartitionsAsFile(luwrain, Popup.WEAK);
+	    if (f == null)
+		return true;
+	    leftPanel.open(f.toPath(), null);
+	    luwrain.setActiveArea(leftPanel);
 	    return true;
-	leftPanel.open(f.toPath(), null);
-	luwrain.setActiveArea(leftPanel);
-	return true;
 	case RIGHT:
-f = Popups.mountedPartitionsAsFile(luwrain, Popup.WEAK);
-	if (f == null)
+	    f = Popups.mountedPartitionsAsFile(luwrain, Popup.WEAK);
+	    if (f == null)
+		return true;
+	    rightPanel.open(f.toPath(), null);
+	    luwrain.setActiveArea(rightPanel);
 	    return true;
-	rightPanel.open(f.toPath(), null);
-	luwrain.setActiveArea(rightPanel);
-	return true;
 	default:
 	    return false;
 	}
@@ -215,32 +206,28 @@ f = Popups.mountedPartitionsAsFile(luwrain, Popup.WEAK);
     @Override public boolean openReader(PanelArea.Side panelSide)
     {
 	/*
-	File[] files = null;
-	switch(panelSide)
-	{
-	case LEFT:
-	    files = leftPanel.selectedAsFiles();
-	    break;
-	case RIGHT:
-	    files = rightPanel.selectedAsFiles();
-	    break;
-	default:
-	    return false;
-	}
-	if (files == null || files.length < 1)
-	    return false;
-	base.openReader(files);
+	  File[] files = null;
+	  switch(panelSide)
+	  {
+	  case LEFT:
+	  files = leftPanel.selectedAsFiles();
+	  break;
+	  case RIGHT:
+	  files = rightPanel.selectedAsFiles();
+	  break;
+	  default:
+	  return false;
+	  }
+	  if (files == null || files.length < 1)
+	  return false;
+	  base.openReader(files);
 	*/
 	return true;
-	
     }
 
-private boolean copy(PanelArea.Side panelSide)
+    private boolean copy(PanelArea.Side panelSide)
     {
 	NullCheck.notNull(panelSide, "panelSide");
-	luwrain.message("copy");
-	return true;
-	/*
 	final PanelArea fromPanel = getPanel(panelSide);
 	final PanelArea toPanel = getAnotherPanel(panelSide);
 	final Path copyFromDir = fromPanel.opened();
@@ -251,7 +238,6 @@ private boolean copy(PanelArea.Side panelSide)
 	    return false;
 	base.copy(operationsArea, copyFromDir, filesToCopy, copyTo);
 	return true;
-	*/
     }
 
     private boolean move(PanelArea.Side panelSide)
@@ -287,7 +273,7 @@ private boolean copy(PanelArea.Side panelSide)
 	*/
     }
 
-private boolean mkdir(PanelArea.Side panelSide)
+    private boolean mkdir(PanelArea.Side panelSide)
     {
 	NullCheck.notNull(panelSide, "panelSide");
 	final PanelArea area = getPanel(panelSide);
@@ -305,18 +291,18 @@ private boolean mkdir(PanelArea.Side panelSide)
     private boolean delete(PanelArea.Side panelSide)
     {
 	/*
-	File[] filesToDelete = panelSide == PanelArea.Side.LEFT?leftPanel.selectedAsFiles():rightPanel.selectedAsFiles();
-	if (filesToDelete == null || filesToDelete.length < 1)
-	    return false;
-	YesNoPopup popup = new YesNoPopup(luwrain, strings.delPopupName(),
-					strings.delPopupText(filesToDelete), false);
-	luwrain.popup(popup);
-	if (popup.closing.cancelled())
-	    return true;
-	if (!popup.result())
-	    return true;
- 	operations.launch(Operations.delete(operations, strings.delOperationName(filesToDelete), 
-filesToDelete));
+	  File[] filesToDelete = panelSide == PanelArea.Side.LEFT?leftPanel.selectedAsFiles():rightPanel.selectedAsFiles();
+	  if (filesToDelete == null || filesToDelete.length < 1)
+	  return false;
+	  YesNoPopup popup = new YesNoPopup(luwrain, strings.delPopupName(),
+	  strings.delPopupText(filesToDelete), false);
+	  luwrain.popup(popup);
+	  if (popup.closing.cancelled())
+	  return true;
+	  if (!popup.result())
+	  return true;
+	  operations.launch(Operations.delete(operations, strings.delOperationName(filesToDelete), 
+	  filesToDelete));
 	*/
 	return true;
     }
@@ -329,6 +315,7 @@ filesToDelete));
 
     private PanelArea getPanel(PanelArea.Side side)
     {
+	NullCheck.notNull(side, "side");
 	switch(side)
 	{
 	case LEFT:
@@ -342,6 +329,7 @@ filesToDelete));
 
     private PanelArea getAnotherPanel(PanelArea.Side side)
     {
+	NullCheck.notNull(side, "side");
 	switch(side)
 	{
 	case LEFT:
@@ -415,5 +403,22 @@ filesToDelete));
     @Override public Settings settings()
     {
 	return base.settings();
+    }
+
+    private boolean calcSize(Path[] selected)
+    {
+	NullCheck.notNull(selected, "selected");
+	try {
+	    long res = 0;
+	    for(Path p: selected)
+		res += TotalSize.getTotalSize(p);
+	    System.out.println("" + res);
+	    luwrain.message(strings.bytesNum(res), Luwrain.MESSAGE_DONE);
+	}
+	catch(IOException e)
+	{
+	}
+	return true;
+
     }
 }
