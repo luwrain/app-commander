@@ -185,14 +185,14 @@ class CommanderApp implements Application, Actions
 	switch(side)
 	{
 	case LEFT:
-	    f = Popups.mountedPartitionsAsFile(luwrain, Popup.WEAK);
+	    f = Popups.mountedPartitionsAsFile(luwrain);
 	    if (f == null)
 		return true;
 	    leftPanel.open(f.toPath(), null);
 	    luwrain.setActiveArea(leftPanel);
 	    return true;
 	case RIGHT:
-	    f = Popups.mountedPartitionsAsFile(luwrain, Popup.WEAK);
+	    f = Popups.mountedPartitionsAsFile(luwrain);
 	    if (f == null)
 		return true;
 	    rightPanel.open(f.toPath(), null);

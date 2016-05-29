@@ -135,8 +135,8 @@ void launch(Operation op)
 	final Operation op = operations.get(getHotPointY());
 	if (op.isFinished())
 	    return false;
-	YesNoPopup popup = new YesNoPopup(luwrain, strings.cancelOperationPopupName(),
-					strings.cancelOperationPopupText(op), false);
+	final YesNoPopup popup = new YesNoPopup(luwrain, strings.cancelOperationPopupName(),
+					  strings.cancelOperationPopupText(op), false, Popups.DEFAULT_POPUP_FLAGS);
 	luwrain.popup(popup);
 	if (popup.closing.cancelled())
 	    return true;

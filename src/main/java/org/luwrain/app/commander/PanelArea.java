@@ -27,7 +27,7 @@ import org.luwrain.controls.*;
 import org.luwrain.core.Registry;
 //import org.luwrain.app.commander.operations.TotalSize;
 
-public class PanelArea extends CommanderArea implements CommanderArea.ClickHandler
+public class PanelArea extends CommanderArea
 {
     enum Side{LEFT, RIGHT};
 
@@ -36,22 +36,10 @@ public class PanelArea extends CommanderArea implements CommanderArea.ClickHandl
     private Strings strings;
     private Side side = Side.LEFT;
 
-    static private CommanderArea.Params createParams(Luwrain luwrain, Path startFrom)
-    {
-	final CommanderArea.Params params = new CommanderArea.Params();
-	params.environment = new DefaultControlEnvironment(luwrain);
-	params.selecting = true;
-	params.filter = new CommanderFilters.NoHidden();
-	params.comparator = new ByNameCommanderComparator();
-	params.clickHandler = null;
-	params.appearance = new DefaultCommanderAppearance(params.environment);
-	return params;
-    }
-
     PanelArea(Luwrain luwrain, Actions actions, Strings strings, 
 	      Path startFrom, Side side)
     {
-	super(createParams(luwrain, startFrom), startFrom);
+	super(constructParams(luwrain, startFrom), startFrom);
 	NullCheck.notNull(luwrain, "luwrain");
 	NullCheck.notNull(strings, "strings");
 	NullCheck.notNull(actions, "actions");
@@ -60,10 +48,10 @@ public class PanelArea extends CommanderArea implements CommanderArea.ClickHandl
 	this.actions = actions;
 	this.strings = strings;
 	this.side = side;
-	setClickHandler(this);
+	//	setClickHandler(this);
     }
 
-    @Override public boolean onCommanderClick(Path current, Path[] selected)
+public boolean onCommanderClick(Path current, Path[] selected)
     {
 	NullCheck.notNull(selected, "selected");
 	return actions.onClickInPanel(selected);
@@ -130,4 +118,17 @@ public class PanelArea extends CommanderArea implements CommanderArea.ClickHandl
     {
 	return actions.getPanelAreaActions(selected());
     }
+
+    static private CommanderArea.CommanderParams constructParams(Luwrain luwrain, Path startFrom)
+    {
+	final CommanderArea.CommanderParams params = new CommanderArea.CommanderParams();
+	params.environment = new DefaultControlEnvironment(luwrain);
+	params.selecting = true;
+	params.filter = new CommanderUtils.NoHiddenFilter();
+	params.comparator = new CommanderUtils.ByNameComparator();
+	//	params.clickHandler = null;
+	params.appearance = new CommanderUtils.DefaultAppearance(params.environment);
+	return params;
+    }
+
 }
