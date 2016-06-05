@@ -1,18 +1,3 @@
-/*
-   Copyright 2012-2016 Michael Pozhidaev <michael.pozhidaev@gmail.com>
-
-   This file is part of the LUWRAIN.
-
-   LUWRAIN is free software; you can redistribute it and/or
-   modify it under the terms of the GNU General Public
-   License as published by the Free Software Foundation; either
-   version 3 of the License, or (at your option) any later version.
-
-   LUWRAIN is distributed in the hope that it will be useful,
-   but WITHOUT ANY WARRANTY; without even the implied warranty of
-   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-   General Public License for more details.
-*/
 
 package org.luwrain.app.commander;
 
@@ -27,6 +12,8 @@ import org.luwrain.app.commander.operations.Operations;
 
 class Base
 {
+    enum Side {LEFT, RIGHT};
+
     static private final String REGISTRY_PATH = "/org/luwrain/app/commander";
 
     private Luwrain luwrain;
@@ -114,7 +101,7 @@ class Base
 	    }
 	    formatsStr[i] = formats[i].substring(pos + 1);
 	}
-	final Object selected = Popups.fixedList(luwrain, "Выберите формат для просмотра:", formatsStr, 0);//FIXME:
+	final Object selected = Popups.fixedList(luwrain, "Выберите формат для просмотра:", formatsStr);
 	if (selected == null)
 	    return false;
 	String format = null;
@@ -250,7 +237,7 @@ class Base
     {
 	NullCheck.notNullItems(selected, "selected");
 	final String[] shortcuts = luwrain.getAllShortcutNames();
-	Popups.fixedList(luwrain, "Выберите приложение:", shortcuts, 0);
+	Popups.fixedList(luwrain, "Выберите приложение:", shortcuts);
 	return true;
     }
 }
