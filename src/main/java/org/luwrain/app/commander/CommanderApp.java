@@ -40,7 +40,7 @@ class CommanderApp implements Application, Actions
     private Strings strings;
     private CommanderArea leftPanel;
     private CommanderArea rightPanel;
-    private OperationArea operationsArea;
+    private OperationsArea operationsArea;
     private SimpleArea infoArea;
     private AreaLayoutSwitch layouts;
     private Path startFrom;

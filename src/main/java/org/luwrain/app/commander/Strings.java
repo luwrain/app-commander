@@ -4,6 +4,8 @@ package org.luwrain.app.commander;
 import java.io.*;
 import java.nio.file.*;
 
+import org.luwrain.app.commander.operations.*;
+
 public interface Strings
 {
     String appName();

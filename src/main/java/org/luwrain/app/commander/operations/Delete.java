@@ -5,13 +5,12 @@ import java.io.*;
 import java.nio.file.Path;
 
 import org.luwrain.core.NullCheck;
-import org.luwrain.app.commander.OperationListener;
 
 class Delete extends Base
 {
     private Path[] deleteWhat;
 
-    Delete(OperationListener listener, String opName,
+    Delete(Listener listener, String opName,
 	   Path[] deleteWhat)
     {
 	super(listener, opName);

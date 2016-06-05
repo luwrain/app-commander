@@ -58,7 +58,7 @@ class Base
     }
 
 	//returns true if copying begings;
-    boolean copy(OperationArea operations, Path copyFromDir,
+    boolean copy(OperationsArea operations, Path copyFromDir,
 	      Path[] filesToCopy, Path copyTo)
     {
 	NullCheck.notNull(operations, "operations");

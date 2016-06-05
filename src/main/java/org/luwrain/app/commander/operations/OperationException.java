@@ -2,7 +2,6 @@
 package org.luwrain.app.commander.operations;
 
 import java.nio.file.*;
-import org.luwrain.app.commander.Operation;
 
 class OperationException extends Exception
 {

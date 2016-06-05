@@ -1,9 +1,9 @@
 
-package org.luwrain.app.commander;
+package org.luwrain.app.commander.operations;
 
 import java.nio.file.Path;
 
-public interface OperationListener
+public interface Listener
 {
     void onOperationProgress(Operation operation);
     boolean confirmOverwrite(Path path);

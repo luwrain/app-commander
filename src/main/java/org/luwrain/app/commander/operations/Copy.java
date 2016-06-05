@@ -5,7 +5,6 @@ import java.io.*;
 import java.nio.file.Path;
 
 import org.luwrain.core.NullCheck;
-import org.luwrain.app.commander.OperationListener;
 import org.luwrain.app.commander.TotalSize;
 
 /**
@@ -33,7 +32,7 @@ class Copy extends Base
     private int lastPercents;//Useful for filtering out notifications with the same number of percent
     private boolean overwriteApproved = false;
 
-    Copy(OperationListener listener, String opName,
+    Copy(Listener listener, String opName,
 	 Path[] copyFrom, Path copyTo)
     {
 	super(listener, opName);

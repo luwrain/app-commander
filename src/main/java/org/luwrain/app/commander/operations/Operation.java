@@ -1,5 +1,5 @@
 
-package org.luwrain.app.commander;
+package org.luwrain.app.commander.operations;
 
 public interface Operation extends Runnable
 {

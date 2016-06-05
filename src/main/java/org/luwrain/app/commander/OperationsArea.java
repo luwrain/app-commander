@@ -11,14 +11,16 @@ import org.luwrain.popups.*;
 
 import org.luwrain.app.commander.Base.Side;
 
-class OperationArea extends NavigateArea implements OperationListener
+import org.luwrain.app.commander.operations.*;
+
+class OperationsArea extends NavigateArea implements Listener
 {
     private Luwrain luwrain;
     private Strings strings;
     private Actions actions;
     private final Vector<Operation> operations = new Vector<Operation>();
 
-    OperationArea(Luwrain luwrain,
+    OperationsArea(Luwrain luwrain,
 		     Actions actions, Strings strings)
     {
 	super(new DefaultControlEnvironment(luwrain));

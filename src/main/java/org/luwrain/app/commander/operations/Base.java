@@ -8,12 +8,10 @@ import java.nio.file.attribute.*;
 
 import org.luwrain.core.NullCheck;
 import org.luwrain.core.Log;
-import org.luwrain.app.commander.Operation;
-import org.luwrain.app.commander.OperationListener;
 
 abstract class Base implements Operation
 {
-    protected OperationListener listener;
+    protected Listener listener;
     protected String opName = "";
     protected boolean finished = false;
     protected boolean finishingAccepted = false ;
@@ -21,7 +19,7 @@ abstract class Base implements Operation
     protected String extInfo = "";
     protected boolean interrupted;
 
-    Base(OperationListener listener, String opName)
+    Base(Listener listener, String opName)
     {
 	this.listener = listener;
 	this.opName = opName;
