@@ -13,7 +13,6 @@ interface Actions
     void gotoOperations();
     void closeApp();
     void refreshPanels();
-    boolean hasOperations();
     Settings settings();
     Action[] getPanelAreaActions(Path[] selected);
     boolean onClickInPanel(Path[] selected);

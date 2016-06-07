@@ -43,19 +43,18 @@ class CommanderApp implements Application, Actions
     private OperationsArea operationsArea;
     private SimpleArea infoArea;
     private AreaLayoutSwitch layouts;
-    private Path startFrom;
+
+    private Path startFrom = null;
 
     CommanderApp()
     {
-	startFrom = null;
     }
 
-    CommanderApp(String arg)
+    CommanderApp(String startFrom)
     {
-	NullCheck.notNull(arg, "arg");
-	if (!arg.isEmpty())
-	    this.startFrom = Paths.get(arg); else
-	    this.startFrom = null;
+	NullCheck.notNull(startFrom, "startFrom");
+	if (!startFrom.isEmpty())
+	    this.startFrom = Paths.get(startFrom);
     }
 
     @Override public boolean onLaunch(Luwrain luwrain)
@@ -68,6 +67,8 @@ class CommanderApp implements Application, Actions
 	this.luwrain = luwrain;
 	if (!base.init(luwrain, strings))
 	    return false;
+	if (startFrom == null)
+	    startFrom = luwrain.getPathProperty("luwrain.dir.userhome");
 	createAreas();
 	layouts = new AreaLayoutSwitch(luwrain);
 	layouts.add(new AreaLayout(AreaLayout.LEFT_RIGHT, leftPanel, rightPanel));
@@ -78,8 +79,6 @@ class CommanderApp implements Application, Actions
 
     private void createAreas()
     {
-	final Actions actions = this;
-
 	final CommanderArea.CommanderParams params = new CommanderArea.CommanderParams();
 	params.environment = new DefaultControlEnvironment(luwrain);
 	params.selecting = true;
@@ -87,79 +86,105 @@ class CommanderApp implements Application, Actions
 	params.comparator = new CommanderUtils.ByNameComparator();
 	//	params.clickHandler = null;
 	params.appearance = new CommanderUtils.DefaultAppearance(params.environment);
-    
-	//	leftPanel = new CommanderArea(params, startFrom);
 
  	leftPanel = new CommanderArea(params, startFrom) {
-    @Override public boolean onKeyboardEvent(KeyboardEvent event)
-    {
-	NullCheck.notNull(event, "event");
-	if (event.isSpecial() && event.withAltOnly())
-	    switch(event.getSpecial())
-	    {
-	    case F1:
-		return selectPartition(Side.LEFT);
-	    case F2:
-		return selectPartition(Side.RIGHT);
-	    }
-	if (event.isSpecial()  && !event.isModified())
-	    switch(event.getSpecial())
-	    {
-	    case TAB:
-		return onTabInPanel(Side.LEFT);
-	    }
-	return super.onKeyboardEvent(event);
-    }
-    @Override public boolean onEnvironmentEvent(EnvironmentEvent event)
-    {
-	switch(event.getCode())
-	{
-	    /*
-	case OPEN:
-	    if (event instanceof OpenEvent)
-	    {
-		final Path path = Paths.get(((OpenEvent)event).path());
-		if (Files.isDirectory(path))
+		@Override public boolean onKeyboardEvent(KeyboardEvent event)
 		{
-		    open(path, null);
-		    return true;
+		    NullCheck.notNull(event, "event");
+		    if (event.isSpecial() && event.withAltOnly())
+			switch(event.getSpecial())
+			{
+			case F1:
+			    return selectPartition(Side.LEFT);
+			case F2:
+			    return selectPartition(Side.RIGHT);
+			}
+		    if (event.isSpecial()  && !event.isModified())
+			switch(event.getSpecial())
+			{
+			case TAB:
+			    return onTabInPanel(Side.LEFT);
+			}
+		    return super.onKeyboardEvent(event);
 		}
-	    }
-	    return false;
-	case INTRODUCE:
-	    luwrain.playSound(Sounds.INTRO_REGULAR);
-	    switch (side)
-	    {
-	    case LEFT:
-		luwrain.say(strings.leftPanelName() + " " + getAreaName());
-		break;
-	    case RIGHT:
-		luwrain.say(strings.rightPanelName() + " " + getAreaName());
-		break;
-	    }
-	    return true;
-	    */
-	case CLOSE:
-closeApp();
-	    return true;
-	case ACTION:
-	    return onPanelAreaAction(event, Side.LEFT, selected());
-	default:
-	    return super.onEnvironmentEvent(event);
-	}
-    }
-    @Override public Action[] getAreaActions()
-    {
-	return getPanelAreaActions(selected());
-    }
+		@Override public boolean onEnvironmentEvent(EnvironmentEvent event)
+		{
+		    switch(event.getCode())
+		    {
+		    case OPEN:
+			return onOpenEvent(event, this);
+		    case INTRODUCE:
+			luwrain.playSound(Sounds.INTRO_REGULAR);
+			luwrain.say(strings.leftPanelName() + " " + getAreaName());
+			return true;
+		    case CLOSE:
+			closeApp();
+			return true;
+		    case ACTION:
+			return onPanelAreaAction(event, Side.LEFT, selected());
+		    default:
+			return super.onEnvironmentEvent(event);
+		    }
+		}
+		@Override public Action[] getAreaActions()
+		{
+		    return getPanelAreaActions(selected());
+		}
 	    };
-	/*
-	leftPanel = new PanelArea(luwrain, this, strings, 
-				  startFrom, PanelArea.Side.LEFT);
-	rightPanel = new PanelArea(luwrain, this, strings, 
-				   startFrom, PanelArea.Side.RIGHT);
-	operationsArea = new OperationArea(luwrain, this, strings);
-	*/
+
+	params.environment = new DefaultControlEnvironment(luwrain);
+	params.selecting = true;
+	params.filter = new CommanderUtils.NoHiddenFilter();
+	params.comparator = new CommanderUtils.ByNameComparator();
+	//	params.clickHandler = null;
+	params.appearance = new CommanderUtils.DefaultAppearance(params.environment);
+
+ 	rightPanel = new CommanderArea(params, startFrom) {
+		@Override public boolean onKeyboardEvent(KeyboardEvent event)
+		{
+		    NullCheck.notNull(event, "event");
+		    if (event.isSpecial() && event.withAltOnly())
+			switch(event.getSpecial())
+			{
+			case F1:
+			    return selectPartition(Side.LEFT);
+			case F2:
+			    return selectPartition(Side.RIGHT);
+			}
+		    if (event.isSpecial()  && !event.isModified())
+			switch(event.getSpecial())
+			{
+			case TAB:
+			    return onTabInPanel(Side.RIGHT);
+			}
+		    return super.onKeyboardEvent(event);
+		}
+		@Override public boolean onEnvironmentEvent(EnvironmentEvent event)
+		{
+		    switch(event.getCode())
+		    {
+		    case OPEN:
+			return onOpenEvent(event, this);
+		    case INTRODUCE:
+			luwrain.playSound(Sounds.INTRO_REGULAR);
+			luwrain.say(strings.rightPanelName() + " " + getAreaName());
+			return true;
+		    case CLOSE:
+			closeApp();
+			return true;
+		    case ACTION:
+			return onPanelAreaAction(event, Side.LEFT, selected());
+		    default:
+			return super.onEnvironmentEvent(event);
+		    }
+		}
+		@Override public Action[] getAreaActions()
+		{
+		    return getPanelAreaActions(selected());
+		}
+	    };
+
+	operationsArea = new OperationsArea(luwrain, this, strings);
 
 	infoArea = new SimpleArea(new DefaultControlEnvironment(luwrain), strings.infoAreaName()){
 		@Override public boolean onEnvironmentEvent(EnvironmentEvent event)
@@ -168,11 +193,11 @@ closeApp();
 		    switch(event.getCode())
 		    {
 		    case CLOSE:
-closeApp();
+			closeApp();
 			return true;
 		    case ACTION:
 			if (ActionEvent.isAction(event, "close-info"))
-closeInfoArea();
+			    closeInfoArea();
 		    default:
 			return super.onEnvironmentEvent(event);
 		    }
@@ -249,8 +274,19 @@ private boolean onPanelAreaAction(Event event, Side side, Path[] selected)
 private boolean onTabInPanel(Side side)
     {
 	NullCheck.notNull(side, "side");
-	//FIXME:
-	return false;
+	switch(side)
+	{
+	case LEFT:
+	    luwrain.setActiveArea(rightPanel);
+	    return true;
+	case RIGHT:
+	    if (operationsArea.hasOperations())
+		luwrain.setActiveArea(operationsArea); else
+		luwrain.setActiveArea(leftPanel);
+	    return true;
+	default:
+	    return false;
+	}
     }
 
 @Override public boolean selectPartition(Side side)
@@ -351,7 +387,7 @@ private boolean onTabInPanel(Side side)
     private boolean mkdir(Side panelSide)
     {
 	NullCheck.notNull(panelSide, "panelSide");
-	final CommanderArea area = getPanel(panelSide);
+final CommanderArea area = getPanel(panelSide);
 	final Path createIn = area.opened();
 	if (createIn == null)
 	    return false;
@@ -416,6 +452,60 @@ private boolean onTabInPanel(Side side)
 	}
     }
 
+
+    private boolean showInfoArea(Path[] selected)
+    {
+	NullCheck.notNullItems(selected, "selected");
+	infoArea.clear();
+	base.fillInfo(infoArea, selected);
+	layouts.show(INFO_LAYOUT_INDEX);
+	//FIXME:add introduction
+	return true;
+    }
+
+private boolean closeInfoArea()
+    {
+	if (operationsArea.hasOperations())
+	    layouts.show(OPERATIONS_LAYOUT_INDEX); else
+	    layouts.show(NORMAL_LAYOUT_INDEX);
+	//FIXME:add introduction
+	return true;
+    }
+
+    @Override public Settings settings()
+    {
+	return base.settings();
+    }
+
+    private boolean onOpenEvent(EnvironmentEvent event, CommanderArea area)
+    {
+	NullCheck.notNull(event, "event");
+	NullCheck.notNull(area, "area");
+	if (!(event instanceof OpenEvent))
+	    return false;
+	final Path path = Paths.get(((OpenEvent)event).path());
+	if (!Files.isDirectory(path))
+	    return false;
+	area.open(path, null);
+	return true;
+    }
+
+    private boolean calcSize(Path[] selected)
+    {
+	NullCheck.notNull(selected, "selected");
+	try {
+	    long res = 0;
+	    for(Path p: selected)
+		res += TotalSize.getTotalSize(p);
+	    System.out.println("" + res);
+	    luwrain.message(strings.bytesNum(res), Luwrain.MESSAGE_DONE);
+	}
+	catch(IOException e)
+	{
+	}
+	return true;
+    }
+
     @Override public AreaLayout getAreasToShow()
     {
 	return layouts.getCurrentLayout();
@@ -449,51 +539,5 @@ private boolean onTabInPanel(Side side)
 	    return;
 	}
 	luwrain.closeApp();
-    }
-
-    @Override public boolean hasOperations()
-    {
-	return operationsArea.hasOperations();
-    }
-
-    private boolean showInfoArea(Path[] selected)
-    {
-	NullCheck.notNullItems(selected, "selected");
-	infoArea.clear();
-	base.fillInfo(infoArea, selected);
-	layouts.show(INFO_LAYOUT_INDEX);
-	//FIXME:add introduction
-	return true;
-    }
-
-private boolean closeInfoArea()
-    {
-	if (hasOperations())
-	    layouts.show(OPERATIONS_LAYOUT_INDEX); else
-	    layouts.show(NORMAL_LAYOUT_INDEX);
-	//FIXME:add introduction
-	return true;
-    }
-
-    @Override public Settings settings()
-    {
-	return base.settings();
-    }
-
-    private boolean calcSize(Path[] selected)
-    {
-	NullCheck.notNull(selected, "selected");
-	try {
-	    long res = 0;
-	    for(Path p: selected)
-		res += TotalSize.getTotalSize(p);
-	    System.out.println("" + res);
-	    luwrain.message(strings.bytesNum(res), Luwrain.MESSAGE_DONE);
-	}
-	catch(IOException e)
-	{
-	}
-	return true;
-
     }
 }

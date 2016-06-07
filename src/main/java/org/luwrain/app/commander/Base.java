@@ -38,10 +38,17 @@ class Base
     //Returns what exactly has been created
     Path mkdir(Path createIn)
     {
-	Path p = Popups.chooseFile(luwrain,
-				   strings.mkdirPopupName(), strings.mkdirPopupPrefix(),
-				   createIn, createIn,
-				   DefaultFileAcceptance.Type.NOT_EXISTING);
+	NullCheck.notNull(createIn, "createIn");
+	final Path p = Popups.path(luwrain,
+				   strings.mkdirPopupName(), strings.mkdirPopupPrefix(), createIn, (path)->{
+				       NullCheck.notNull(path, "path");
+				       if (Files.exists(path))
+				       {
+					   luwrain.message("Указанный файл существует", Luwrain.MESSAGE_ERROR);
+					   return false;
+				       }
+				       return true;
+				   });
 	if (p == null)
 	    return null;
 	try {
@@ -50,7 +57,7 @@ class Base
 	catch (IOException e)
 	{
 	    e.printStackTrace();
-	    luwrain.message(strings.mkdirErrorMessage(), Luwrain.MESSAGE_ERROR);
+	    luwrain.message(strings.mkdirErrorMessage() + ":" + e.getMessage(), Luwrain.MESSAGE_ERROR);
 	    return null;
 	}
 	luwrain.message(strings.mkdirOkMessage(p.getFileName().toString()), Luwrain.MESSAGE_OK);
@@ -65,10 +72,14 @@ class Base
 	NullCheck.notNull(copyFromDir, "copyFromDir");
 	NullCheck.notNullItems(filesToCopy, "filesToCopy");
 	NullCheck.notNull(copyTo, "copyTo");
-	final Path dest = Popups.chooseFile(luwrain,
+	final Path dest = Popups.path(luwrain,
 				      strings.copyPopupName(), strings.copyPopupPrefix(filesToCopy),
 					    copyTo, copyFromDir,
-					    DefaultFileAcceptance.Type.ANY);
+				      (path)->{
+					  NullCheck.notNull(path, "path");
+					  return true;
+				      },
+				      Popups.loadFilePopupFlags(luwrain), Popups.DEFAULT_POPUP_FLAGS);
 	if (dest == null)
 	    return false;
  	operations.launch(Operations.copy(operations, strings.copyOperationName(filesToCopy, dest), 
