@@ -84,7 +84,7 @@ class CommanderApp implements Application, Actions
 	params.selecting = true;
 	params.filter = new CommanderUtils.NoHiddenFilter();
 	params.comparator = new CommanderUtils.ByNameComparator();
-	//	params.clickHandler = null;
+	params.clickHandler = (area, path, dir)->onClick(area, path, dir);
 	params.appearance = new CommanderUtils.DefaultAppearance(params.environment);
 
  	leftPanel = new CommanderArea(params, startFrom) {
@@ -121,14 +121,14 @@ class CommanderApp implements Application, Actions
 			closeApp();
 			return true;
 		    case ACTION:
-			return onPanelAreaAction(event, Side.LEFT, selected());
+			return onPanelAreaAction(event, Side.LEFT, this);
 		    default:
 			return super.onEnvironmentEvent(event);
 		    }
 		}
 		@Override public Action[] getAreaActions()
 		{
-		    return getPanelAreaActions(selected());
+		    return getPanelAreaActions(this);
 		}
 	    };
 
@@ -136,7 +136,7 @@ class CommanderApp implements Application, Actions
 	params.selecting = true;
 	params.filter = new CommanderUtils.NoHiddenFilter();
 	params.comparator = new CommanderUtils.ByNameComparator();
-	//	params.clickHandler = null;
+	params.clickHandler = (area, path, dir)->onClick(area, path, dir);
 	params.appearance = new CommanderUtils.DefaultAppearance(params.environment);
 
  	rightPanel = new CommanderArea(params, startFrom) {
@@ -173,14 +173,14 @@ class CommanderApp implements Application, Actions
 			closeApp();
 			return true;
 		    case ACTION:
-			return onPanelAreaAction(event, Side.LEFT, selected());
+			return onPanelAreaAction(event, Side.LEFT, this);
 		    default:
 			return super.onEnvironmentEvent(event);
 		    }
 		}
 		@Override public Action[] getAreaActions()
 		{
-		    return getPanelAreaActions(selected());
+		    return getPanelAreaActions(this);
 		}
 	    };
 
@@ -210,9 +210,13 @@ class CommanderApp implements Application, Actions
 	    };
     }
 
-    @Override public Action[] getPanelAreaActions(Path[] selected)
+private Action[] getPanelAreaActions(CommanderArea area)
     {
-	NullCheck.notNullItems(selected, "selected");
+	NullCheck.notNull(area, "area");
+	Path[] selected;
+	if (area.marked().length > 0)
+	    selected = area.marked(); else
+	    selected = new Path[]{area.selectedPath()};
 	if (selected.length < 1)
 	    return new Action[]{
 		new Action("hidden-show", strings.panelActionTitle("hidden-show", false)), 
@@ -235,8 +239,11 @@ class CommanderApp implements Application, Actions
 	};
     }
 
-private boolean onPanelAreaAction(Event event, Side side, Path[] selected)
+private boolean onPanelAreaAction(Event event, Side side, CommanderArea area)
     {
+	NullCheck.notNull(event, "event");
+	NullCheck.notNull(side, "side");
+	NullCheck.notNull(area, "area");
 	if (ActionEvent.isAction(event, "preview"))
 	    return openReader(side);
 	if (ActionEvent.isAction(event, "hidden-show"))
@@ -252,7 +259,7 @@ private boolean onPanelAreaAction(Event event, Side side, Path[] selected)
 	    return true;
 	}
 	if (ActionEvent.isAction(event, "info"))
-	    return showInfoArea(selected);
+	    return showInfoArea(null);
 	if (ActionEvent.isAction(event, "copy"))
 	    return copy(side);
 	if (ActionEvent.isAction(event, "move"))
@@ -260,15 +267,18 @@ private boolean onPanelAreaAction(Event event, Side side, Path[] selected)
 	if (ActionEvent.isAction(event, "mkdir"))
 	    return mkdir(side);
 	if (ActionEvent.isAction(event, "size"))
-	    return calcSize(selected);
+	    return calcSize(null);
 	return false;
     }
 
-    @Override public boolean onClickInPanel(Path[] selected)
+    private CommanderArea.ClickHandler.Result onClick(CommanderArea area, Path path, boolean dir)
     {
-	NullCheck.notNullItems(selected, "selected");
-	//FIXME:
-	return false;
+	NullCheck.notNull(area, "area");
+	NullCheck.notNull(path, "path");
+	if (dir)
+	    return CommanderArea.ClickHandler.Result.OPEN_DIR;
+	luwrain.openFile(path.toString());
+	return CommanderArea.ClickHandler.Result.OK;
     }
 
 private boolean onTabInPanel(Side side)
@@ -338,6 +348,7 @@ private boolean onTabInPanel(Side side)
 
     private boolean copy(Side panelSide)
     {
+	/*
 	NullCheck.notNull(panelSide, "panelSide");
 	final CommanderArea fromPanel = getPanel(panelSide);
 	final CommanderArea toPanel = getAnotherPanel(panelSide);
@@ -348,6 +359,7 @@ private boolean onTabInPanel(Side side)
 	    copyFromDir == null || copyTo == null)
 	    return false;
 	base.copy(operationsArea, copyFromDir, filesToCopy, copyTo);
+	*/
 	return true;
     }
 

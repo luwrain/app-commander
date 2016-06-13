@@ -14,7 +14,7 @@ interface Actions
     void closeApp();
     void refreshPanels();
     Settings settings();
-    Action[] getPanelAreaActions(Path[] selected);
-    boolean onClickInPanel(Path[] selected);
+    //    Action[] getPanelAreaActions(Path[] selected);
+    //    boolean onClickInPanel(Path[] selected);
     boolean selectPartition(Base.Side side);
 }
