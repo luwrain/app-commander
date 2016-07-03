@@ -13,7 +13,7 @@ import org.luwrain.app.commander.Base.Side;
 
 import org.luwrain.app.commander.operations.*;
 
-class OperationsArea extends NavigateArea implements Listener
+class OperationsArea extends NavigationArea implements Listener
 {
     private Luwrain luwrain;
     private Strings strings;
