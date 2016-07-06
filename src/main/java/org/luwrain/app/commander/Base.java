@@ -7,6 +7,7 @@ import java.nio.file.*;
 import java.nio.file.attribute.*;
 
 import org.luwrain.core.*;
+import org.luwrain.controls.*;
 import org.luwrain.popups.*;
 import org.luwrain.app.commander.operations.Operations;
 
@@ -64,26 +65,51 @@ class Base
 	return p;
     }
 
-	//returns true if copying begings;
-    boolean copy(OperationsArea operations, Path copyFromDir,
-	      Path[] filesToCopy, Path copyTo)
+    boolean copy(CommanderArea copyFromArea, CommanderArea copyToArea, OperationsArea operationsArea)
     {
-	NullCheck.notNull(operations, "operations");
-	NullCheck.notNull(copyFromDir, "copyFromDir");
-	NullCheck.notNullItems(filesToCopy, "filesToCopy");
-	NullCheck.notNull(copyTo, "copyTo");
+	NullCheck.notNull(copyFromArea, "copyFromArea");
+	NullCheck.notNull(copyToArea, "copyToArea");
+	NullCheck.notNull(operationsArea, "operationsArea");
+	final Path copyFromDir = copyFromArea.opened();
+	final Path[] pathsToCopy = entriesToProcess(copyFromArea);
+	final Path copyTo = copyToArea.opened();
+	if (pathsToCopy.length < 1)
+	    return false;
 	final Path dest = Popups.path(luwrain,
-				      strings.copyPopupName(), strings.copyPopupPrefix(filesToCopy),
-					    copyTo, copyFromDir,
+				      strings.copyPopupName(), copyPopupPrefix(pathsToCopy),
+				      copyTo, copyFromDir,
 				      (path)->{
 					  NullCheck.notNull(path, "path");
 					  return true;
 				      },
 				      Popups.loadFilePopupFlags(luwrain), Popups.DEFAULT_POPUP_FLAGS);
 	if (dest == null)
+	    return true;
+ 	operationsArea.launch(Operations.copy(operationsArea, copyOperationName(pathsToCopy, dest), pathsToCopy, dest));
+	return true;
+    }
+
+    boolean move(CommanderArea moveFromArea, CommanderArea moveToArea, OperationsArea operationsArea)
+    {
+	NullCheck.notNull(moveFromArea, "moveFromArea");
+	NullCheck.notNull(moveToArea, "moveToArea");
+	NullCheck.notNull(operationsArea, "operationsArea");
+	final Path moveFromDir = moveFromArea.opened();
+	final Path[] pathsToMove = entriesToProcess(moveFromArea);
+	final Path moveTo = moveToArea.opened();
+	if (pathsToMove.length < 1)
 	    return false;
- 	operations.launch(Operations.copy(operations, strings.copyOperationName(filesToCopy, dest), 
-					  filesToCopy, dest));
+	final Path dest = Popups.path(luwrain,
+				      strings.movePopupName(), movePopupPrefix(pathsToMove),
+				      moveTo, moveFromDir,
+				      (path)->{
+					  NullCheck.notNull(path, "path");
+					  return true;
+				      },
+				      Popups.loadFilePopupFlags(luwrain), Popups.DEFAULT_POPUP_FLAGS);
+	if (dest == null)
+	    return true;
+ 	operationsArea.launch(Operations.move(operationsArea, moveOperationName(pathsToMove, dest), pathsToMove, dest));
 	return true;
     }
 
@@ -201,11 +227,11 @@ class Base
 		{
 		    final BasicFileAttributes attr = basic.readAttributes();
 		    if (attr.isDirectory())
-			b.append(luwrain.i18n().staticStr(LangStatic.COMMANDER_DIRECTORY) + " "); else 
+			b.append(luwrain.i18n().getStaticStr("CommanderDirectory") + " "); else 
 			if (attr.isSymbolicLink())
-			    b.append(luwrain.i18n().staticStr(LangStatic.COMMANDER_SYMLINK) + " "); else 
+			    b.append(luwrain.i18n().getStaticStr("CommanderSymlink") + " "); else 
 			    if (attr.isOther())
-				b.append(luwrain.i18n().staticStr(LangStatic.COMMANDER_SYMLINK) + " ");
+				b.append(luwrain.i18n().getStaticStr("CommanderSymlink") + " ");
 		    symlink = attr.isSymbolicLink();
 		    directory = attr.isDirectory();
 		}
@@ -250,5 +276,65 @@ class Base
 	final String[] shortcuts = luwrain.getAllShortcutNames();
 	Popups.fixedList(luwrain, "Выберите приложение:", shortcuts);
 	return true;
+    }
+
+    boolean onCopyToClipboard(CommanderArea area)
+    {
+	NullCheck.notNull(area, "area");
+	final Path[] marked = area.marked();
+	if (marked.length > 0)
+	{
+	    final LinkedList<String> fileNames = new LinkedList<String>();
+	    for(Path p: marked)
+		fileNames.add(p.getFileName().toString());
+	    luwrain.setClipboard(new RegionContent(fileNames.toArray(new String[fileNames.size()]), marked));
+	    return true;
+	}
+	final CommanderArea.Entry entry = area.selectedEntry();
+	if (entry == null || entry.type() == CommanderArea.Entry.Type.PARENT)
+	    return false;
+	final Path path = entry.path();
+	luwrain.setClipboard(new RegionContent(new String[]{path.getFileName().toString()}, new Object[]{path}));
+	return true;
+    }
+
+    static Path[] entriesToProcess(CommanderArea area)
+    {
+	NullCheck.notNull(area, "area");
+	final Path[] marked = area.marked();
+	if (marked.length > 0)
+	    return marked;
+	final CommanderArea.Entry entry = area.selectedEntry();
+	if (entry == null || entry.type() == CommanderArea.Entry.Type.PARENT)
+	    return new Path[0];
+	return new Path[]{entry.path()};
+    }
+
+    private String copyPopupPrefix(Path[] pathsToCopy)
+	{
+	    return strings.copyPopupPrefix(pathsToCopy.length > 1?luwrain.i18n().getNumberStr(pathsToCopy.length, "items"):pathsToCopy[0].getFileName().toString());
+	}
+
+    private String movePopupPrefix(Path[] pathsToMove)
+	{
+	    return strings.movePopupPrefix(pathsToMove.length > 1?luwrain.i18n().getNumberStr(pathsToMove.length, "items"):pathsToMove[0].getFileName().toString());
+	}
+
+    private String copyOperationName(Path[] pathsToCopy, Path copyTo)
+    {
+	if (pathsToCopy.length < 1)
+	    return "";
+	if (pathsToCopy.length > 1)
+	    return strings.copyOperationName(pathsToCopy[0].getFileName().toString() + ",...", copyTo.toString());
+	return strings.copyOperationName(pathsToCopy[0].getFileName().toString(), copyTo.toString());
+    }
+
+    private String moveOperationName(Path[] pathsToMove, Path moveTo)
+    {
+	if (pathsToMove.length < 1)
+	    return "";
+	if (pathsToMove.length > 1)
+	    return strings.moveOperationName(pathsToMove[0].getFileName().toString() + ",...", moveTo.toString());
+	return strings.moveOperationName(pathsToMove[0].getFileName().toString(), moveTo.toString());
     }
 }

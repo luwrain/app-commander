@@ -79,7 +79,7 @@ class CommanderApp implements Application, Actions
 
     private void createAreas()
     {
-	final CommanderArea.CommanderParams params = new CommanderArea.CommanderParams();
+	final CommanderArea.Params params = new CommanderArea.Params();
 	params.environment = new DefaultControlEnvironment(luwrain);
 	params.selecting = true;
 	params.filter = new CommanderUtils.NoHiddenFilter();
@@ -98,6 +98,12 @@ class CommanderApp implements Application, Actions
 			    return selectPartition(Side.LEFT);
 			case F2:
 			    return selectPartition(Side.RIGHT);
+			}
+		    if (!event.isSpecial()  && !event.isModified())
+			switch(Character.toLowerCase(event.getChar()))
+			{
+			case 'w':
+			    return base.onCopyToClipboard(this);
 			}
 		    if (event.isSpecial()  && !event.isModified())
 			switch(event.getSpecial())
@@ -150,6 +156,12 @@ class CommanderApp implements Application, Actions
 			    return selectPartition(Side.LEFT);
 			case F2:
 			    return selectPartition(Side.RIGHT);
+			}
+		    if (!event.isSpecial()  && !event.isModified())
+			switch(Character.toLowerCase(event.getChar()))
+			{
+			case 'w':
+			    return base.onCopyToClipboard(this);
 			}
 		    if (event.isSpecial()  && !event.isModified())
 			switch(event.getSpecial())
@@ -261,9 +273,9 @@ private boolean onPanelAreaAction(Event event, Side side, CommanderArea area)
 	if (ActionEvent.isAction(event, "info"))
 	    return showInfoArea(null);
 	if (ActionEvent.isAction(event, "copy"))
-	    return copy(side);
+	    return base.copy(getPanel(side), getAnotherPanel(side), operationsArea);
 	if (ActionEvent.isAction(event, "move"))
-	    return move(side);
+	    return base.move(getPanel(side), getAnotherPanel(side), operationsArea);
 	if (ActionEvent.isAction(event, "mkdir"))
 	    return mkdir(side);
 	if (ActionEvent.isAction(event, "size"))
@@ -302,21 +314,21 @@ private boolean onTabInPanel(Side side)
 @Override public boolean selectPartition(Side side)
     {
 	NullCheck.notNull(side, "side");
-	File f = null;
+	org.luwrain.hardware.Partition part = null;
 	switch(side)
 	{
 	case LEFT:
-	    f = Popups.mountedPartitionsAsFile(luwrain);
-	    if (f == null)
+	    part = Popups.mountedPartitions(luwrain);
+	    if (part == null)
 		return true;
-	    leftPanel.open(f.toPath(), null);
+	    leftPanel.open(part.file().toPath(), null);
 	    luwrain.setActiveArea(leftPanel);
 	    return true;
 	case RIGHT:
-	    f = Popups.mountedPartitionsAsFile(luwrain);
-	    if (f == null)
+	    part = Popups.mountedPartitions(luwrain);
+	    if (part == null)
 		return true;
-	    rightPanel.open(f.toPath(), null);
+	    rightPanel.open(part.file().toPath(), null);
 	    luwrain.setActiveArea(rightPanel);
 	    return true;
 	default:
@@ -342,23 +354,6 @@ private boolean onTabInPanel(Side side)
 	  if (files == null || files.length < 1)
 	  return false;
 	  base.openReader(files);
-	*/
-	return true;
-    }
-
-    private boolean copy(Side panelSide)
-    {
-	/*
-	NullCheck.notNull(panelSide, "panelSide");
-	final CommanderArea fromPanel = getPanel(panelSide);
-	final CommanderArea toPanel = getAnotherPanel(panelSide);
-	final Path copyFromDir = fromPanel.opened();
-	final Path[] filesToCopy = fromPanel.selected();
-	final Path copyTo = toPanel.opened();
-	if (filesToCopy == null || filesToCopy.length < 1|| 
-	    copyFromDir == null || copyTo == null)
-	    return false;
-	base.copy(operationsArea, copyFromDir, filesToCopy, copyTo);
 	*/
 	return true;
     }

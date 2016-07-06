@@ -16,11 +16,11 @@ public interface Strings
     String panelActionTitle(String actionName, boolean multiple);
     String infoActionTitle(String actionName);
     String copyPopupName();
-    String copyPopupPrefix(Path[] files);
-    String copyOperationName(Path[] filesToCopy, Path copyTo);
+    String copyPopupPrefix(String copyWhat);
+    String copyOperationName(String copyWhat, String copyTo);
     String movePopupName();
-    String movePopupPrefix(File[] files);
-    String moveOperationName(File[] moveToCopy, File moveTo);
+    String movePopupPrefix(String moveWhat);
+    String moveOperationName(String moveWhat, String moveTo);
     String mkdirPopupName();
     String mkdirPopupPrefix();
     String mkdirErrorMessage();
