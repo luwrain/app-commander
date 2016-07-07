@@ -1,3 +1,18 @@
+/*
+   Copyright 2012-2016 Michael Pozhidaev <michael.pozhidaev@gmail.com>
+
+   This file is part of the LUWRAIN.
+
+   LUWRAIN is free software; you can redistribute it and/or
+   modify it under the terms of the GNU General Public
+   License as published by the Free Software Foundation; either
+   version 3 of the License, or (at your option) any later version.
+
+   LUWRAIN is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+   General Public License for more details.
+*/
 
 package org.luwrain.app.commander;
 
@@ -18,18 +33,21 @@ class OperationsArea extends NavigationArea implements Listener
     private Luwrain luwrain;
     private Strings strings;
     private Actions actions;
+    private Base base;
     private final Vector<Operation> operations = new Vector<Operation>();
 
-    OperationsArea(Luwrain luwrain,
+    OperationsArea(Luwrain luwrain, Base base,
 		     Actions actions, Strings strings)
     {
 	super(new DefaultControlEnvironment(luwrain));
-	this.luwrain = luwrain;
-	this.strings = strings;
-	this.actions = actions;
 	NullCheck.notNull(luwrain, "luwrain");
+	NullCheck.notNull(base, "base");
 	NullCheck.notNull(strings, "strings");
 	NullCheck.notNull(luwrain, "luwrain");
+	this.luwrain = luwrain;
+	this.base = base;
+	this.strings = strings;
+	this.actions = actions;
     }
 
 void launch(Operation op)
@@ -147,7 +165,7 @@ void launch(Operation op)
 	{
 	    if (issuer.finishingAccepted())
 		return;
-	    luwrain.message(strings.operationCompletedMessage(issuer), issuer.getFinishCode() == Operation.Result.OK?Luwrain.MESSAGE_OK:Luwrain.MESSAGE_ERROR);
+	    luwrain.message(strings.operationCompletedMessage(issuer), issuer.getResult() == Operation.Result.OK?Luwrain.MESSAGE_OK:Luwrain.MESSAGE_ERROR);
 	    actions.refreshPanels();//Update list of files on opened panels;
 	}
 	luwrain.onAreaNewContent(this);
@@ -155,10 +173,9 @@ void launch(Operation op)
 
     private String getLineForScreen(Operation op)
     {
-	if (op == null)
-	    throw new NullPointerException("op may not be null");
+	NullCheck.notNull(op, "op");
 	if (op.isFinished())
-	    return strings.operationFinishDescr(op);
+	    return base.opResultDescr(op.getResult());
 	final int percents = op.getPercents();
 	if (percents == 0)
 	    return op.getOperationName() + "...";

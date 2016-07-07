@@ -1,3 +1,18 @@
+/*
+   Copyright 2012-2016 Michael Pozhidaev <michael.pozhidaev@gmail.com>
+
+   This file is part of the LUWRAIN.
+
+   LUWRAIN is free software; you can redistribute it and/or
+   modify it under the terms of the GNU General Public
+   License as published by the Free Software Foundation; either
+   version 3 of the License, or (at your option) any later version.
+
+   LUWRAIN is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+   General Public License for more details.
+*/
 
 package org.luwrain.app.commander;
 
@@ -9,6 +24,7 @@ import java.nio.file.attribute.*;
 import org.luwrain.core.*;
 import org.luwrain.controls.*;
 import org.luwrain.popups.*;
+import org.luwrain.app.commander.operations.Operation;
 import org.luwrain.app.commander.operations.Operations;
 
 class Base
@@ -113,16 +129,30 @@ class Base
 	return true;
     }
 
-
-    boolean openReader(File[] files)
+    boolean runWithShortcut(Path[] selected)
     {
-	NullCheck.notNull(files, "files");
-	for(File f: files)
-	    if (f.isDirectory())
+	NullCheck.notNullItems(selected, "selected");
+	final String[] shortcuts = luwrain.getAllShortcutNames();
+	Popups.fixedList(luwrain, "Выберите приложение:", shortcuts);
+	return true;
+    }
+
+    boolean openReader(CommanderArea area)
+    {
+	NullCheck.notNull(area, "area");
+	final Path[] paths = entriesToProcess(area);
+	if (paths.length < 1)
+	    return false;
+	for(Path p: paths)
+	    if (Files.isDirectory(p))
 	    {
-		luwrain.message("Просмотр не применим к каталогам", Luwrain.MESSAGE_ERROR);
-		return false;
+		luwrain.message(strings.dirMayNotBePreviewed(), Luwrain.MESSAGE_ERROR);
+		return true;
 	    }
+	for(Path p: paths)
+	    luwrain.launchApp("reader", new String[]{p.toString()});
+	return true;
+/*
 	final Object  o = luwrain.getSharedObject("luwrain.reader.formats");
 	if (!(o instanceof String[]))
 	    return false;
@@ -156,7 +186,7 @@ class Base
 		    f.getAbsolutePath(),
 		    id,
 		});
-	return true;
+*/
     }
 
     boolean onClickInFiles(Path[] selected)
@@ -166,7 +196,6 @@ class Base
 	    fileNames[i] = selected[i].toString();
 	luwrain.openFiles(fileNames);
 	return true;
-
     }
 
     /*
@@ -190,6 +219,7 @@ class Base
 	return true;
     }
 
+    /*
     private boolean openZip(Path path)
     {
 	final Map<String, String> prop = new HashMap<String, String>();
@@ -208,7 +238,7 @@ class Base
     }
     */
 
-    void fillInfo(MutableLines lines, Path[] items)
+    void fillProperties(MutableLines lines, Path[] items)
     {
 	NullCheck.notNull(lines, "lines");
 	NullCheck.notNullItems(items, "items");
@@ -270,15 +300,7 @@ class Base
 	lines.addLine("");
     }
 
-    boolean runWithShortcut(Path[] selected)
-    {
-	NullCheck.notNullItems(selected, "selected");
-	final String[] shortcuts = luwrain.getAllShortcutNames();
-	Popups.fixedList(luwrain, "Выберите приложение:", shortcuts);
-	return true;
-    }
-
-    boolean onCopyToClipboard(CommanderArea area)
+    boolean copyToClipboard(CommanderArea area)
     {
 	NullCheck.notNull(area, "area");
 	final Path[] marked = area.marked();
@@ -336,5 +358,43 @@ class Base
 	if (pathsToMove.length > 1)
 	    return strings.moveOperationName(pathsToMove[0].getFileName().toString() + ",...", moveTo.toString());
 	return strings.moveOperationName(pathsToMove[0].getFileName().toString(), moveTo.toString());
+    }
+
+    String opResultDescr(Operation.Result res)
+    {
+	NullCheck.notNull(res, "res");
+	switch(res)
+	{
+	case OK:
+	    return strings.opResultOk();
+	case INTERRUPTED:
+	    return strings.opResultInterrupted();
+	case UNEXPECTED_PROBLEM:
+	    return strings.opResultUnexpectedProblem();
+	case PROBLEM_CREATING_DIRECTORY:
+	    return strings.opResultProblemCreatingDirectory();
+	case PROBLEM_READING_FILE:
+	    return strings.opResultProblemReadingFile();
+	case PROBLEM_WRITING_FILE:
+	    return strings.opResultProblemWritingFile();
+	case INACCESSIBLE_SOURCE:
+	    return strings.opResultInaccessibleSource();
+	case PROBLEM_CREATING_SYMLINK:
+	    return strings.opResultProblemCreatingSymlink();
+	case PROBLEM_READING_SYMLINK:
+	    return strings.opResultProblemReadingSymlink();
+	case PROBLEM_DELETING:
+	    return strings.opResultProblemDeleting();
+	case DEST_EXISTS_NOT_REGULAR:
+	    return strings.opResultDestExistsNotRegular();
+	case NOT_CONFIRMED_OVERWRITE:
+	    return strings.opResultNotConfirmedOverride();
+	case DEST_EXISTS_NOT_DIR:
+	    return strings.opResultDestExistsNotDir();
+	case DEST_EXISTS:
+	    return strings.opResultDestExists();
+	default:
+	    return "";
+	}
     }
 }

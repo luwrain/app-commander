@@ -29,11 +29,9 @@ import org.luwrain.app.commander.Base.Side;
 
 class CommanderApp implements Application, Actions
 {
-    static private final String STRINGS_NAME = "luwrain.commander";
-
     static private final int NORMAL_LAYOUT_INDEX = 0;
     static private final int OPERATIONS_LAYOUT_INDEX = 1;
-    static private final int INFO_LAYOUT_INDEX = 2;
+    static private final int PROPERTIES_LAYOUT_INDEX = 2;
 
     private Luwrain luwrain;
     private final Base base = new Base();
@@ -41,13 +39,14 @@ class CommanderApp implements Application, Actions
     private CommanderArea leftPanel;
     private CommanderArea rightPanel;
     private OperationsArea operationsArea;
-    private SimpleArea infoArea;
+    private SimpleArea propertiesArea;
     private AreaLayoutSwitch layouts;
 
     private Path startFrom = null;
 
     CommanderApp()
     {
+	startFrom = null;
     }
 
     CommanderApp(String startFrom)
@@ -60,7 +59,7 @@ class CommanderApp implements Application, Actions
     @Override public boolean onLaunch(Luwrain luwrain)
     {
 	NullCheck.notNull(luwrain, "luwrain");
-	final Object o =  luwrain.i18n().getStrings(STRINGS_NAME);
+	final Object o =  luwrain.i18n().getStrings(Strings.NAME);
 	if (o == null || !(o instanceof Strings))
 	    return false;
 	strings = (Strings)o;
@@ -73,7 +72,7 @@ class CommanderApp implements Application, Actions
 	layouts = new AreaLayoutSwitch(luwrain);
 	layouts.add(new AreaLayout(AreaLayout.LEFT_RIGHT, leftPanel, rightPanel));
 	layouts.add(new AreaLayout(AreaLayout.LEFT_RIGHT_BOTTOM, leftPanel, rightPanel, operationsArea));
-	layouts.add(new AreaLayout(infoArea));
+	layouts.add(new AreaLayout(propertiesArea));
 	return true;
     }
 
@@ -103,7 +102,7 @@ class CommanderApp implements Application, Actions
 			switch(Character.toLowerCase(event.getChar()))
 			{
 			case 'w':
-			    return base.onCopyToClipboard(this);
+			    return base.copyToClipboard(this);
 			}
 		    if (event.isSpecial()  && !event.isModified())
 			switch(event.getSpecial())
@@ -128,6 +127,8 @@ class CommanderApp implements Application, Actions
 			return true;
 		    case ACTION:
 			return onPanelAreaAction(event, Side.LEFT, this);
+		    case PROPERTIES:
+			return showPropertiesArea(this);
 		    default:
 			return super.onEnvironmentEvent(event);
 		    }
@@ -161,7 +162,7 @@ class CommanderApp implements Application, Actions
 			switch(Character.toLowerCase(event.getChar()))
 			{
 			case 'w':
-			    return base.onCopyToClipboard(this);
+			    return base.copyToClipboard(this);
 			}
 		    if (event.isSpecial()  && !event.isModified())
 			switch(event.getSpecial())
@@ -186,6 +187,8 @@ class CommanderApp implements Application, Actions
 			return true;
 		    case ACTION:
 			return onPanelAreaAction(event, Side.LEFT, this);
+		    case PROPERTIES:
+			return showPropertiesArea(this);
 		    default:
 			return super.onEnvironmentEvent(event);
 		    }
@@ -196,9 +199,20 @@ class CommanderApp implements Application, Actions
 		}
 	    };
 
-	operationsArea = new OperationsArea(luwrain, this, strings);
+	operationsArea = new OperationsArea(luwrain, base, this, strings);
 
-	infoArea = new SimpleArea(new DefaultControlEnvironment(luwrain), strings.infoAreaName()){
+	propertiesArea = new SimpleArea(new DefaultControlEnvironment(luwrain), strings.infoAreaName()){
+		@Override public boolean onKeyboardEvent(KeyboardEvent event)
+		{
+		    NullCheck.notNull(event, "event");
+		    if (event.isSpecial() && !event.isModified())
+			switch(event.getSpecial())
+			{
+			case ESCAPE:
+			    return closePropertiesArea();
+			}
+		    return super.onKeyboardEvent(event);
+		}
 		@Override public boolean onEnvironmentEvent(EnvironmentEvent event)
 		{
 		    NullCheck.notNull(event, "event");
@@ -207,17 +221,9 @@ class CommanderApp implements Application, Actions
 		    case CLOSE:
 			closeApp();
 			return true;
-		    case ACTION:
-			if (ActionEvent.isAction(event, "close-info"))
-			    closeInfoArea();
 		    default:
 			return super.onEnvironmentEvent(event);
 		    }
-		}
-		@Override public Action[] getAreaActions()
-		{
-		    //		    return getInfoAreaActions();
-		    return new Action[0];
 		}
 	    };
     }
@@ -225,29 +231,25 @@ class CommanderApp implements Application, Actions
 private Action[] getPanelAreaActions(CommanderArea area)
     {
 	NullCheck.notNull(area, "area");
-	Path[] selected;
-	if (area.marked().length > 0)
-	    selected = area.marked(); else
-	    selected = new Path[]{area.selectedPath()};
-	if (selected.length < 1)
+	final Path[] toProcess = Base.entriesToProcess(area);
+	if (toProcess.length < 1)
 	    return new Action[]{
-		new Action("hidden-show", strings.panelActionTitle("hidden-show", false)), 
-		new Action("hidden-hide", strings.panelActionTitle("hidden-hide", false)), 
+		new Action("hidden-show", strings.actionHiddenShow()), 
+			   new Action("hidden-hide", strings.actionHiddenHide()), 
 	    };
 	return new Action[]{
-	    new Action("open", strings.panelActionTitle("open", false)),
-	    new Action("edit-text", strings.panelActionTitle("edit-as-text", false)),
-	    new Action("preview", strings.panelActionTitle("preview", false)),
-	    new Action("preview-another-format", strings.panelActionTitle("preview-another-format", false)),
-	    new Action("open-choosing-app", strings.panelActionTitle("open-choosing-app", false)),
-	    new Action("copy", strings.panelActionTitle("copy", false), new KeyboardEvent(KeyboardEvent.Special.F5)),
-	    new Action("move", strings.panelActionTitle("move", false), new KeyboardEvent(KeyboardEvent.Special.F6)),
-	    new Action("mkdir", strings.panelActionTitle("mkdir", false), new KeyboardEvent(KeyboardEvent.Special.F7)),
-	    new Action("delete", strings.panelActionTitle("delete", false), new KeyboardEvent(KeyboardEvent.Special.F8)),
-	    new Action("hidden-show", strings.panelActionTitle("hidden-show", false)), 
-	    new Action("hidden-hide", strings.panelActionTitle("hidden-hide", false)), 
-	    new Action("size", strings.panelActionTitle("size", false), new KeyboardEvent('?')),
-	    new Action("info", strings.panelActionTitle("info", selected.length > 1)),
+	    new Action("open", strings.actionOpen()),
+	    new Action("edit-text", strings.actionEditAsText()),
+	    new Action("preview", strings.actionPreview()),
+	    new Action("preview-another-format", strings.actionPreviewAnotherFormat()),
+	    new Action("open-choosing-app", strings.actionOpenChoosingApp()),
+	    new Action("copy", strings.actionCopy(), new KeyboardEvent(KeyboardEvent.Special.F5)),
+	    new Action("move", strings.actionMove(), new KeyboardEvent(KeyboardEvent.Special.F6)),
+	    new Action("mkdir", strings.actionMkdir(), new KeyboardEvent(KeyboardEvent.Special.F7)),
+	    new Action("delete", strings.actionDelete(), new KeyboardEvent(KeyboardEvent.Special.F8)),
+	    new Action("hidden-show", strings.actionHiddenShow()), 
+	    new Action("hidden-hide", strings.actionHiddenHide()), 
+	    new Action("size", strings.actionSize(), new KeyboardEvent('?')),
 	};
     }
 
@@ -257,7 +259,7 @@ private boolean onPanelAreaAction(Event event, Side side, CommanderArea area)
 	NullCheck.notNull(side, "side");
 	NullCheck.notNull(area, "area");
 	if (ActionEvent.isAction(event, "preview"))
-	    return openReader(side);
+	    return base.openReader(area);
 	if (ActionEvent.isAction(event, "hidden-show"))
 	{
 	    //		setFilter(new CommanderFilters.AllFiles());
@@ -270,8 +272,6 @@ private boolean onPanelAreaAction(Event event, Side side, CommanderArea area)
 	    //		refresh();
 	    return true;
 	}
-	if (ActionEvent.isAction(event, "info"))
-	    return showInfoArea(null);
 	if (ActionEvent.isAction(event, "copy"))
 	    return base.copy(getPanel(side), getAnotherPanel(side), operationsArea);
 	if (ActionEvent.isAction(event, "move"))
@@ -334,61 +334,6 @@ private boolean onTabInPanel(Side side)
 	default:
 	    return false;
 	}
-    }
-
-    private boolean openReader(Side panelSide)
-    {
-	/*
-	  File[] files = null;
-	  switch(panelSide)
-	  {
-	  case LEFT:
-	  files = leftPanel.selectedAsFiles();
-	  break;
-	  case RIGHT:
-	  files = rightPanel.selectedAsFiles();
-	  break;
-	  default:
-	  return false;
-	  }
-	  if (files == null || files.length < 1)
-	  return false;
-	  base.openReader(files);
-	*/
-	return true;
-    }
-
-    private boolean move(Side panelSide)
-    {
-	return false;
-	/*
-	File[] filesToMove = null;
-	File moveTo = null;
-	switch(panelSide)
-	{
-	case LEFT:
-	    filesToMove = leftPanel.selectedAsFiles();
-	    moveTo= rightPanel.openedAsFile(); 
-	    break;
-	case RIGHT:
-	    filesToMove = rightPanel.selectedAsFiles();
-	    moveTo= leftPanel.openedAsFile(); 
-	    break;
-	default:
-	    return false;
-	}
-	if (filesToMove == null || filesToMove.length < 1|| moveTo == null)
-	    return false;
-	moveTo = Popups.file(luwrain,
-			     strings.movePopupName(),
-			     strings.movePopupPrefix(filesToMove),
-			     moveTo,
-			     FilePopup.ANY, 0);
-	if (moveTo == null)
-	    return true;
- 	operations.launch(new Move(operations, strings.moveOperationName(filesToMove, moveTo), filesToMove, moveTo));
-	return true;
-	*/
     }
 
     private boolean mkdir(Side panelSide)
@@ -460,28 +405,26 @@ final CommanderArea area = getPanel(panelSide);
     }
 
 
-    private boolean showInfoArea(Path[] selected)
+    private boolean showPropertiesArea(CommanderArea area)
     {
-	NullCheck.notNullItems(selected, "selected");
-	infoArea.clear();
-	base.fillInfo(infoArea, selected);
-	layouts.show(INFO_LAYOUT_INDEX);
-	//FIXME:add introduction
+	NullCheck.notNull(area, "area");
+	final Path[] paths = Base.entriesToProcess(area);
+	if (paths.length < 1)
+	    return false;
+	propertiesArea.clear();
+	base.fillProperties(propertiesArea, paths);
+	layouts.show(PROPERTIES_LAYOUT_INDEX);
+	luwrain.announceActiveArea();
 	return true;
     }
 
-private boolean closeInfoArea()
+private boolean closePropertiesArea()
     {
 	if (operationsArea.hasOperations())
 	    layouts.show(OPERATIONS_LAYOUT_INDEX); else
 	    layouts.show(NORMAL_LAYOUT_INDEX);
-	//FIXME:add introduction
+	luwrain.announceActiveArea();
 	return true;
-    }
-
-    @Override public Settings settings()
-    {
-	return base.settings();
     }
 
     private boolean onOpenEvent(EnvironmentEvent event, CommanderArea area)
@@ -513,9 +456,9 @@ private boolean closeInfoArea()
 	return true;
     }
 
-    @Override public AreaLayout getAreasToShow()
+    @Override public Settings settings()
     {
-	return layouts.getCurrentLayout();
+	return base.settings();
     }
 
     @Override public void gotoLeftPanel()
@@ -531,6 +474,11 @@ private boolean closeInfoArea()
     @Override public void gotoOperations()
     {
 	luwrain.setActiveArea(operationsArea);
+    }
+
+    @Override public AreaLayout getAreasToShow()
+    {
+	return layouts.getCurrentLayout();
     }
 
     @Override public String getAppName()
