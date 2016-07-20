@@ -302,7 +302,7 @@ private boolean onTabInPanel(Side side)
 	    luwrain.setActiveArea(rightPanel);
 	    return true;
 	case RIGHT:
-	    if (operationsArea.hasOperations())
+	    if (base.hasOperations())
 		luwrain.setActiveArea(operationsArea); else
 		luwrain.setActiveArea(leftPanel);
 	    return true;
@@ -420,7 +420,7 @@ final CommanderArea area = getPanel(panelSide);
 
 private boolean closePropertiesArea()
     {
-	if (operationsArea.hasOperations())
+	if (base.hasOperations())
 	    layouts.show(OPERATIONS_LAYOUT_INDEX); else
 	    layouts.show(NORMAL_LAYOUT_INDEX);
 	luwrain.announceActiveArea();
@@ -488,7 +488,7 @@ private boolean closePropertiesArea()
 
     @Override public void closeApp()
     {
-	if (!operationsArea.allOperationsFinished())
+	if (!base.allOperationsFinished())
 	{
 	    luwrain.message(strings.notAllOperationsFinished(), Luwrain.MESSAGE_ERROR);
 	    return;

@@ -36,8 +36,9 @@ class Base
     private Luwrain luwrain;
     private Strings strings;
     private Settings settings = null;
+    final Vector<Operation> operations = new Vector<Operation>();
 
-    public boolean init(Luwrain luwrain, Strings strings)
+    boolean init(Luwrain luwrain, Strings strings)
     {
 	this.luwrain = luwrain;
 	this.strings = strings;
@@ -101,7 +102,7 @@ class Base
 				      Popups.loadFilePopupFlags(luwrain), Popups.DEFAULT_POPUP_FLAGS);
 	if (dest == null)
 	    return true;
- 	operationsArea.launch(Operations.copy(operationsArea, copyOperationName(pathsToCopy, dest), pathsToCopy, dest));
+	launch(Operations.copy(operationsArea, copyOperationName(pathsToCopy, dest), pathsToCopy, dest), operationsArea);
 	return true;
     }
 
@@ -125,7 +126,7 @@ class Base
 				      Popups.loadFilePopupFlags(luwrain), Popups.DEFAULT_POPUP_FLAGS);
 	if (dest == null)
 	    return true;
- 	operationsArea.launch(Operations.move(operationsArea, moveOperationName(pathsToMove, dest), pathsToMove, dest));
+	launch(Operations.move(operationsArea, moveOperationName(pathsToMove, dest), pathsToMove, dest), operationsArea);
 	return true;
     }
 
@@ -397,4 +398,29 @@ class Base
 	    return "";
 	}
     }
+
+    boolean hasOperations()
+    {
+	return !operations.isEmpty();
+    }
+
+    boolean allOperationsFinished()
+    {
+	for(Operation op:operations)
+	    if (!op.isFinished())
+		return false;
+	return true;
+    }
+
+
+
+    private void launch(Operation op, Area area)
+    {
+	NullCheck.notNull(op, "op");
+	NullCheck.notNull(area, "area");
+	operations.add(op);
+	luwrain.onAreaNewContent(area);
+	new Thread(op).start();
+    }
+
 }

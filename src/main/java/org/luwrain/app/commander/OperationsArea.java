@@ -34,7 +34,6 @@ class OperationsArea extends NavigationArea implements Listener
     private Strings strings;
     private Actions actions;
     private Base base;
-    private final Vector<Operation> operations = new Vector<Operation>();
 
     OperationsArea(Luwrain luwrain, Base base,
 		     Actions actions, Strings strings)
@@ -50,22 +49,14 @@ class OperationsArea extends NavigationArea implements Listener
 	this.actions = actions;
     }
 
-void launch(Operation op)
-    {
-	NullCheck.notNull(op, "op");
-	operations.add(op);
-	luwrain.onAreaNewContent(this);
-	new Thread(op).start();
-    }
-
     @Override public int getLineCount()
     {
-	return operations.size() + 1;
+	return base.operations.size() + 1;
     }
 
     @Override public String getLine(int index)
     {
-	return index < operations.size()?getLineForScreen(operations.get(index)):"";
+	return index < base.operations.size()?getLineForScreen(base.operations.get(index)):"";
     }
 
     @Override public boolean onKeyboardEvent(KeyboardEvent event)
@@ -111,21 +102,11 @@ void launch(Operation op)
 	return strings.operationsAreaName();
     }
 
-    boolean hasOperations()
-    {
-	return !operations.isEmpty();
-    }
 
-    boolean allOperationsFinished()
-    {
-	for(Operation op:operations)
-	    if (!op.isFinished())
-		return false;
-	return true;
-    }
 
     private boolean onEnter(KeyboardEvent event)
     {
+	/*
 	if (operations == null || getHotPointY() >= operations.size())
 	    return false;
 	if (!operations.get(getHotPointY()).isFinished())
@@ -133,10 +114,13 @@ void launch(Operation op)
 	operations.remove(getHotPointY());
 	luwrain.onAreaNewContent(this);
 	return true;
+	*/
+	return true;
     }
 
     private boolean onEscape(KeyboardEvent event)
     {
+	/*
 	if (operations == null || getHotPointY() >= operations.size())
 	    return false;
 	final Operation op = operations.get(getHotPointY());
@@ -151,11 +135,13 @@ void launch(Operation op)
 	    return true;
 	op.interrupt();
 	luwrain.onAreaNewContent(this);
+	*/
 	return true;
     }
 
     private void onUpdate(Operation issuer)
     {
+	/*
 	int index = 0;
 	while(index < operations.size() && operations.get(index) != issuer)
 	    ++index;
@@ -169,6 +155,7 @@ void launch(Operation op)
 	    actions.refreshPanels();//Update list of files on opened panels;
 	}
 	luwrain.onAreaNewContent(this);
+	*/
     }
 
     private String getLineForScreen(Operation op)
