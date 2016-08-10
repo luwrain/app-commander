@@ -19,20 +19,20 @@ package org.luwrain.app.commander.operations;
 public interface Operation extends Runnable
 {
     public enum Result {
-	OK,
-	INTERRUPTED,
-	UNEXPECTED_PROBLEM,
-	PROBLEM_CREATING_DIRECTORY,//has arg
-	PROBLEM_READING_FILE,//has arg
-	PROBLEM_WRITING_FILE,//has arg
-	INACCESSIBLE_SOURCE,
-	PROBLEM_CREATING_SYMLINK,//has arg
-	PROBLEM_READING_SYMLINK,//has arg
-	PROBLEM_DELETING,//has arg
-	DEST_EXISTS_NOT_REGULAR,//has arg
-	NOT_CONFIRMED_OVERWRITE,//has arg
-	DEST_EXISTS_NOT_DIR,//has arg
 	DEST_EXISTS,//has arg
+	DEST_EXISTS_NOT_DIR,//has arg
+	DEST_EXISTS_NOT_REGULAR,//has arg
+	INACCESSIBLE_SOURCE,
+	INTERRUPTED,
+	NOT_CONFIRMED_OVERWRITE,//has arg
+	OK,
+	PROBLEM_CREATING_DIRECTORY,//has arg
+	PROBLEM_CREATING_SYMLINK,//has arg
+	PROBLEM_DELETING,//has arg
+	PROBLEM_READING_FILE,//has arg
+	PROBLEM_READING_SYMLINK,//has arg
+	PROBLEM_WRITING_FILE,//has arg
+	UNEXPECTED_PROBLEM,
     };
 
     String getOperationName();

@@ -26,19 +26,20 @@ import org.luwrain.controls.*;
 import org.luwrain.popups.*;
 
 import org.luwrain.app.commander.Base.Side;
+import org.luwrain.app.commander.operations.Operation;
 
-class CommanderApp implements Application, Actions
+class CommanderApp implements Application, Actions, org.luwrain.app.commander.operations.Listener
 {
-    static private final int NORMAL_LAYOUT_INDEX = 0;
-    static private final int OPERATIONS_LAYOUT_INDEX = 1;
-    static private final int PROPERTIES_LAYOUT_INDEX = 2;
+    static final int NORMAL_LAYOUT_INDEX = 0;
+    static final int OPERATIONS_LAYOUT_INDEX = 1;
+    static final int PROPERTIES_LAYOUT_INDEX = 2;
 
     private Luwrain luwrain;
     private final Base base = new Base();
     private Strings strings;
     private CommanderArea leftPanel;
     private CommanderArea rightPanel;
-    private OperationsArea operationsArea;
+    private ListArea operationsArea;
     private SimpleArea propertiesArea;
     private AreaLayoutSwitch layouts;
 
@@ -199,7 +200,39 @@ class CommanderApp implements Application, Actions
 		}
 	    };
 
-	operationsArea = new OperationsArea(luwrain, base, this, strings);
+	final ListArea.Params listParams = new ListArea.Params();
+	listParams.environment = new DefaultControlEnvironment(luwrain);
+	listParams.model = base.getOperationsListModel();
+	listParams.appearance = new OperationsAppearance(luwrain, strings, base);
+	listParams.name = strings.operationsAreaName();
+
+	operationsArea = new ListArea(listParams) {
+		@Override public boolean onKeyboardEvent(KeyboardEvent event)
+		{
+		    NullCheck.notNull(event, "event");
+		    if (event.isSpecial() && !event.isModified())
+			switch(event.getSpecial())
+			{
+			case TAB:
+			    gotoLeftPanel();
+			    return true;
+			}
+		    return super.onKeyboardEvent(event);
+		}
+		@Override public boolean onEnvironmentEvent(EnvironmentEvent event)
+		{
+		    NullCheck.notNull(event, "event");
+		    switch(event.getCode())
+		    {
+		    case CLOSE:
+			closeApp();
+			return true;
+		    default:
+			return super.onEnvironmentEvent(event);
+		    }
+		}
+	    };
+
 
 	propertiesArea = new SimpleArea(new DefaultControlEnvironment(luwrain), strings.infoAreaName()){
 		@Override public boolean onKeyboardEvent(KeyboardEvent event)
@@ -273,9 +306,9 @@ private boolean onPanelAreaAction(Event event, Side side, CommanderArea area)
 	    return true;
 	}
 	if (ActionEvent.isAction(event, "copy"))
-	    return base.copy(getPanel(side), getAnotherPanel(side), operationsArea);
+	    return base.copy(getPanel(side), getAnotherPanel(side), this, operationsArea, layouts);
 	if (ActionEvent.isAction(event, "move"))
-	    return base.move(getPanel(side), getAnotherPanel(side), operationsArea);
+	    return base.move(getPanel(side), getAnotherPanel(side), this, operationsArea, layouts);
 	if (ActionEvent.isAction(event, "mkdir"))
 	    return mkdir(side);
 	if (ActionEvent.isAction(event, "size"))
@@ -456,9 +489,31 @@ private boolean closePropertiesArea()
 	return true;
     }
 
+    private void onOperationUpdate(Operation operation)
+    {
+	NullCheck.notNull(operation, "operation");
+	operationsArea.refresh();
+    }
+
     @Override public Settings settings()
     {
 	return base.settings();
+    }
+
+    @Override public void onOperationProgress(Operation operation)
+    {
+	NullCheck.notNull(operation, "operation");
+	luwrain.runInMainThread(()->onOperationUpdate(operation));
+    }
+
+    @Override public boolean confirmOverwrite(Path path)
+    {
+	return true;
+    }
+
+    @Override public boolean confirmOverwrite()
+    {
+	return true;
     }
 
     @Override public void gotoLeftPanel()

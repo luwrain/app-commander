@@ -26,6 +26,7 @@ import org.luwrain.controls.*;
 import org.luwrain.popups.*;
 import org.luwrain.app.commander.operations.Operation;
 import org.luwrain.app.commander.operations.Operations;
+import org.luwrain.app.commander.operations.Listener;
 
 class Base
 {
@@ -37,6 +38,7 @@ class Base
     private Strings strings;
     private Settings settings = null;
     final Vector<Operation> operations = new Vector<Operation>();
+    private FixedListModel operationsListModel = new FixedListModel();
 
     boolean init(Luwrain luwrain, Strings strings)
     {
@@ -82,11 +84,14 @@ class Base
 	return p;
     }
 
-    boolean copy(CommanderArea copyFromArea, CommanderArea copyToArea, OperationsArea operationsArea)
+    boolean copy(CommanderArea copyFromArea, CommanderArea copyToArea, 
+		 Listener listener, ListArea area, AreaLayoutSwitch layouts)
     {
 	NullCheck.notNull(copyFromArea, "copyFromArea");
 	NullCheck.notNull(copyToArea, "copyToArea");
-	NullCheck.notNull(operationsArea, "operationsArea");
+	NullCheck.notNull(listener, "listener");
+	NullCheck.notNull(area, "area");
+	NullCheck.notNull(layouts, "layouts");
 	final Path copyFromDir = copyFromArea.opened();
 	final Path[] pathsToCopy = entriesToProcess(copyFromArea);
 	final Path copyTo = copyToArea.opened();
@@ -102,15 +107,20 @@ class Base
 				      Popups.loadFilePopupFlags(luwrain), Popups.DEFAULT_POPUP_FLAGS);
 	if (dest == null)
 	    return true;
-	launch(Operations.copy(operationsArea, copyOperationName(pathsToCopy, dest), pathsToCopy, dest), operationsArea);
+	launch(Operations.copy(listener, copyOperationName(pathsToCopy, dest), pathsToCopy, dest));
+	area.refresh();
+	layouts.show(CommanderApp.OPERATIONS_LAYOUT_INDEX);
 	return true;
     }
 
-    boolean move(CommanderArea moveFromArea, CommanderArea moveToArea, OperationsArea operationsArea)
+    boolean move(CommanderArea moveFromArea, CommanderArea moveToArea, 
+		 Listener listener, ListArea area, AreaLayoutSwitch layouts)
     {
 	NullCheck.notNull(moveFromArea, "moveFromArea");
 	NullCheck.notNull(moveToArea, "moveToArea");
-	NullCheck.notNull(operationsArea, "operationsArea");
+	NullCheck.notNull(listener, "listener");
+	NullCheck.notNull(area, "area");
+	NullCheck.notNull(layouts, "layouts");
 	final Path moveFromDir = moveFromArea.opened();
 	final Path[] pathsToMove = entriesToProcess(moveFromArea);
 	final Path moveTo = moveToArea.opened();
@@ -126,7 +136,9 @@ class Base
 				      Popups.loadFilePopupFlags(luwrain), Popups.DEFAULT_POPUP_FLAGS);
 	if (dest == null)
 	    return true;
-	launch(Operations.move(operationsArea, moveOperationName(pathsToMove, dest), pathsToMove, dest), operationsArea);
+	launch(Operations.move(listener, moveOperationName(pathsToMove, dest), pathsToMove, dest));
+	area.refresh();
+	layouts.show(CommanderApp.OPERATIONS_LAYOUT_INDEX);
 	return true;
     }
 
@@ -361,10 +373,10 @@ class Base
 	return strings.moveOperationName(pathsToMove[0].getFileName().toString(), moveTo.toString());
     }
 
-    String opResultDescr(Operation.Result res)
+    String opResultDescr(Operation op)
     {
-	NullCheck.notNull(res, "res");
-	switch(res)
+	NullCheck.notNull(op, "op");
+	switch(op.getResult())
 	{
 	case OK:
 	    return strings.opResultOk();
@@ -373,27 +385,27 @@ class Base
 	case UNEXPECTED_PROBLEM:
 	    return strings.opResultUnexpectedProblem();
 	case PROBLEM_CREATING_DIRECTORY:
-	    return strings.opResultProblemCreatingDirectory();
+	    return strings.opResultProblemCreatingDirectory(op.getExtInfo());
 	case PROBLEM_READING_FILE:
-	    return strings.opResultProblemReadingFile();
+	    return strings.opResultProblemReadingFile(op.getExtInfo());
 	case PROBLEM_WRITING_FILE:
-	    return strings.opResultProblemWritingFile();
+	    return strings.opResultProblemWritingFile(op.getExtInfo());
 	case INACCESSIBLE_SOURCE:
 	    return strings.opResultInaccessibleSource();
 	case PROBLEM_CREATING_SYMLINK:
-	    return strings.opResultProblemCreatingSymlink();
+	    return strings.opResultProblemCreatingSymlink(op.getExtInfo());
 	case PROBLEM_READING_SYMLINK:
-	    return strings.opResultProblemReadingSymlink();
+	    return strings.opResultProblemReadingSymlink(op.getExtInfo());
 	case PROBLEM_DELETING:
-	    return strings.opResultProblemDeleting();
+	    return strings.opResultProblemDeleting(op.getExtInfo());
 	case DEST_EXISTS_NOT_REGULAR:
-	    return strings.opResultDestExistsNotRegular();
+	    return strings.opResultDestExistsNotRegular(op.getExtInfo());
 	case NOT_CONFIRMED_OVERWRITE:
-	    return strings.opResultNotConfirmedOverride();
+	    return strings.opResultNotConfirmedOverride(op.getExtInfo());
 	case DEST_EXISTS_NOT_DIR:
-	    return strings.opResultDestExistsNotDir();
+	    return strings.opResultDestExistsNotDir(op.getExtInfo());
 	case DEST_EXISTS:
-	    return strings.opResultDestExists();
+	    return strings.opResultDestExists(op.getExtInfo());
 	default:
 	    return "";
 	}
@@ -412,15 +424,16 @@ class Base
 	return true;
     }
 
-
-
-    private void launch(Operation op, Area area)
+    ListArea.Model getOperationsListModel()
     {
-	NullCheck.notNull(op, "op");
-	NullCheck.notNull(area, "area");
-	operations.add(op);
-	luwrain.onAreaNewContent(area);
-	new Thread(op).start();
+	return operationsListModel;
     }
 
+    private void launch(Operation op)
+    {
+	NullCheck.notNull(op, "op");
+	operations.add(op);
+	operationsListModel.setItems(operations.toArray(new Operation[operations.size()]));
+	new Thread(op).start();
+    }
 }

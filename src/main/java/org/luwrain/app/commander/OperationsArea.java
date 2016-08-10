@@ -162,7 +162,7 @@ class OperationsArea extends NavigationArea implements Listener
     {
 	NullCheck.notNull(op, "op");
 	if (op.isFinished())
-	    return base.opResultDescr(op.getResult());
+	    return base.opResultDescr(op);
 	final int percents = op.getPercents();
 	if (percents == 0)
 	    return op.getOperationName() + "...";
