@@ -32,21 +32,21 @@ class OperationsArea extends NavigationArea implements Listener
 {
     private Luwrain luwrain;
     private Strings strings;
-    private Actions actions;
+    private CommanderApp actions;
     private Base base;
 
     OperationsArea(Luwrain luwrain, Base base,
-		     Actions actions, Strings strings)
+		     CommanderApp app, Strings strings)
     {
 	super(new DefaultControlEnvironment(luwrain));
 	NullCheck.notNull(luwrain, "luwrain");
 	NullCheck.notNull(base, "base");
 	NullCheck.notNull(strings, "strings");
-	NullCheck.notNull(luwrain, "luwrain");
+	NullCheck.notNull(app, "app");
 	this.luwrain = luwrain;
 	this.base = base;
 	this.strings = strings;
-	this.actions = actions;
+	this.actions = app;
     }
 
     @Override public int getLineCount()

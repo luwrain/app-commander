@@ -17,19 +17,75 @@
 package org.luwrain.app.commander;
 
 import java.nio.file.*;
+
 import org.luwrain.core.*;
+import org.luwrain.core.events.*;
 import org.luwrain.controls.*;
 
-
-interface Actions
+class Actions
 {
-    void gotoLeftPanel();
-    void gotoRightPanel();
-    void gotoOperations();
-    void closeApp();
-    void refreshPanels();
-    Settings settings();
-    //    Action[] getPanelAreaActions(Path[] selected);
-    //    boolean onClickInPanel(Path[] selected);
-    boolean selectPartition(Base.Side side);
+    private Luwrain luwrain;
+    private AreaLayoutSwitch layouts;
+
+    void init(Luwrain luwrain, AreaLayoutSwitch layouts)
+    {
+	NullCheck.notNull(luwrain, "luwrain");
+	NullCheck.notNull(layouts, "layouts");
+	this.luwrain = luwrain;
+	this.layouts = layouts;
+    }
+
+    boolean showPropertiesArea(InfoAndProperties infoAndProps,
+			       CommanderArea area, SimpleArea propertiesArea)
+    {
+	NullCheck.notNull(area, "area");
+	final Path[] paths = Base.entriesToProcess(area);
+	if (paths.length < 1)
+	    return false;
+	propertiesArea.clear();
+	infoAndProps.fillProperties(propertiesArea, paths);
+	layouts.show(CommanderApp.PROPERTIES_LAYOUT_INDEX);
+	luwrain.announceActiveArea();
+	return true;
+    }
+
+    boolean onOpenFilesWithApp(String appName, Path[] paths)
+    {
+	NullCheck.notEmpty(appName, "appName");
+	NullCheck.notNullItems(paths, "paths");
+	boolean atLeastOne = false;
+	for(Path p: paths)
+	    if (!Files.isDirectory(p))
+	{
+	    atLeastOne = true;
+	    luwrain.launchApp(appName, new String[]{p.toString()});
+	}
+	return atLeastOne;
+    }
+
+    static Action[] getPanelAreaActions(Strings strings, CommanderArea area)
+    {
+	NullCheck.notNull(area, "area");
+	final Path[] toProcess = Base.entriesToProcess(area);
+	if (toProcess.length < 1)
+	    return new Action[]{
+		new Action("hidden-show", strings.actionHiddenShow()), 
+			   new Action("hidden-hide", strings.actionHiddenHide()), 
+	    };
+	return new Action[]{
+	    new Action("open", strings.actionOpen()),
+	    new Action("edit-text", strings.actionEditAsText(), new KeyboardEvent('n')),
+	    new Action("preview", strings.actionPreview(), new KeyboardEvent('v')),
+	    new Action("preview-another-format", strings.actionPreviewAnotherFormat()),
+	    new Action("play", "Воспроизвести в плеере", new KeyboardEvent('p')),
+	    new Action("open-choosing-app", strings.actionOpenChoosingApp()),
+	    new Action("copy", strings.actionCopy(), new KeyboardEvent(KeyboardEvent.Special.F5)),
+	    new Action("move", strings.actionMove(), new KeyboardEvent(KeyboardEvent.Special.F6)),
+	    new Action("mkdir", strings.actionMkdir(), new KeyboardEvent(KeyboardEvent.Special.F7)),
+	    new Action("delete", strings.actionDelete(), new KeyboardEvent(KeyboardEvent.Special.F8)),
+	    new Action("hidden-show", strings.actionHiddenShow()), 
+	    new Action("hidden-hide", strings.actionHiddenHide()), 
+	    new Action("size", strings.actionSize(), new KeyboardEvent('s')),
+	};
+    }
 }

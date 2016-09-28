@@ -20,7 +20,7 @@ import java.io.*;
 import java.nio.file.Path;
 
 import org.luwrain.core.NullCheck;
-import org.luwrain.app.commander.TotalSize;
+import org.luwrain.app.commander.InfoAndProperties;
 
 /**
  * Implementation of the files copying procedure. To make its behaviour
@@ -72,7 +72,7 @@ class Copy extends Base
 	for(Path f: copyFrom)
 	    try {
 		status("calculating size of " + f);
-		totalBytes += TotalSize.getTotalSize(f);
+		totalBytes += InfoAndProperties.getTotalSize(f);
 	    }
 	    catch (IOException e)
 	    {

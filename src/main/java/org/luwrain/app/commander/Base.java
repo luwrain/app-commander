@@ -150,58 +150,6 @@ class Base
 	return true;
     }
 
-    boolean openReader(CommanderArea area)
-    {
-	NullCheck.notNull(area, "area");
-	final Path[] paths = entriesToProcess(area);
-	if (paths.length < 1)
-	    return false;
-	for(Path p: paths)
-	    if (Files.isDirectory(p))
-	    {
-		luwrain.message(strings.dirMayNotBePreviewed(), Luwrain.MESSAGE_ERROR);
-		return true;
-	    }
-	for(Path p: paths)
-	    luwrain.launchApp("reader", new String[]{p.toString()});
-	return true;
-/*
-	final Object  o = luwrain.getSharedObject("luwrain.reader.formats");
-	if (!(o instanceof String[]))
-	    return false;
-	final String[] formats = (String[])o;
-	final String[] formatsStr = new String[formats.length];
-	for(int i = 0;i < formats.length;++i)
-	{
-	    final int pos = formats[i].indexOf(":");
-	    if (pos < 0 || pos + 1 >= formats[i].length())
-	    {
-		formatsStr[i] = formats[i];
-		continue;
-	    }
-	    formatsStr[i] = formats[i].substring(pos + 1);
-	}
-	final Object selected = Popups.fixedList(luwrain, "Выберите формат для просмотра:", formatsStr);
-	if (selected == null)
-	    return false;
-	String format = null;
-	for(int i = 0;i < formatsStr.length;++i)
-	    if (selected == formatsStr[i])
-		format = formats[i];
-	if (format == null)
-	    return false;
-	final int pos = format.indexOf(":");
-	if (pos < 1)
-	    return false;
-	final String id = format.substring(0, pos);
-	for(File f: files)
-	    luwrain.launchApp("reader", new String[]{
-		    f.getAbsolutePath(),
-		    id,
-		});
-*/
-    }
-
     boolean onClickInFiles(Path[] selected)
     {
     	final String fileNames[] = new String[selected.length];
@@ -250,68 +198,6 @@ class Base
 	}
     }
     */
-
-    void fillProperties(MutableLines lines, Path[] items)
-    {
-	NullCheck.notNull(lines, "lines");
-	NullCheck.notNullItems(items, "items");
-	for(Path p: items)
-	{
-	    try {
-		final StringBuilder b = new StringBuilder();
-		b.append(p.getFileName().toString());
-		if (Files.isDirectory(p))
-		    b.append(FileSystems.getDefault().getSeparator());
-		b.append(" ");
-		boolean symlink = false;
-		boolean directory = false;
-		final BasicFileAttributeView basic = Files.getFileAttributeView(p, BasicFileAttributeView.class, LinkOption.NOFOLLOW_LINKS);
-		if (basic != null)
-		{
-		    final BasicFileAttributes attr = basic.readAttributes();
-		    if (attr.isDirectory())
-			b.append(luwrain.i18n().getStaticStr("CommanderDirectory") + " "); else 
-			if (attr.isSymbolicLink())
-			    b.append(luwrain.i18n().getStaticStr("CommanderSymlink") + " "); else 
-			    if (attr.isOther())
-				b.append(luwrain.i18n().getStaticStr("CommanderSymlink") + " ");
-		    symlink = attr.isSymbolicLink();
-		    directory = attr.isDirectory();
-		}
-		final PosixFileAttributeView posix = Files.getFileAttributeView(p, PosixFileAttributeView.class, LinkOption.NOFOLLOW_LINKS);
-		if (posix != null && !symlink)
-		{
-		    final PosixFileAttributes attr = posix.readAttributes();
-		    final Set<PosixFilePermission> perm = attr.permissions();
-		    b.append(perm.contains(PosixFilePermission.OWNER_READ)?"r":"-");
-		    b.append(perm.contains(PosixFilePermission.OWNER_WRITE)?"w":"-");
-		    b.append(perm.contains(PosixFilePermission.OWNER_EXECUTE)?"x":"-");
-		    b.append(perm.contains(PosixFilePermission.GROUP_READ)?"r":"-");
-		    b.append(perm.contains(PosixFilePermission.GROUP_WRITE)?"w":"-");
-		    b.append(perm.contains(PosixFilePermission.GROUP_EXECUTE)?"x":"-");
-		    b.append(perm.contains(PosixFilePermission.OTHERS_READ)?"r":"-");
-		    b.append(perm.contains(PosixFilePermission.OTHERS_WRITE)?"w":"-");
-		    b.append(perm.contains(PosixFilePermission.OTHERS_EXECUTE)?"x":"-");
-		    b.append(" ");
-		    b.append(attr.owner() + " ");
-		    b.append(attr.group() + " ");
-		}
-		if (basic != null && !symlink)
-		{
-		    final BasicFileAttributes attr = basic.readAttributes();
-		    b.append(directory?attr.creationTime():attr.lastModifiedTime() + " ");
-		}
-		lines.addLine(new String(b));
-	    }
-	    catch (Exception e)
-	    {
-		lines.addLine(p.getFileName().toString() + ":FIXME:ERROR:" + e.getMessage());
-		Log.error("commander", p.toString() + ":" + e.getMessage());
-		e.printStackTrace();
-	    }
-	}
-	lines.addLine("");
-    }
 
     boolean copyToClipboard(CommanderArea area)
     {
