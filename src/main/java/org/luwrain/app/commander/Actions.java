@@ -17,6 +17,7 @@
 package org.luwrain.app.commander;
 
 import java.nio.file.*;
+import java.util.*;
 
 import org.luwrain.core.*;
 import org.luwrain.core.events.*;
@@ -49,7 +50,7 @@ class Actions
 	return true;
     }
 
-    boolean onOpenFilesWithApp(String appName, Path[] paths)
+    boolean onOpenFilesWithApp(String appName, Path[] paths, boolean asUrls)
     {
 	NullCheck.notEmpty(appName, "appName");
 	NullCheck.notNullItems(paths, "paths");
@@ -58,7 +59,20 @@ class Actions
 	    if (!Files.isDirectory(p))
 	{
 	    atLeastOne = true;
-	    luwrain.launchApp(appName, new String[]{p.toString()});
+	    String arg;
+	    if (asUrls)
+	    {
+		try {
+		    arg = p.toUri().toURL().toString();
+		}
+		catch(java.net.MalformedURLException e)
+		{
+		    e.printStackTrace();
+		    arg = p.toString();
+		}
+	    } else
+		arg = p.toString();
+	    luwrain.launchApp(appName, new String[]{arg});
 	}
 	return atLeastOne;
     }
@@ -74,8 +88,8 @@ class Actions
 	    };
 	return new Action[]{
 	    new Action("open", strings.actionOpen()),
-	    new Action("edit-text", strings.actionEditAsText(), new KeyboardEvent('n')),
-	    new Action("preview", strings.actionPreview(), new KeyboardEvent('v')),
+	    new Action("edit-text", strings.actionEditAsText(), new KeyboardEvent(KeyboardEvent.Special.F4, EnumSet.of(KeyboardEvent.Modifiers.SHIFT))),
+	    new Action("preview", strings.actionPreview(), new KeyboardEvent(KeyboardEvent.Special.F3, EnumSet.of(KeyboardEvent.Modifiers.SHIFT))),
 	    new Action("preview-another-format", strings.actionPreviewAnotherFormat()),
 	    new Action("play", "Воспроизвести в плеере", new KeyboardEvent('p')),
 	    new Action("open-choosing-app", strings.actionOpenChoosingApp()),
@@ -85,7 +99,7 @@ class Actions
 	    new Action("delete", strings.actionDelete(), new KeyboardEvent(KeyboardEvent.Special.F8)),
 	    new Action("hidden-show", strings.actionHiddenShow()), 
 	    new Action("hidden-hide", strings.actionHiddenHide()), 
-	    new Action("size", strings.actionSize(), new KeyboardEvent('s')),
+	    new Action("size", strings.actionSize(), new KeyboardEvent(KeyboardEvent.Special.F2, EnumSet.of(KeyboardEvent.Modifiers.SHIFT))),
 	};
     }
 }

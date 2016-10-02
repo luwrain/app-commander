@@ -82,6 +82,21 @@ class CommanderApp implements Application, org.luwrain.app.commander.operations.
 	return true;
     }
 
+    void closeApp()
+    {
+	if (!base.allOperationsFinished())
+	{
+	    luwrain.message(strings.notAllOperationsFinished(), Luwrain.MESSAGE_ERROR);
+	    return;
+	}
+	luwrain.closeApp();
+    }
+
+    Settings settings()
+    {
+	return base.settings();
+    }
+
     private void createAreas()
     {
 	final CommanderArea.Params params = new CommanderArea.Params();
@@ -262,20 +277,18 @@ class CommanderApp implements Application, org.luwrain.app.commander.operations.
 		    return false;
 		}
 
-
-
 private boolean onPanelAreaAction(Event event, Side side, CommanderArea area)
     {
 	NullCheck.notNull(event, "event");
 	NullCheck.notNull(side, "side");
 	NullCheck.notNull(area, "area");
 	if (ActionEvent.isAction(event, "edit-text"))
-	    return actions.onOpenFilesWithApp("notepad", Base.entriesToProcess(area));
+	    return actions.onOpenFilesWithApp("notepad", Base.entriesToProcess(area), false);
 	if (ActionEvent.isAction(event, "size"))
 	    return infoAndProps.calcSize(Base.entriesToProcess(area));
 
 	if (ActionEvent.isAction(event, "preview"))
-	    return actions.onOpenFilesWithApp("reader", Base.entriesToProcess(area));
+	    return actions.onOpenFilesWithApp("reader", Base.entriesToProcess(area), true);
 	if (ActionEvent.isAction(event, "hidden-show"))
 	{
 	    //		setFilter(new CommanderFilters.AllFiles());
@@ -418,7 +431,6 @@ final CommanderArea area = getPanel(panelSide);
 	}
     }
 
-
     private boolean showPropertiesArea(CommanderArea area)
     {
 	NullCheck.notNull(area, "area");
@@ -460,9 +472,19 @@ private boolean closePropertiesArea()
 	operationsArea.refresh();
     }
 
-    Settings settings()
+    void gotoLeftPanel()
     {
-	return base.settings();
+	luwrain.setActiveArea(leftPanel);
+    }
+
+    private void gotoRightPanel()
+    {
+	luwrain.setActiveArea(rightPanel);
+    }
+
+    private void gotoOperations()
+    {
+	luwrain.setActiveArea(operationsArea);
     }
 
     @Override public void onOperationProgress(Operation operation)
@@ -481,21 +503,6 @@ private boolean closePropertiesArea()
 	return true;
     }
 
-    void gotoLeftPanel()
-    {
-	luwrain.setActiveArea(leftPanel);
-    }
-
-    void gotoRightPanel()
-    {
-	luwrain.setActiveArea(rightPanel);
-    }
-
-    void gotoOperations()
-    {
-	luwrain.setActiveArea(operationsArea);
-    }
-
     @Override public AreaLayout getAreasToShow()
     {
 	return layouts.getCurrentLayout();
@@ -506,13 +513,4 @@ private boolean closePropertiesArea()
 	return strings.appName();
     }
 
-    void closeApp()
-    {
-	if (!base.allOperationsFinished())
-	{
-	    luwrain.message(strings.notAllOperationsFinished(), Luwrain.MESSAGE_ERROR);
-	    return;
-	}
-	luwrain.closeApp();
-    }
 }
