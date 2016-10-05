@@ -212,9 +212,9 @@ class Base
 	    return true;
 	}
 	final CommanderArea.Entry entry = area.selectedEntry();
-	if (entry == null || entry.type() == CommanderArea.Entry.Type.PARENT)
+	if (entry == null || entry.getType() == CommanderArea.Entry.Type.PARENT)
 	    return false;
-	final Path path = entry.path();
+	final Path path = entry.getPath();
 	luwrain.setClipboard(new RegionContent(new String[]{path.getFileName().toString()}, new Object[]{path}));
 	return true;
     }
@@ -226,9 +226,9 @@ class Base
 	if (marked.length > 0)
 	    return marked;
 	final CommanderArea.Entry entry = area.selectedEntry();
-	if (entry == null || entry.type() == CommanderArea.Entry.Type.PARENT)
+	if (entry == null || entry.getType() == CommanderArea.Entry.Type.PARENT)
 	    return new Path[0];
-	return new Path[]{entry.path()};
+	return new Path[]{entry.getPath()};
     }
 
     private String copyPopupPrefix(Path[] pathsToCopy)
