@@ -176,7 +176,7 @@ class CommanderApp implements Application, org.luwrain.app.commander.operations.
 			closeApp();
 			return true;
 		    case ACTION:
-			return onPanelAreaAction(event, Side.LEFT, this);
+			return onPanelAreaAction(event, Side.RIGHT, this);
 		    case PROPERTIES:
 			return showPropertiesArea(this);
 		    default:
@@ -302,7 +302,8 @@ private boolean onPanelAreaAction(Event event, Side side, CommanderArea area)
 	    return true;
 	}
 	if (ActionEvent.isAction(event, "copy"))
-	    return base.copy(getPanel(side), getAnotherPanel(side), this, operationsArea, layouts);
+	    return actions.onCopy(getPanel(side), getAnotherPanel(side), 
+				base, this, operationsArea, layouts);
 	if (ActionEvent.isAction(event, "move"))
 	    return base.move(getPanel(side), getAnotherPanel(side), this, operationsArea, layouts);
 	if (ActionEvent.isAction(event, "mkdir"))

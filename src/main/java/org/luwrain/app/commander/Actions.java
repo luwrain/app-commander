@@ -25,6 +25,9 @@ import org.luwrain.core.events.*;
 import org.luwrain.controls.*;
 import org.luwrain.popups.Popups;
 
+import org.luwrain.app.commander.operations.Operations;
+import org.luwrain.app.commander.operations.Listener;
+
 class Actions
 {
     private final Luwrain luwrain;
@@ -108,6 +111,38 @@ class Actions
 	};
     }
 
+    boolean onCopy(CommanderArea copyFromArea, CommanderArea copyToArea, 
+		 Base base, Listener listener,
+ListArea area, AreaLayoutSwitch layouts)
+    {
+	NullCheck.notNull(copyFromArea, "copyFromArea");
+	NullCheck.notNull(copyToArea, "copyToArea");
+	NullCheck.notNull(base, "base");
+	NullCheck.notNull(listener, "listener");
+	NullCheck.notNull(area, "area");
+	NullCheck.notNull(layouts, "layouts");
+	final Path copyFromDir = copyFromArea.opened();
+	final Path[] pathsToCopy = Base.entriesToProcess(copyFromArea);
+	final Path copyTo = copyToArea.opened();
+	if (pathsToCopy.length < 1)
+	    return false;
+	final Path dest = Popups.path(luwrain,
+				      strings.copyPopupName(), copyPopupPrefix(pathsToCopy),
+				      copyTo, copyFromDir,
+				      (path)->{
+					  NullCheck.notNull(path, "path");
+					  return true;
+				      });
+	//				      Popups.loadFilePopupFlags(luwrain), Popups.DEFAULT_POPUP_FLAGS);
+	if (dest == null)
+	    return true;
+	base.launch(Operations.copy(listener, copyOperationName(pathsToCopy, dest), pathsToCopy, dest));
+	area.refresh();
+	layouts.show(CommanderApp.OPERATIONS_LAYOUT_INDEX);
+	return true;
+    }
+
+
     boolean mkdir(CommanderApp app, CommanderArea area)
     {
 	NullCheck.notNull(app, "app");
@@ -140,4 +175,33 @@ class Actions
 	area.find(p, false);
 	return true;
     }
+
+    private String copyPopupPrefix(Path[] pathsToCopy)
+	{
+	    return strings.copyPopupPrefix(pathsToCopy.length > 1?luwrain.i18n().getNumberStr(pathsToCopy.length, "items"):pathsToCopy[0].getFileName().toString());
+	}
+
+    private String movePopupPrefix(Path[] pathsToMove)
+	{
+	    return strings.movePopupPrefix(pathsToMove.length > 1?luwrain.i18n().getNumberStr(pathsToMove.length, "items"):pathsToMove[0].getFileName().toString());
+	}
+
+    private String copyOperationName(Path[] pathsToCopy, Path copyTo)
+    {
+	if (pathsToCopy.length < 1)
+	    return "";
+	if (pathsToCopy.length > 1)
+	    return strings.copyOperationName(pathsToCopy[0].getFileName().toString() + ",...", copyTo.toString());
+	return strings.copyOperationName(pathsToCopy[0].getFileName().toString(), copyTo.toString());
+    }
+
+    private String moveOperationName(Path[] pathsToMove, Path moveTo)
+    {
+	if (pathsToMove.length < 1)
+	    return "";
+	if (pathsToMove.length > 1)
+	    return strings.moveOperationName(pathsToMove[0].getFileName().toString() + ",...", moveTo.toString());
+	return strings.moveOperationName(pathsToMove[0].getFileName().toString(), moveTo.toString());
+    }
+
 }

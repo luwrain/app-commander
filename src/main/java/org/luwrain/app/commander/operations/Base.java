@@ -157,7 +157,7 @@ abstract class Base implements Operation
 
     protected ConfirmationChoices confirmOverwrite(Path path)
     {
-	return ConfirmationChoices.CANCEL;
+	return ConfirmationChoices.OVERWRITE;
     }
 
     protected void setResultExtInfoPath(Path path)
