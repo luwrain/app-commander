@@ -18,29 +18,33 @@ package org.luwrain.app.commander;
 
 import java.nio.file.Path;
 
-import org.luwrain.core.Event;
+import org.luwrain.core.*;
+import org.luwrain.core.events.*;
 
-class ConfirmationEvent extends Event
+class ConfirmationEvent extends AddressedEnvironmentEvent
 {
-    private Path path;//May be null
-    private boolean answer = false;
+    private final Path path;
+    private ConfirmationChoices answer = null;
 
-    ConfirmationEvent(Path path)
+    ConfirmationEvent(Area destArea, Path path)
     {
+	super(destArea, EnvironmentEvent.Code.USER);
+	NullCheck.notNull(path, "path");
 	this.path = path;
     }
 
-    Path path()
+    Path getPath()
     {
 	return path;
     }
 
-    void setAnswer(boolean answer)
+    void setAnswer(ConfirmationChoices answer)
     {
+	NullCheck.notNull(answer, "answer");
 	this.answer = answer;
     }
 
-    boolean answer()
+    ConfirmationChoices getAnswer()              
     {
 	return answer;
     }

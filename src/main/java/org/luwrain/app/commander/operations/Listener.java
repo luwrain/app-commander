@@ -18,9 +18,11 @@ package org.luwrain.app.commander.operations;
 
 import java.nio.file.Path;
 
+import org.luwrain.app.commander.ConfirmationChoices;
+
 public interface Listener
 {
     void onOperationProgress(Operation operation);
-    boolean confirmOverwrite(Path path);
+    ConfirmationChoices confirmOverwrite(Path path);
     boolean confirmOverwrite();
 }

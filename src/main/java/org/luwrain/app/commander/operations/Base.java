@@ -55,6 +55,7 @@ abstract class Base implements Operation
 	}
 	catch (IOException e)
 	{
+	    Log.error("commander", opName + ":" + e.getClass().getName() + ":" + e.getMessage());
 	    e.printStackTrace();
 	    //	    opCode = e.code();
 	    //	    extInfo = e.extInfo();
@@ -157,7 +158,8 @@ abstract class Base implements Operation
 
     protected ConfirmationChoices confirmOverwrite(Path path)
     {
-	return ConfirmationChoices.OVERWRITE;
+	NullCheck.notNull(path, "path");
+	return listener.confirmOverwrite(path);
     }
 
     protected void setResultExtInfoPath(Path path)

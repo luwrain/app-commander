@@ -124,7 +124,7 @@ abstract class CopyingBase extends Base
     {
 	NullCheck.notNullItems(filesFrom, "filesFrom");
 	NullCheck.notNull(fileTo, "fileTo");
-	status("copying " + filesFrom.length + " items to " + fileTo);
+	status("copyRecurse:copying " + filesFrom.length + " item(s) to " + fileTo);
 	//toFile should already exist and should be a directory
 	for(Path f: filesFrom)
 	{
@@ -149,7 +149,7 @@ abstract class CopyingBase extends Base
 		}
 		Files.delete(newDest);
 	    }
-	    Files.createDirectory(newDest);
+	    Files.createDirectories(newDest);
 	    status("" + newDest + " prepared");
 	    final Result res = copyRecurse(getDirContent(f), newDest);
 	    if (res != Result.OK)

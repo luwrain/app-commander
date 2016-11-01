@@ -197,6 +197,7 @@ class CommanderApp implements Application, org.luwrain.app.commander.operations.
 	listParams.name = strings.operationsAreaName();
 
 	operationsArea = new ListArea(listParams) {
+
 		@Override public boolean onKeyboardEvent(KeyboardEvent event)
 		{
 		    NullCheck.notNull(event, "event");
@@ -209,9 +210,14 @@ class CommanderApp implements Application, org.luwrain.app.commander.operations.
 			}
 		    return super.onKeyboardEvent(event);
 		}
+
 		@Override public boolean onEnvironmentEvent(EnvironmentEvent event)
 		{
 		    NullCheck.notNull(event, "event");
+	if (event.getType() != EnvironmentEvent.Type.REGULAR)
+	    return super.onEnvironmentEvent(event);
+	if (event instanceof ConfirmationEvent)
+	    return onConfirmationEvent((ConfirmationEvent)event);
 		    switch(event.getCode())
 		    {
 		    case CLOSE:
@@ -221,6 +227,25 @@ class CommanderApp implements Application, org.luwrain.app.commander.operations.
 			return super.onEnvironmentEvent(event);
 		    }
 		}
+
+    private boolean onConfirmationEvent(ConfirmationEvent event)
+    {
+	NullCheck.notNull(event, "event");
+	Log.debug("commander", "showing confirmation event for " + event.getPath().toString());
+	final String cancel = "Прервать";
+	final String overwrite = "Перезаписать";
+	final String overwriteAll = "Перезаписать все";
+	final String skip = "Пропустить";
+	final String skipAll = "Пропустить все";
+	final Object res = Popups.fixedList(luwrain, "Подтверждение перезаписи " + event.getPath().toString(), new String[]{overwrite, overwriteAll, skip, skipAll, cancel});
+	if (res == overwrite || res == overwriteAll)
+	    event.setAnswer(ConfirmationChoices.OVERWRITE); else
+	    if (res == skip || res == skipAll)
+		event.setAnswer(ConfirmationChoices.SKIP); else
+		event.setAnswer(ConfirmationChoices.CANCEL);
+	Log.debug("commander", "popup closed, answer is " + event.getAnswer().toString());
+	return true;
+    }
 	    };
 
 	propertiesArea = new SimpleArea(new DefaultControlEnvironment(luwrain), strings.infoAreaName()){
@@ -479,9 +504,25 @@ private boolean closePropertiesArea()
 	luwrain.runInMainThread(()->onOperationUpdate(operation));
     }
 
-    @Override public boolean confirmOverwrite(Path path)
+    @Override public ConfirmationChoices confirmOverwrite(Path path)
     {
-	return true;
+	NullCheck.notNull(path, "path");
+	final ConfirmationEvent event = new ConfirmationEvent(operationsArea, path);
+	Log.debug("commander", "sending confirmation event for " + path.toString());
+	luwrain.enqueueEvent(event);
+	Log.debug("commander", "starting to wait the event to be processed for " + path.toString());
+	try {
+	    event.waitForBeProcessed();
+	}
+	catch(InterruptedException e)
+	{
+	    Log.debug("commander", "thread was interrupted while waiting the confirmation for " + path.toString());
+	    Thread.currentThread().interrupt();
+	}
+	if (event.getAnswer() == null)
+	    Log.warning("commander", "confirmation event for " + path.toString() + " returned with null answer"); else
+	    Log.debug("commander", "the confirmation for " + path.toString() + " came:" + event.getAnswer().toString());
+	return event.getAnswer();
     }
 
     @Override public boolean confirmOverwrite()

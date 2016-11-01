@@ -28,7 +28,7 @@ import org.luwrain.app.commander.Base.Side;
 
 import org.luwrain.app.commander.operations.*;
 
-class OperationsArea extends NavigationArea implements Listener
+class OperationsArea extends NavigationArea// implements Listener
 {
     private Luwrain luwrain;
     private Strings strings;
@@ -87,6 +87,10 @@ class OperationsArea extends NavigationArea implements Listener
     @Override public boolean onEnvironmentEvent(EnvironmentEvent event)
     {
 	NullCheck.notNull(event, "event");
+	if (event.getType() != EnvironmentEvent.Type.REGULAR)
+	    return super.onEnvironmentEvent(event);
+	if (event instanceof ConfirmationEvent)
+	    return onConfirmationEvent((ConfirmationEvent)event);
 	switch(event.getCode())
 	{
 	case CLOSE:
@@ -101,8 +105,6 @@ class OperationsArea extends NavigationArea implements Listener
     {
 	return strings.operationsAreaName();
     }
-
-
 
     private boolean onEnter(KeyboardEvent event)
     {
@@ -169,19 +171,28 @@ class OperationsArea extends NavigationArea implements Listener
 	return  percents + "%, "+ op.getOperationName();
     }
 
-    @Override public void onOperationProgress(Operation operation)
+public void onOperationProgress(Operation operation)
     {
 	NullCheck.notNull(operation, "operation");
 	luwrain.runInMainThread(()->onUpdate(operation));
     }
 
-    @Override public boolean confirmOverwrite(Path path)
+    private boolean onConfirmationEvent(ConfirmationEvent event)
     {
-	return true;
-    }
-
-    @Override public boolean confirmOverwrite()
-    {
+	NullCheck.notNull(event, "event");
+	Log.debug("commander", "showing confirmation event for " + event.getPath().toString());
+	final String cancel = "Прервать";
+	final String overwrite = "Перезаписать";
+	final String overwriteAll = "Перезаписать все";
+	final String skip = "Пропустить";
+	final String skipAll = "Пропустить все";
+	final Object res = Popups.fixedList(luwrain, "Подтверждение перезаписи " + event.getPath().toString(), new String[]{overwrite, overwriteAll, skip, skipAll, cancel});
+	if (res == overwrite || res == overwriteAll)
+	    event.setAnswer(ConfirmationChoices.OVERWRITE); else
+	    if (res == skip || res == skipAll)
+		event.setAnswer(ConfirmationChoices.SKIP); else
+		event.setAnswer(ConfirmationChoices.CANCEL);
+	Log.debug("commander", "popup closed, answer is " + event.getAnswer().toString());
 	return true;
     }
 }
