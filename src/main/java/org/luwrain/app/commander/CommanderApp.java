@@ -43,7 +43,7 @@ class CommanderApp implements Application, org.luwrain.app.commander.operations.
     private AreaLayoutSwitch layouts;
 
     private final Base base = new Base();
-    private final Actions actions = new Actions();
+    private Actions actions;
     private final InfoAndProperties infoAndProps = new InfoAndProperties();
 
     private Path startFrom = null;
@@ -78,7 +78,7 @@ class CommanderApp implements Application, org.luwrain.app.commander.operations.
 	layouts.add(new AreaLayout(AreaLayout.LEFT_RIGHT, leftPanel, rightPanel));
 	layouts.add(new AreaLayout(AreaLayout.LEFT_RIGHT_BOTTOM, leftPanel, rightPanel, operationsArea));
 	layouts.add(new AreaLayout(propertiesArea));
-	actions.init(luwrain, layouts);
+	actions = new Actions(luwrain, strings, layouts);
 	return true;
     }
 
@@ -306,7 +306,7 @@ private boolean onPanelAreaAction(Event event, Side side, CommanderArea area)
 	if (ActionEvent.isAction(event, "move"))
 	    return base.move(getPanel(side), getAnotherPanel(side), this, operationsArea, layouts);
 	if (ActionEvent.isAction(event, "mkdir"))
-	    return mkdir(side);
+	    return actions.mkdir(this, getPanel(side));
 	return false;
     }
 
@@ -363,21 +363,6 @@ private boolean onTabInPanel(Side side)
 	}
     }
 
-    private boolean mkdir(Side panelSide)
-    {
-	NullCheck.notNull(panelSide, "panelSide");
-final CommanderArea area = getPanel(panelSide);
-	final Path createIn = area.opened();
-	if (createIn == null)
-	    return false;
-	final Path created = base.mkdir(createIn);
-	if (created == null)
-	    return true;
-	refreshPanels();
-	area.find(created, false);
-	return true;
-    }
-
     private boolean delete(Side panelSide)
     {
 	/*
@@ -397,7 +382,7 @@ final CommanderArea area = getPanel(panelSide);
 	return true;
     }
 
-    private void refreshPanels()
+    void refreshPanels()
     {
 	leftPanel.refresh();
 	rightPanel.refresh();

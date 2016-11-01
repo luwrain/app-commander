@@ -40,7 +40,7 @@ public interface Strings
     String moveOperationName(String moveWhat, String moveTo);
     String mkdirPopupName();
     String mkdirPopupPrefix();
-    String mkdirErrorMessage();
+    String mkdirErrorMessage(String comment);
     String mkdirOkMessage(String dirName);
     String delPopupName();
     String delPopupText(File[] files);
@@ -77,4 +77,5 @@ public interface Strings
     String actionDelete();
     String actionSize();
     String dirMayNotBePreviewed();
+    String enteredPathExists(String path);
 }

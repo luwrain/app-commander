@@ -16,23 +16,28 @@
 
 package org.luwrain.app.commander;
 
+import java.io.*;
 import java.nio.file.*;
 import java.util.*;
 
 import org.luwrain.core.*;
 import org.luwrain.core.events.*;
 import org.luwrain.controls.*;
+import org.luwrain.popups.Popups;
 
 class Actions
 {
-    private Luwrain luwrain;
-    private AreaLayoutSwitch layouts;
+    private final Luwrain luwrain;
+    private final Strings strings;
+    private final AreaLayoutSwitch layouts;
 
-    void init(Luwrain luwrain, AreaLayoutSwitch layouts)
+    Actions(Luwrain luwrain, Strings strings, AreaLayoutSwitch layouts)
     {
 	NullCheck.notNull(luwrain, "luwrain");
+	NullCheck.notNull(strings, "strings");
 	NullCheck.notNull(layouts, "layouts");
 	this.luwrain = luwrain;
+	this.strings = strings;
 	this.layouts = layouts;
     }
 
@@ -57,23 +62,23 @@ class Actions
 	boolean atLeastOne = false;
 	for(Path p: paths)
 	    if (!Files.isDirectory(p))
-	{
-	    atLeastOne = true;
-	    String arg;
-	    if (asUrls)
 	    {
-		try {
-		    arg = p.toUri().toURL().toString();
-		}
-		catch(java.net.MalformedURLException e)
+		atLeastOne = true;
+		String arg;
+		if (asUrls)
 		{
-		    e.printStackTrace();
+		    try {
+			arg = p.toUri().toURL().toString();
+		    }
+		    catch(java.net.MalformedURLException e)
+		    {
+			e.printStackTrace();
+			arg = p.toString();
+		    }
+		} else
 		    arg = p.toString();
-		}
-	    } else
-		arg = p.toString();
-	    luwrain.launchApp(appName, new String[]{arg});
-	}
+		luwrain.launchApp(appName, new String[]{arg});
+	    }
 	return atLeastOne;
     }
 
@@ -84,7 +89,7 @@ class Actions
 	if (toProcess.length < 1)
 	    return new Action[]{
 		new Action("hidden-show", strings.actionHiddenShow()), 
-			   new Action("hidden-hide", strings.actionHiddenHide()), 
+		new Action("hidden-hide", strings.actionHiddenHide()), 
 	    };
 	return new Action[]{
 	    new Action("open", strings.actionOpen()),
@@ -101,5 +106,38 @@ class Actions
 	    new Action("hidden-hide", strings.actionHiddenHide()), 
 	    new Action("size", strings.actionSize(), new KeyboardEvent(KeyboardEvent.Special.F2, EnumSet.of(KeyboardEvent.Modifiers.SHIFT))),
 	};
+    }
+
+    boolean mkdir(CommanderApp app, CommanderArea area)
+    {
+	NullCheck.notNull(app, "app");
+	NullCheck.notNull(area, "area");
+	final Path createIn = area.opened();
+	if (createIn == null)
+	    return false;
+	final Path p = Popups.path(luwrain,
+				   strings.mkdirPopupName(), strings.mkdirPopupPrefix(), createIn, (path)->{
+				       NullCheck.notNull(path, "path");
+				       if (Files.exists(path))
+				       {
+					   luwrain.message(strings.enteredPathExists(path.toString()), Luwrain.MESSAGE_ERROR);
+					   return false;
+				       }
+				       return true;
+				   });
+	if (p == null)
+	    return true;
+	try {
+	    Files.createDirectories(p);
+	}
+	catch (IOException e)
+	{
+	    luwrain.message(strings.mkdirErrorMessage(luwrain.i18n().getExceptionDescr(e)), Luwrain.MESSAGE_ERROR);
+	    return true;
+	}
+	luwrain.message(strings.mkdirOkMessage(p.getFileName().toString()), Luwrain.MESSAGE_OK);
+	app.refreshPanels();
+	area.find(p, false);
+	return true;
     }
 }

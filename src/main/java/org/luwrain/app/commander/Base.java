@@ -55,34 +55,6 @@ class Base
 	return settings;
     }
 
-    //Returns what exactly has been created
-    Path mkdir(Path createIn)
-    {
-	NullCheck.notNull(createIn, "createIn");
-	final Path p = Popups.path(luwrain,
-				   strings.mkdirPopupName(), strings.mkdirPopupPrefix(), createIn, (path)->{
-				       NullCheck.notNull(path, "path");
-				       if (Files.exists(path))
-				       {
-					   luwrain.message("Указанный файл существует", Luwrain.MESSAGE_ERROR);
-					   return false;
-				       }
-				       return true;
-				   });
-	if (p == null)
-	    return null;
-	try {
-	    Files.createDirectories(p);
-	}
-	catch (IOException e)
-	{
-	    e.printStackTrace();
-	    luwrain.message(strings.mkdirErrorMessage() + ":" + e.getMessage(), Luwrain.MESSAGE_ERROR);
-	    return null;
-	}
-	luwrain.message(strings.mkdirOkMessage(p.getFileName().toString()), Luwrain.MESSAGE_OK);
-	return p;
-    }
 
     boolean copy(CommanderArea copyFromArea, CommanderArea copyToArea, 
 		 Listener listener, ListArea area, AreaLayoutSwitch layouts)
