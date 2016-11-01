@@ -47,7 +47,7 @@ class Delete extends Base
 	return Result.OK;
     }
 
-    private void deleteFileOrDir(Path p) throws OperationException
+    private void deleteFileOrDir(Path p)
     {
 	/*
 	    if (interrupted)

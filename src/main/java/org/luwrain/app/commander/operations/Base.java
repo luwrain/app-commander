@@ -70,87 +70,6 @@ abstract class Base implements Operation
 	listener.onOperationProgress(this);
     }
 
-    protected void createDirectory(Path path) throws OperationException
-    {
-	try {
-	    Files.createDirectory(path);
-	}
-	catch(Exception e)
-	{
-	    throw new OperationException(Result.PROBLEM_CREATING_DIRECTORY, path, e);
-	}
-    }
-
-    protected InputStream newInputStream(Path path) throws OperationException
-    {
-	try {
-	    return Files.newInputStream(path);
-	}
-	catch(Exception e)
-	{
-	    throw new OperationException(Result.PROBLEM_READING_FILE, path, e);
-	}
-    }
-
-    protected OutputStream newOutputStream(Path path) throws OperationException
-    {
-	try {
-	    return Files.newOutputStream(path);
-	}
-	catch(Exception e)
-	{
-	    throw new OperationException(Result.PROBLEM_WRITING_FILE, path, e);
-	}
-    }
-
-    /*
-    protected int read(InputStream stream, byte[] buf) throws OperationException
-    {
-	try {
-	    return stream.read(buf);
-	}
-	catch(Exception e)
-	{
-	    throw new OperationException(Result.PROBLEM_READING_FILE, null, e);
-	}
-    }
-
-    protected void write(OutputStream stream, byte[] buf, int len) throws OperationException
-    {
-	try {
-	    stream.write(buf, 0, len);
-	}
-	catch(Exception e)
-	{
-	    throw new OperationException(Result.PROBLEM_WRITING_FILE, null, e);
-	}
-    }
-    */
-
-    /*
-    protected void close(InputStream stream)
-    {
-	try {
-	    stream.close();
-	}
-	catch(IOException e)
-	{
-	    e.printStackTrace();
-	}
-    }
-    */
-
-    protected void close(OutputStream stream)
-    {
-	try {
-	    stream.close();
-	}
-	catch(IOException e)
-	{
-	    e.printStackTrace();
-	}
-    }
-
     @Override public synchronized void interrupt()
     {
 	interrupted = true;
@@ -194,13 +113,11 @@ abstract class Base implements Operation
 
     protected Path[] getDirContent(final Path path) throws IOException
     {
-	status("enumerating items in " + path);
 	final LinkedList<Path> res = new LinkedList<Path>();
         try (DirectoryStream<Path> directoryStream = Files.newDirectoryStream(path)) {
 		for (Path p : directoryStream) 
 		    res.add(p);
 	    } 
-	status("" + path + " contains " + res.size() + " items");
 	return res.toArray(new Path[res.size()]);
     }
 
@@ -221,31 +138,6 @@ abstract class Base implements Operation
     }
 
     /*
-    protected void createSymlink(Path symlink, Path dest) throws OperationException
-    {
-	try {
-	    Files.createSymbolicLink(symlink, dest);
-	}
-	catch(Exception e)
-	{
-	    throw new OperationException(Result.PROBLEM_CREATING_SYMLINK, symlink, e);
-	}
-    }
-    */
-
-    /*
-    protected Path readSymlink(Path path) throws OperationException
-    { 
-	try {
-	    return Files.readSymbolicLink(path);
-	}
-	catch(Exception e)
-	{
-	    throw new OperationException(Result.PROBLEM_READING_SYMLINK, path, e);
-	}
-    }
-    */
-
     protected void delete(Path path) throws OperationException
     {
 	try {
@@ -256,6 +148,7 @@ abstract class Base implements Operation
 	    throw new OperationException(Result.PROBLEM_DELETING, path);
 	}
     }
+    */
 
     protected void status(String message)
     {
@@ -271,6 +164,4 @@ abstract class Base implements Operation
     {
 	resultExtInfoPath = path;
     }
-
-
 }
