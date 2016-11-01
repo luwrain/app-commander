@@ -17,7 +17,7 @@
 package org.luwrain.app.commander.operations;
 
 import java.io.*;
-import java.nio.file.Path;
+import java.nio.file.*;
 
 import org.luwrain.core.NullCheck;
 import org.luwrain.app.commander.InfoAndProperties;
@@ -39,90 +39,73 @@ import org.luwrain.app.commander.InfoAndProperties;
  */
 class Copy extends Base
 {
-    private Path[] copyFrom;
-    private Path copyTo;
-    private long totalBytes;
-    private long processedBytes;
-    private int percents;
-    private int lastPercents;//Useful for filtering out notifications with the same number of percent
+    private final Path[] copyFrom;
+    private final Path copyTo;
+
+    private long totalBytes = 0;
+    private long processedBytes = 0;
+    private int percents = 0;
+    private int lastPercents = 0;//Useful for filtering out notifications with the same number of percents
+
     private boolean overwriteApproved = false;
 
     Copy(Listener listener, String opName,
 	 Path[] copyFrom, Path copyTo)
     {
 	super(listener, opName);
+	NullCheck.notNullItems(copyFrom, "copyFrom");
+	NullCheck.notEmptyArray(copyFrom, "copyFrom");
+	NullCheck.notNull(copyTo, "copyTo");
 	this.copyFrom = copyFrom;
 	this.copyTo = copyTo;
-	NullCheck.notNull(copyFrom, "copyFrom");
-	if (copyFrom.length < 1)
-	    throw new IllegalArgumentException("copyFrom may not be empty");
-	for(int i = 0;i < copyFrom.length;++i)
-	    NullCheck.notNull(copyFrom[i], "copyFrom[" + i + "]");
-	NullCheck.notNull(copyTo, "copyTo");
-	totalBytes = 0;
-	processedBytes = 0;
-	percents = 0;
-	lastPercents = 0;
     }
 
-    @Override protected void work() throws OperationException
+    @Override protected Result work() throws IOException
     {
 	//Calculating the total size of source files
 	totalBytes = 0;
 	for(Path f: copyFrom)
-	    try {
+	{
 		status("calculating size of " + f);
 		totalBytes += InfoAndProperties.getTotalSize(f);
 	    }
-	    catch (IOException e)
-	    {
-		throw new OperationException(Result.INACCESSIBLE_SOURCE, f, e);
-	    }
 	status("total size is " + totalBytes);
-	/*
-	for(Path p: copyFrom)
-	    if (!p.isAbsolute())
-		throw new OperationException(RELATIVE_SOURCE_PATH, p.toString());
-	*/
 	Path dest = copyTo;
 	if (!dest.isAbsolute())
 	{
 	    final Path parent = copyFrom[0].getParent();
-	    if (parent == null)
-		throw new OperationException(Result.PROBLEM_CREATING_DIRECTORY, dest);
+	    NullCheck.notNull(parent, "parent");
 	    dest = parent.resolve(dest);
 	}
 	if (copyFrom.length == 1)
-	    singleSource(copyFrom[0], dest); else
-	    multipleSource(copyFrom, dest);
+	    return singleSource(copyFrom[0], dest); else
+	    return multipleSource(copyFrom, dest);
     }
 
-    private void singleSource(Path fileFrom, Path fileTo) throws OperationException
+    private Result singleSource(Path fileFrom, Path fileTo) throws IOException
     {
 	status("single source mode: " + fileFrom + " -> " + fileTo);
 	//The destination directory already exists, just copying whatever fileFrom is
 	if (isDirectory(fileTo, true))
 	{
-	    status("" + fileTo + " exists and is a directory");
-	    copyRecurse(new Path[]{fileFrom}, fileTo);
-	    return;
+	    status("" + fileTo + " exists and is a directory (or a symlink to a directory)");
+	    return copyRecurse(new Path[]{fileFrom}, fileTo);
 	}
-	//The destination doesn't exist and we are about to create it depending on what fileFrom is
+	//The destination isn't a directory, maybe even doesn't exist
 	if (isDirectory(fileFrom, false))
 	{
-	    status("" + fileFrom + " is a directory");
-	    //If fileTo points to a non-directory item, these operations will fail
-	    createDirectories(fileTo);
-	    if (!isDirectory(fileTo, false))//It cannot be a symlink, we have just created it
-		throw new OperationException(Result.PROBLEM_CREATING_DIRECTORY, fileTo);
-	    status("ensured that " + fileTo + "exists and is a directory");
-	    copyRecurse(getDirContent(fileFrom), fileTo);
-	    return;
+	    //fileFrom is a directory, we must copy its content to newly created directory
+	    status("" + fileFrom + " is a directory and isn\'t a symlink");
+	    //This will fail, if fileTo points to anything different than a directory
+	    Files.createDirectories(fileTo);
+	    //Copying the content of fileFrom to the newly created directory fileTo
+	    return copyRecurse(getDirContent(fileFrom), fileTo);
 	}
-	if (!isSymlink(fileFrom) && !isRegularFile(fileFrom, false))
+	//We sure that fileFrom and fileTo aren't directories, but fileTo may exist
+	if (!Files.isSymbolicLink(fileFrom) && !isRegularFile(fileFrom, false))
 	{
 	    status("" + fileFrom + "is not a symlink and is not a regular file, nothing to do");
-	    return;//Silently do nothing
+	    return Result.OK;//Silently do nothing
 	}
 	status("" + fileFrom + " is a symlink or a regular file");
 	if (exists(fileTo, false))
@@ -130,32 +113,30 @@ class Copy extends Base
 	    status("" + fileTo + " exists");
 	    //We may overwrite only a regular file
 	    if (!isRegularFile(fileTo, false))
-		throw new OperationException(Result.DEST_EXISTS_NOT_REGULAR, fileTo);
-	    status("" + fileTo + "is a regular file, requesting confirmation to overwrite");
-	    if (!listener.confirmOverwrite(fileTo))
-		throw new OperationException(Result.NOT_CONFIRMED_OVERWRITE, fileTo);
-	    overwriteApproved = true;
+	    {
+		setResultExtInfoPath(fileTo);
+		return Result.DEST_EXISTS_NOT_REGULAR;
+	    }
+	    status("" + fileTo + "is a regular file, requesting confirmation to overwrite it");
+	    if (!confirmOverwrite(fileTo))
+		return Result.OK;//Do nothing
 	    status("overwriting approved");
-	}
-	copySingleFile(fileFrom, fileTo);//This takes care if fromFile is a symlink
+	    }
+	return copySingleFile(fileFrom, fileTo);//This takes care if fromFile is a symlink
     }
 
-    private void multipleSource(Path[] filesFrom, Path fileTo) throws OperationException
+    private Result multipleSource(Path[] filesFrom, Path fileTo) throws IOException
     {
 	status("multiple source mode");
 	if (!isDirectory(fileTo, true))
-	{
-	    status("" + fileTo + "does not exist or not a a directory");
-	    createDirectories(fileTo);
-	    if (!isDirectory(fileTo, true))
-		throw new OperationException(Result.PROBLEM_CREATING_DIRECTORY, fileTo);
-	    status("ensured that " + fileTo + " exists and is a directory");
-	}
-	copyRecurse(filesFrom, fileTo);
+	    Files.createDirectories(fileTo);
+	return copyRecurse(filesFrom, fileTo);
     }
 
-    private void copyRecurse(Path[] filesFrom, Path fileTo) throws OperationException
+    private Result copyRecurse(Path[] filesFrom, Path fileTo) throws IOException
     {
+	NullCheck.notNullItems(filesFrom, "filesFrom");
+	NullCheck.notNull(fileTo, "fileTo");
 	status("copying " + filesFrom.length + " items to " + fileTo);
 	//toFile should already exist and should be a directory
 	for(Path f: filesFrom)
@@ -167,68 +148,98 @@ class Copy extends Base
 		{
 		    status("" + newDest + " already exists");
 		    if (!isDirectory(newDest, true))
-			throw new OperationException(Result.DEST_EXISTS_NOT_DIR, newDest);
+		    {
+			setResultExtInfoPath(newDest);
+return Result.DEST_EXISTS_NOT_DIR;
+		    }
 		    status("" + newDest + " is a directory");
 		} else
-		    createDirectory(newDest);
-		if (!isDirectory(newDest, true))
-		    throw new OperationException(Result.PROBLEM_CREATING_DIRECTORY, newDest);
+		    Files.createDirectory(newDest);
 		status("" + newDest + " prepared");
-		copyRecurse(getDirContent(f), newDest);
+		final Result res = copyRecurse(getDirContent(f), newDest);
+		if (res != Result.OK)
+		    return res;
 	    } else
-		copyFileToDir(f, fileTo);
+	    {
+		final Result res = copyFileToDir(f, fileTo);
+		if (res != Result.OK)
+		    return res;
+	    }
+	return Result.OK;
     }
 
-    private void copyFileToDir(Path file, Path destDir) throws OperationException
+    private Result copyFileToDir(Path file, Path destDir) throws IOException
     {
-	copySingleFile(file, destDir.resolve(file.getFileName()));
+	NullCheck.notNull(file, "file");
+	NullCheck.notNull(destDir, "destDir");
+	return copySingleFile(file, destDir.resolve(file.getFileName()));
     }
 
     //Saves the symlinks and asks confirmation if overriteApproved is false
-    private void copySingleFile(Path fromFile, Path toFile) throws OperationException
+    private Result copySingleFile(Path fromFile, Path toFile) throws IOException
     {
+	NullCheck.notNull(fromFile, "fromFile");
+	NullCheck.notNull(toFile, "toFile");
 	status("copying single file " + fromFile + " to " + toFile);
-	if (isSymlink(fromFile))
-	{
-	    status("" + fromFile + "is a symlink");
-	    if (exists(toFile, false))
-		throw new OperationException(Result.DEST_EXISTS, toFile);
-	    createSymlink(toFile, readSymlink(fromFile));
-	    status("new symlink " + toFile + " is created");
-	    return;
-	}
+	if (Files.isSymbolicLink(fromFile))
+	    return copySymlink(fromFile, toFile);
 	if (exists(toFile, false))
 	{
 	    status("" + toFile + " already exists");
 	    if (!isRegularFile(toFile, false))
-		throw new OperationException(Result.DEST_EXISTS_NOT_REGULAR, toFile);
+	    {
+		setResultExtInfoPath(toFile);
+return Result.DEST_EXISTS_NOT_REGULAR;
+	    }
 	    status("" + toFile + " is a regular file, need a confirmation, overwriteApproved=" + overwriteApproved);
-	    if (!overwriteApproved && !listener.confirmOverwrite())
-		throw new OperationException(Result.NOT_CONFIRMED_OVERWRITE, toFile);
-	    overwriteApproved = true;
-	}
+	    if (confirmOverwrite(toFile))
+	    {
+		setResultExtInfoPath(toFile);
+		return Result.NOT_CONFIRMED_OVERWRITE;
+	    }
+	} //toFile exists
 	status("opening streams and copying data");
-	final InputStream in = newInputStream(fromFile);
-	final OutputStream out = newOutputStream(toFile);
+	final InputStream in = Files.newInputStream(fromFile);
+	final OutputStream out = Files.newOutputStream(toFile);
+	try {
 	final byte[] buf = new byte[2048];
 	int length;
 	while (true)
 	{ 
-	    length = read(in, buf);
+	    length = in.read(buf);
 	    if (length <= 0)
 		break;
+	    if (interrupted)
+		return Result.INTERRUPTED;
 	    onNewPortion(length);
-	    write(out, buf, length);
+	    out.write(buf, 0, length);
 	}
-	close(in);
-	close(out);
+    }
+    finally {
+	in.close();
+	out.close();
+    }
 	status("" + fromFile + " successfully copied to " + toFile);
+	return Result.OK;
     }
 
-    private void onNewPortion(int bytes) throws OperationException
+    private Result copySymlink(Path pathFrom, Path pathTo) throws IOException
     {
-	if (interrupted)
-	    throw new OperationException(Result.INTERRUPTED);
+	NullCheck.notNull(pathFrom, "pathFrom");
+	NullCheck.notNull(pathTo, "pathTo");
+	    status("" + pathFrom + "is a symlink");
+	    if (exists(pathTo, false))
+	    {
+		setResultExtInfoPath(pathTo);
+return Result.DEST_EXISTS;
+	    }
+	    Files.createSymbolicLink(pathTo, Files.readSymbolicLink(pathFrom));
+	    status("new symlink " + pathTo + " is created");
+	    return Result.OK;
+    }
+
+    private void onNewPortion(int bytes)
+    {
 	processedBytes += bytes;
 	long lPercents = (processedBytes * 100) / totalBytes;
 	percents = (int)lPercents;

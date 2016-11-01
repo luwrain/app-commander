@@ -38,14 +38,18 @@ class Delete extends Base
 		throw new IllegalArgumentException("deleteWhat[" + i + "] must be absolute");
     }
 
-    @Override protected void work() throws OperationException
+    @Override protected Result work() throws IOException
     {
+	/*
 	    for(Path p: deleteWhat)
 	    deleteFileOrDir(p);
+	*/
+	return Result.OK;
     }
 
     private void deleteFileOrDir(Path p) throws OperationException
     {
+	/*
 	    if (interrupted)
 		throw new OperationException(Result.INTERRUPTED);
 	    if (isDirectory(p, false))
@@ -55,6 +59,7 @@ class Delete extends Base
 		deleteFileOrDir(pp);
 	}
 	    delete(p);
+	*/
     }
 
     @Override public int getPercents()

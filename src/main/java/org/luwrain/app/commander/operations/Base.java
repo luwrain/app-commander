@@ -26,29 +26,25 @@ import org.luwrain.core.Log;
 
 abstract class Base implements Operation
 {
-    protected Listener listener;
-    protected String opName = "";
+    protected final Listener listener;
+    protected final String opName;
+
     protected boolean finished = false;
     protected boolean finishingAccepted = false ;
-    protected Result opCode;
+    protected Result opCode = Result.OK;
+    protected Path resultExtInfoPath = null;
     protected String extInfo = "";
-    protected boolean interrupted;
+    protected boolean interrupted = false;
 
     Base(Listener listener, String opName)
     {
+	NullCheck.notNull(listener, "listener");
+	NullCheck.notEmpty(opName, "opName");
 	this.listener = listener;
 	this.opName = opName;
-	NullCheck.notNull(listener, "listener");
-	NullCheck.notNull(opName, "opName");
-	if (opName.trim().isEmpty())
-	    throw new IllegalArgumentException("opName may not be empty");
-	interrupted = false;
-	finished = false;
-	opCode = Result.OK;
-	extInfo = "";
     }
 
-    abstract protected void work() throws OperationException;
+    abstract protected Result work() throws IOException;
 
     @Override public void run()
     {
@@ -57,11 +53,11 @@ abstract class Base implements Operation
 	    opCode = Result.OK;
 	    finished = true;
 	}
-	catch (OperationException e)
+	catch (IOException e)
 	{
 	    e.printStackTrace();
-	    opCode = e.code();
-	    extInfo = e.extInfo();
+	    //	    opCode = e.code();
+	    //	    extInfo = e.extInfo();
 	    finished = true;
 	}
 	catch (Exception e)
@@ -72,17 +68,6 @@ abstract class Base implements Operation
 	    finished = true;
 	}
 	listener.onOperationProgress(this);
-    }
-
-    protected void createDirectories(Path path) throws OperationException
-    {
-	try {
-	    Files.createDirectories(path);
-	}
-	catch(Exception e)
-	{
-	    throw new OperationException(Result.PROBLEM_CREATING_DIRECTORY, path, e);
-	}
     }
 
     protected void createDirectory(Path path) throws OperationException
@@ -118,6 +103,7 @@ abstract class Base implements Operation
 	}
     }
 
+    /*
     protected int read(InputStream stream, byte[] buf) throws OperationException
     {
 	try {
@@ -139,7 +125,9 @@ abstract class Base implements Operation
 	    throw new OperationException(Result.PROBLEM_WRITING_FILE, null, e);
 	}
     }
+    */
 
+    /*
     protected void close(InputStream stream)
     {
 	try {
@@ -150,6 +138,7 @@ abstract class Base implements Operation
 	    e.printStackTrace();
 	}
     }
+    */
 
     protected void close(OutputStream stream)
     {
@@ -195,20 +184,15 @@ abstract class Base implements Operation
 	return false;
     }
 
-    protected boolean isDirectory(Path path, boolean followSymlinks) throws OperationException
+    protected boolean isDirectory(Path path, boolean followSymlinks) throws IOException
     {
-	try {
+	NullCheck.notNull(path, "path");
 	    if (followSymlinks)
 		return Files.isDirectory(path); else
 		return Files.isDirectory(path, LinkOption.NOFOLLOW_LINKS);
-	}
-	catch(Exception e)
-	{
-	    throw new OperationException(Result.UNEXPECTED_PROBLEM, path);
-	}
     }
 
-    protected Path[] getDirContent(final Path path) throws OperationException
+    protected Path[] getDirContent(final Path path) throws IOException
     {
 	status("enumerating items in " + path);
 	final LinkedList<Path> res = new LinkedList<Path>();
@@ -216,51 +200,27 @@ abstract class Base implements Operation
 		for (Path p : directoryStream) 
 		    res.add(p);
 	    } 
-	catch(Exception e)
-	{
-	    throw new OperationException(Result.INACCESSIBLE_SOURCE, path, e);
-	}
 	status("" + path + " contains " + res.size() + " items");
 	return res.toArray(new Path[res.size()]);
     }
 
-    protected boolean isSymlink(Path path) throws OperationException
+    protected boolean isRegularFile(Path path, boolean followSymlinks) throws IOException
     {
-	try {
-	    return Files.isSymbolicLink(path);
-	}
-	catch (Exception e)
-	{
-	    throw new OperationException(Result.UNEXPECTED_PROBLEM, path);
-	}
-    }
-
-    protected boolean isRegularFile(Path path, boolean followSymlinks) throws OperationException
-    {
-	try {
+	NullCheck.notNull(path, "path");
 	    if (followSymlinks)
 		return Files.isRegularFile(path); else
 		return Files.isRegularFile(path, LinkOption.NOFOLLOW_LINKS);
-	}
-	catch(Exception  e)
-	{
-	    throw new OperationException(Result.UNEXPECTED_PROBLEM, path);
-	}
     }
 
-    protected boolean exists(Path path, boolean followSymlinks) throws OperationException
+    protected boolean exists(Path path, boolean followSymlinks) throws IOException
     {
-	try {
+	NullCheck.notNull(path, "path");
 	    if (followSymlinks)
 		return Files.exists(path); else
 		return Files.exists(path, LinkOption.NOFOLLOW_LINKS);
-	}
-	catch(Exception e)
-	{
-	    throw new OperationException(Result.UNEXPECTED_PROBLEM, path);
-	}
     }
 
+    /*
     protected void createSymlink(Path symlink, Path dest) throws OperationException
     {
 	try {
@@ -271,7 +231,9 @@ abstract class Base implements Operation
 	    throw new OperationException(Result.PROBLEM_CREATING_SYMLINK, symlink, e);
 	}
     }
+    */
 
+    /*
     protected Path readSymlink(Path path) throws OperationException
     { 
 	try {
@@ -282,6 +244,7 @@ abstract class Base implements Operation
 	    throw new OperationException(Result.PROBLEM_READING_SYMLINK, path, e);
 	}
     }
+    */
 
     protected void delete(Path path) throws OperationException
     {
@@ -297,6 +260,16 @@ abstract class Base implements Operation
     protected void status(String message)
     {
 	Log.debug("commander", message);
+    }
+
+    protected boolean confirmOverwrite(Path path)
+    {
+	return true;
+    }
+
+    protected void setResultExtInfoPath(Path path)
+    {
+	resultExtInfoPath = path;
     }
 
 
