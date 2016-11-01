@@ -481,6 +481,7 @@ private boolean closePropertiesArea()
     {
 	NullCheck.notNull(operation, "operation");
 	operationsArea.refresh();
+	//	luwrain.onAreaNewBackgroundSound();
     }
 
     void gotoLeftPanel()
@@ -523,11 +524,6 @@ private boolean closePropertiesArea()
 	    Log.warning("commander", "confirmation event for " + path.toString() + " returned with null answer"); else
 	    Log.debug("commander", "the confirmation for " + path.toString() + " came:" + event.getAnswer().toString());
 	return event.getAnswer();
-    }
-
-    @Override public boolean confirmOverwrite()
-    {
-	return true;
     }
 
     @Override public AreaLayout getAreasToShow()

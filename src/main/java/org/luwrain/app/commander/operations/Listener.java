@@ -24,5 +24,4 @@ public interface Listener
 {
     void onOperationProgress(Operation operation);
     ConfirmationChoices confirmOverwrite(Path path);
-    boolean confirmOverwrite();
 }

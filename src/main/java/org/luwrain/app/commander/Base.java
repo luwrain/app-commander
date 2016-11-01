@@ -157,30 +157,30 @@ class Base
 	    return strings.opResultOk();
 	case INTERRUPTED:
 	    return strings.opResultInterrupted();
-	case UNEXPECTED_PROBLEM:
-	    return strings.opResultUnexpectedProblem();
-	case PROBLEM_CREATING_DIRECTORY:
-	    return strings.opResultProblemCreatingDirectory(op.getExtInfo());
-	case PROBLEM_READING_FILE:
-	    return strings.opResultProblemReadingFile(op.getExtInfo());
-	case PROBLEM_WRITING_FILE:
-	    return strings.opResultProblemWritingFile(op.getExtInfo());
-	case INACCESSIBLE_SOURCE:
-	    return strings.opResultInaccessibleSource();
-	case PROBLEM_CREATING_SYMLINK:
-	    return strings.opResultProblemCreatingSymlink(op.getExtInfo());
-	case PROBLEM_READING_SYMLINK:
-	    return strings.opResultProblemReadingSymlink(op.getExtInfo());
-	case PROBLEM_DELETING:
-	    return strings.opResultProblemDeleting(op.getExtInfo());
-	case DEST_EXISTS_NOT_REGULAR:
-	    return strings.opResultDestExistsNotRegular(op.getExtInfo());
-	case NOT_CONFIRMED_OVERWRITE:
-	    return strings.opResultNotConfirmedOverride(op.getExtInfo());
-	case DEST_EXISTS_NOT_DIR:
-	    return strings.opResultDestExistsNotDir(op.getExtInfo());
-	case DEST_EXISTS:
-	    return strings.opResultDestExists(op.getExtInfo());
+	    //	case UNEXPECTED_PROBLEM:
+	    //	    return strings.opResultUnexpectedProblem();
+	    //	case PROBLEM_CREATING_DIRECTORY:
+	    //	    return strings.opResultProblemCreatingDirectory(op.getExtInfo());
+	    //	case PROBLEM_READING_FILE:
+	    //	    return strings.opResultProblemReadingFile(op.getExtInfo());
+	    //	case PROBLEM_WRITING_FILE:
+	    //	    return strings.opResultProblemWritingFile(op.getExtInfo());
+	    //	case INACCESSIBLE_SOURCE:
+	    //	    return strings.opResultInaccessibleSource();
+	    //	case PROBLEM_CREATING_SYMLINK:
+	    //	    return strings.opResultProblemCreatingSymlink(op.getExtInfo());
+	    //	case PROBLEM_READING_SYMLINK:
+	    //	    return strings.opResultProblemReadingSymlink(op.getExtInfo());
+	    //	case PROBLEM_DELETING:
+	    //	    return strings.opResultProblemDeleting(op.getExtInfo());
+	    //	case DEST_EXISTS_NOT_REGULAR:
+	    //	    return strings.opResultDestExistsNotRegular(op.getExtInfo());
+	    //	case NOT_CONFIRMED_OVERWRITE:
+	    //	    return strings.opResultNotConfirmedOverride(op.getExtInfo());
+	    //	case DEST_EXISTS_NOT_DIR:
+	    //	    return strings.opResultDestExistsNotDir(op.getExtInfo());
+	    //	case DEST_EXISTS:
+	    //	    return strings.opResultDestExists(op.getExtInfo());
 	default:
 	    return "";
 	}

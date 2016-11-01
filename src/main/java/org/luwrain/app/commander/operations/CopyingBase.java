@@ -220,7 +220,7 @@ abstract class CopyingBase extends Base
 	percents = (int)lPercents;
 	if (percents > lastPercents)
 	{
-	    listener.onOperationProgress(this);
+onProgress(this);
 	    lastPercents = percents;
 	}
     }

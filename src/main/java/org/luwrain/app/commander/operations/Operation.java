@@ -16,23 +16,15 @@
 
 package org.luwrain.app.commander.operations;
 
+import java.io.IOException;
+import java.nio.file.Path;
+
 public interface Operation extends Runnable
 {
     public enum Result {
-	DEST_EXISTS,//has arg
-	DEST_EXISTS_NOT_DIR,//has arg
-	DEST_EXISTS_NOT_REGULAR,//has arg
-	INACCESSIBLE_SOURCE,
 	INTERRUPTED,
-	NOT_CONFIRMED_OVERWRITE,//has arg
+	IO_EXCEPTION,
 	OK,
-	PROBLEM_CREATING_DIRECTORY,//has arg
-	PROBLEM_CREATING_SYMLINK,//has arg
-	PROBLEM_DELETING,//has arg
-	PROBLEM_READING_FILE,//has arg
-	PROBLEM_READING_SYMLINK,//has arg
-	PROBLEM_WRITING_FILE,//has arg
-	UNEXPECTED_PROBLEM,
     };
 
     String getOperationName();
@@ -40,6 +32,7 @@ public interface Operation extends Runnable
     void interrupt();
     boolean isFinished();
     Result getResult();
-    String getExtInfo();
+Path getExtInfoPath();
+    IOException getExtInfoIoException();
     boolean finishingAccepted();
 }

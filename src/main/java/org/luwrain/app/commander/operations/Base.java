@@ -26,22 +26,22 @@ import org.luwrain.app.commander.ConfirmationChoices;
 
 abstract class Base implements Operation
 {
-    protected final Listener listener;
-    protected final String opName;
+    private final Listener listener;
+    private final String name;
 
-    protected boolean finished = false;
-    protected boolean finishingAccepted = false ;
-    protected Result opCode = Result.OK;
-    protected Path resultExtInfoPath = null;
-    protected String extInfo = "";
+    private boolean finished = false;
+    private boolean finishingAccepted = false ;
+    private Result result = Result.OK;
+    private Path extInfoPath = null;
+    private IOException extInfoIoException = null;
     protected boolean interrupted = false;
 
-    Base(Listener listener, String opName)
+    Base(Listener listener, String name)
     {
 	NullCheck.notNull(listener, "listener");
-	NullCheck.notEmpty(opName, "opName");
+	NullCheck.notEmpty(name, "name");
 	this.listener = listener;
-	this.opName = opName;
+	this.name = name;
     }
 
     abstract protected Result work() throws IOException;
@@ -49,25 +49,15 @@ abstract class Base implements Operation
     @Override public void run()
     {
 	try {
-	    work();
-	    opCode = Result.OK;
-	    finished = true;
+	    result = work();
 	}
 	catch (IOException e)
 	{
-	    Log.error("commander", opName + ":" + e.getClass().getName() + ":" + e.getMessage());
-	    e.printStackTrace();
-	    //	    opCode = e.code();
-	    //	    extInfo = e.extInfo();
-	    finished = true;
+	    Log.error("commander", name + ":" + e.getClass().getName() + ":" + e.getMessage());
+	    result = Result.IO_EXCEPTION;
+	    extInfoIoException = e;
 	}
-	catch (Exception e)
-	{
-	    e.printStackTrace();
-	    opCode = Result.UNEXPECTED_PROBLEM;
-	    extInfo = "";
-	    finished = true;
-	}
+	finished = true;
 	listener.onOperationProgress(this);
     }
 
@@ -78,7 +68,7 @@ abstract class Base implements Operation
 
     @Override public synchronized  String getOperationName()
     {
-	return opName;
+	return name;
     }
 
     @Override public synchronized  boolean isFinished()
@@ -88,12 +78,17 @@ abstract class Base implements Operation
 
     @Override public synchronized Result getResult()
     {
-	return opCode;
+	return result;
     }
 
-    @Override public synchronized  String getExtInfo()
+    @Override public synchronized  Path getExtInfoPath()
     {
-	return extInfo != null?extInfo:"";
+	return extInfoPath;
+    }
+
+    @Override public IOException getExtInfoIoException()
+    {
+	return extInfoIoException;
     }
 
     @Override public boolean finishingAccepted()
@@ -164,6 +159,12 @@ abstract class Base implements Operation
 
     protected void setResultExtInfoPath(Path path)
     {
-	resultExtInfoPath = path;
+	extInfoPath = path;
+    }
+
+    protected void onProgress(Operation op)
+    {
+	NullCheck.notNull(op, "op");
+	listener.onOperationProgress(op);
     }
 }
