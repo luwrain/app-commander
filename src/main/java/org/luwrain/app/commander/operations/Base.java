@@ -21,8 +21,8 @@ import java.io.*;
 import java.nio.file.*;
 import java.nio.file.attribute.*;
 
-import org.luwrain.core.NullCheck;
-import org.luwrain.core.Log;
+import org.luwrain.core.*;
+import org.luwrain.app.commander.ConfirmationChoices;
 
 abstract class Base implements Operation
 {
@@ -155,9 +155,9 @@ abstract class Base implements Operation
 	Log.debug("commander", message);
     }
 
-    protected boolean confirmOverwrite(Path path)
+    protected ConfirmationChoices confirmOverwrite(Path path)
     {
-	return true;
+	return ConfirmationChoices.CANCEL;
     }
 
     protected void setResultExtInfoPath(Path path)

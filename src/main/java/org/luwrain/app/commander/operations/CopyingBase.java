@@ -89,17 +89,15 @@ abstract class CopyingBase extends Base
 	status("" + fileFrom + " is a symlink or a regular file");
 	if (exists(fileTo, false))
 	{
-	    status("" + fileTo + " exists");
-	    //We may overwrite only a regular file
-	    if (!isRegularFile(fileTo, false))
+	    status("" + fileTo + " exists, trying to overwrite it");
+	    switch(confirmOverwrite(fileTo))
 	    {
-		setResultExtInfoPath(fileTo);
-		return Result.DEST_EXISTS_NOT_REGULAR;
+	    case SKIP:
+		return Result.OK;
+	    case CANCEL:
+		return Result.INTERRUPTED;
 	    }
-	    status("" + fileTo + "is a regular file, requesting confirmation to overwrite it");
-	    if (!confirmOverwrite(fileTo))
-		return Result.OK;//Do nothing
-	    status("overwriting approved");
+	    Files.delete(fileTo);
 	}
 	return copySingleFile(fileFrom, fileTo);//This takes care if fromFile is a symlink
     }
@@ -107,8 +105,18 @@ abstract class CopyingBase extends Base
     private Result multipleSource(Path[] filesFrom, Path fileTo) throws IOException
     {
 	status("multiple source mode");
-	if (!isDirectory(fileTo, true))
-	    Files.createDirectories(fileTo);
+	if (exists(fileTo, false) && !isDirectory(fileTo, true))
+	{
+	    switch(confirmOverwrite(fileTo))
+	    {
+	    case SKIP:
+		return Result.OK;
+	    case CANCEL:
+		return Result.INTERRUPTED;
+	    }
+	    Files.delete(fileTo);
+	}
+	Files.createDirectory(fileTo);
 	return copyRecurse(filesFrom, fileTo);
     }
 
@@ -119,31 +127,34 @@ abstract class CopyingBase extends Base
 	status("copying " + filesFrom.length + " items to " + fileTo);
 	//toFile should already exist and should be a directory
 	for(Path f: filesFrom)
-	    if (isDirectory(f, false))
-	    {
-		//checking the type
-		final Path newDest = fileTo.resolve(f.getFileName());
-		if (exists(newDest, false))
-		{
-		    status("" + newDest + " already exists");
-		    if (!isDirectory(newDest, true))
-		    {
-			setResultExtInfoPath(newDest);
-			return Result.DEST_EXISTS_NOT_DIR;
-		    }
-		    status("" + newDest + " is a directory");
-		} else
-		    Files.createDirectory(newDest);
-		status("" + newDest + " prepared");
-		final Result res = copyRecurse(getDirContent(f), newDest);
-		if (res != Result.OK)
-		    return res;
-	    } else
+	{
+	    if (!isDirectory(f, false))
 	    {
 		final Result res = copyFileToDir(f, fileTo);
 		if (res != Result.OK)
 		    return res;
+		continue;
 	    }
+	    //f is a directory
+	    final Path newDest = fileTo.resolve(f.getFileName());
+	    if (exists(newDest, false) && !isDirectory(newDest, true))
+	    {
+		status("" + newDest + " already exists and isn\'t a directory, asking confirmation and trying to delete it");
+		switch(confirmOverwrite(newDest))
+		{
+		case SKIP:
+		    continue;
+		case CANCEL:
+		    return Result.INTERRUPTED;
+		}
+		Files.delete(newDest);
+	    }
+	    Files.createDirectory(newDest);
+	    status("" + newDest + " prepared");
+	    final Result res = copyRecurse(getDirContent(f), newDest);
+	    if (res != Result.OK)
+		return res;
+	}
 	return Result.OK;
     }
 
@@ -160,23 +171,23 @@ abstract class CopyingBase extends Base
 	NullCheck.notNull(fromFile, "fromFile");
 	NullCheck.notNull(toFile, "toFile");
 	status("copying single file " + fromFile + " to " + toFile);
-	if (Files.isSymbolicLink(fromFile))
-	    return copySymlink(fromFile, toFile);
 	if (exists(toFile, false))
 	{
 	    status("" + toFile + " already exists");
-	    if (!isRegularFile(toFile, false))
+	    switch(confirmOverwrite(toFile))
 	    {
-		setResultExtInfoPath(toFile);
-		return Result.DEST_EXISTS_NOT_REGULAR;
+	    case SKIP:
+		return Result.OK;
+	    case CANCEL:
+		return Result.INTERRUPTED;
 	    }
-	    status("" + toFile + " is a regular file, need a confirmation, overwriteApproved=" + overwriteApproved);
-	    if (confirmOverwrite(toFile))
-	    {
-		setResultExtInfoPath(toFile);
-		return Result.NOT_CONFIRMED_OVERWRITE;
-	    }
+	    Files.delete(toFile);
 	} //toFile exists
+	if (Files.isSymbolicLink(fromFile))
+	{
+	    Files.createSymbolicLink(toFile, Files.readSymbolicLink(fromFile));
+	    return Result.OK;
+	}
 	status("opening streams and copying data");
 	final InputStream in = Files.newInputStream(fromFile);
 	final OutputStream out = Files.newOutputStream(toFile);
@@ -199,21 +210,6 @@ abstract class CopyingBase extends Base
 	    out.close();
 	}
 	status("" + fromFile + " successfully copied to " + toFile);
-	return Result.OK;
-    }
-
-    private Result copySymlink(Path pathFrom, Path pathTo) throws IOException
-    {
-	NullCheck.notNull(pathFrom, "pathFrom");
-	NullCheck.notNull(pathTo, "pathTo");
-	status("" + pathFrom + "is a symlink");
-	if (exists(pathTo, false))
-	{
-	    setResultExtInfoPath(pathTo);
-	    return Result.DEST_EXISTS;
-	}
-	Files.createSymbolicLink(pathTo, Files.readSymbolicLink(pathFrom));
-	status("new symlink " + pathTo + " is created");
 	return Result.OK;
     }
 
