@@ -47,7 +47,7 @@ Base base)
 	final Operation op = (Operation)item;
 	if (op.isFinished())
 	{
-	    luwrain.say(base.opResultDescr(op) + " " + op.getOperationName());
+	    luwrain.say(base.getOperationResultDescr(op) + " " + op.getOperationName());
 	    return;
 	}
 	final int percents = op.getPercents();
@@ -64,7 +64,7 @@ Base base)
 	NullCheck.notNull(flags, "flags");
 	final Operation op = (Operation)item;
 	if (op.isFinished())
-	    return base.opResultDescr(op);
+	    return base.getOperationResultDescr(op);
 	final int percents = op.getPercents();
 	if (percents == 0)
 	    return op.getOperationName() + "...";

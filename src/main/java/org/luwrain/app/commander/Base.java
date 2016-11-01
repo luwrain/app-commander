@@ -50,39 +50,17 @@ class Base
 	return true;
     }
 
-    Settings settings()
+    void launch(Operation op)
     {
-	return settings;
+	NullCheck.notNull(op, "op");
+	operations.add(op);
+	operationsListModel.setItems(operations.toArray(new Operation[operations.size()]));
+	new Thread(op).start();
     }
 
-
-    boolean move(CommanderArea moveFromArea, CommanderArea moveToArea, 
-		 Listener listener, ListArea area, AreaLayoutSwitch layouts)
+    Settings getSettings()
     {
-	NullCheck.notNull(moveFromArea, "moveFromArea");
-	NullCheck.notNull(moveToArea, "moveToArea");
-	NullCheck.notNull(listener, "listener");
-	NullCheck.notNull(area, "area");
-	NullCheck.notNull(layouts, "layouts");
-	final Path moveFromDir = moveFromArea.opened();
-	final Path[] pathsToMove = entriesToProcess(moveFromArea);
-	final Path moveTo = moveToArea.opened();
-	if (pathsToMove.length < 1)
-	    return false;
-	final Path dest = Popups.path(luwrain,
-				      strings.movePopupName(), movePopupPrefix(pathsToMove),
-				      moveTo, moveFromDir,
-				      (path)->{
-					  NullCheck.notNull(path, "path");
-					  return true;
-				      },
-				      Popups.loadFilePopupFlags(luwrain), Popups.DEFAULT_POPUP_FLAGS);
-	if (dest == null)
-	    return true;
-	launch(Operations.move(listener, moveOperationName(pathsToMove, dest), pathsToMove, dest));
-	area.refresh();
-	layouts.show(CommanderApp.OPERATIONS_LAYOUT_INDEX);
-	return true;
+	return settings;
     }
 
     boolean runWithShortcut(Path[] selected)
@@ -122,33 +100,7 @@ class Base
 	return true;
     }
 
-    static Path[] entriesToProcess(CommanderArea area)
-    {
-	NullCheck.notNull(area, "area");
-	final Path[] marked = area.marked();
-	if (marked.length > 0)
-	    return marked;
-	final CommanderArea.Entry entry = area.selectedEntry();
-	if (entry == null || entry.getType() == CommanderArea.Entry.Type.PARENT)
-	    return new Path[0];
-	return new Path[]{entry.getPath()};
-    }
-
-    private String movePopupPrefix(Path[] pathsToMove)
-	{
-	    return strings.movePopupPrefix(pathsToMove.length > 1?luwrain.i18n().getNumberStr(pathsToMove.length, "items"):pathsToMove[0].getFileName().toString());
-	}
-
-    private String moveOperationName(Path[] pathsToMove, Path moveTo)
-    {
-	if (pathsToMove.length < 1)
-	    return "";
-	if (pathsToMove.length > 1)
-	    return strings.moveOperationName(pathsToMove[0].getFileName().toString() + ",...", moveTo.toString());
-	return strings.moveOperationName(pathsToMove[0].getFileName().toString(), moveTo.toString());
-    }
-
-    String opResultDescr(Operation op)
+    String getOperationResultDescr(Operation op)
     {
 	NullCheck.notNull(op, "op");
 	switch(op.getResult())
@@ -157,30 +109,8 @@ class Base
 	    return strings.opResultOk();
 	case INTERRUPTED:
 	    return strings.opResultInterrupted();
-	    //	case UNEXPECTED_PROBLEM:
-	    //	    return strings.opResultUnexpectedProblem();
-	    //	case PROBLEM_CREATING_DIRECTORY:
-	    //	    return strings.opResultProblemCreatingDirectory(op.getExtInfo());
-	    //	case PROBLEM_READING_FILE:
-	    //	    return strings.opResultProblemReadingFile(op.getExtInfo());
-	    //	case PROBLEM_WRITING_FILE:
-	    //	    return strings.opResultProblemWritingFile(op.getExtInfo());
-	    //	case INACCESSIBLE_SOURCE:
-	    //	    return strings.opResultInaccessibleSource();
-	    //	case PROBLEM_CREATING_SYMLINK:
-	    //	    return strings.opResultProblemCreatingSymlink(op.getExtInfo());
-	    //	case PROBLEM_READING_SYMLINK:
-	    //	    return strings.opResultProblemReadingSymlink(op.getExtInfo());
-	    //	case PROBLEM_DELETING:
-	    //	    return strings.opResultProblemDeleting(op.getExtInfo());
-	    //	case DEST_EXISTS_NOT_REGULAR:
-	    //	    return strings.opResultDestExistsNotRegular(op.getExtInfo());
-	    //	case NOT_CONFIRMED_OVERWRITE:
-	    //	    return strings.opResultNotConfirmedOverride(op.getExtInfo());
-	    //	case DEST_EXISTS_NOT_DIR:
-	    //	    return strings.opResultDestExistsNotDir(op.getExtInfo());
-	    //	case DEST_EXISTS:
-	    //	    return strings.opResultDestExists(op.getExtInfo());
+	case IO_EXCEPTION:
+	    return luwrain.i18n().getExceptionDescr(op.getExtInfoIoException());
 	default:
 	    return "";
 	}
@@ -204,11 +134,17 @@ class Base
 	return operationsListModel;
     }
 
-    void launch(Operation op)
+    static Path[] entriesToProcess(CommanderArea area)
     {
-	NullCheck.notNull(op, "op");
-	operations.add(op);
-	operationsListModel.setItems(operations.toArray(new Operation[operations.size()]));
-	new Thread(op).start();
+	NullCheck.notNull(area, "area");
+	final Path[] marked = area.marked();
+	if (marked.length > 0)
+	    return marked;
+	final CommanderArea.Entry entry = area.selectedEntry();
+	if (entry == null || entry.getType() == CommanderArea.Entry.Type.PARENT)
+	    return new Path[0];
+	return new Path[]{entry.getPath()};
     }
+
+
 }

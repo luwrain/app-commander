@@ -142,6 +142,38 @@ ListArea area, AreaLayoutSwitch layouts)
 	return true;
     }
 
+    boolean onMove(CommanderArea moveFromArea, CommanderArea moveToArea, 
+		   Base base, Listener listener,
+		   ListArea area, AreaLayoutSwitch layouts)
+    {
+	NullCheck.notNull(moveFromArea, "moveFromArea");
+	NullCheck.notNull(moveToArea, "moveToArea");
+	NullCheck.notNull(base, "base");
+	NullCheck.notNull(listener, "listener");
+	NullCheck.notNull(area, "area");
+	NullCheck.notNull(layouts, "layouts");
+	final Path moveFromDir = moveFromArea.opened();
+	final Path[] pathsToMove = Base.entriesToProcess(moveFromArea);
+	final Path moveTo = moveToArea.opened();
+	if (pathsToMove.length < 1)
+	    return false;
+	final Path dest = Popups.path(luwrain,
+				      strings.movePopupName(), movePopupPrefix(pathsToMove),
+				      moveTo, moveFromDir,
+				      (path)->{
+					  NullCheck.notNull(path, "path");
+					  return true;
+				      },
+				      Popups.loadFilePopupFlags(luwrain), Popups.DEFAULT_POPUP_FLAGS);
+	if (dest == null)
+	    return true;
+	base.launch(Operations.move(listener, moveOperationName(pathsToMove, dest), pathsToMove, dest));
+	area.refresh();
+	layouts.show(CommanderApp.OPERATIONS_LAYOUT_INDEX);
+	return true;
+    }
+
+
 
     boolean mkdir(CommanderApp app, CommanderArea area)
     {

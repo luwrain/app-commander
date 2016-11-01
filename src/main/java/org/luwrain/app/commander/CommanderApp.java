@@ -92,10 +92,12 @@ class CommanderApp implements Application, org.luwrain.app.commander.operations.
 	luwrain.closeApp();
     }
 
+    /*
     Settings settings()
     {
-	return base.settings();
+	return base.getSettings();
     }
+    */
 
     private void createAreas()
     {
@@ -330,7 +332,8 @@ private boolean onPanelAreaAction(Event event, Side side, CommanderArea area)
 	    return actions.onCopy(getPanel(side), getAnotherPanel(side), 
 				base, this, operationsArea, layouts);
 	if (ActionEvent.isAction(event, "move"))
-	    return base.move(getPanel(side), getAnotherPanel(side), this, operationsArea, layouts);
+	    return actions.onMove(getPanel(side), getAnotherPanel(side), 
+				  base, this, operationsArea, layouts);
 	if (ActionEvent.isAction(event, "mkdir"))
 	    return actions.mkdir(this, getPanel(side));
 	return false;

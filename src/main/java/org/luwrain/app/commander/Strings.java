@@ -28,7 +28,7 @@ public interface Strings
     String appName();
     String leftPanelName();
     String rightPanelName();
-    String infoAreaName();
+        String infoAreaName();
     String operationsAreaName();
     String panelActionTitle(String actionName, boolean multiple);
     String infoActionTitle(String actionName);
@@ -52,18 +52,6 @@ public interface Strings
     String bytesNum(long num);
     String opResultOk();
     String opResultInterrupted();
-    String opResultUnexpectedProblem();
-    String opResultProblemCreatingDirectory(String arg);
-    String opResultProblemReadingFile(String arg);
-    String opResultProblemWritingFile(String arg);
-    String opResultInaccessibleSource();
-    String opResultProblemCreatingSymlink(String arg);
-    String opResultProblemReadingSymlink(String arg);
-    String opResultProblemDeleting(String arg);
-    String opResultDestExistsNotRegular(String arg);
-    String opResultNotConfirmedOverride(String arg);
-    String opResultDestExistsNotDir(String arg);
-    String opResultDestExists(String arg);
     String actionHiddenShow();
     String actionHiddenHide();
     String actionOpen();
