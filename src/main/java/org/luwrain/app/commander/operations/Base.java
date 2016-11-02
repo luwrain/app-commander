@@ -133,18 +133,24 @@ abstract class Base implements Operation
 		return Files.exists(path, LinkOption.NOFOLLOW_LINKS);
     }
 
-    /*
-    protected void delete(Path path) throws OperationException
+    protected Result deleteFileOrDir(Path p) throws IOException
     {
-	try {
-	    Files.delete(path);
-	}
-	catch (Exception e)
+	NullCheck.notNull(p, "p");
+	if (interrupted)
+	    return Result.INTERRUPTED;
+	if (isDirectory(p, false))
 	{
-	    throw new OperationException(Result.PROBLEM_DELETING, path);
+	    final Path[] content = getDirContent(p);
+	    for(Path pp: content)
+	    {
+		final Result res = deleteFileOrDir(pp);
+		if (res != Result.OK)
+		    return res;
+	    }
 	}
+	Files.delete(p);
+	return Result .OK;
     }
-    */
 
     protected void status(String message)
     {

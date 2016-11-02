@@ -23,47 +23,33 @@ import org.luwrain.core.NullCheck;
 
 class Delete extends Base
 {
-    private Path[] deleteWhat;
+    private final Path[] toDelete;
 
-    Delete(Listener listener, String opName,
-	   Path[] deleteWhat)
+    Delete(Listener listener, String name,
+	   Path[] toDelete)
     {
-	super(listener, opName);
-	this.deleteWhat = deleteWhat;
-	NullCheck.notNullItems(deleteWhat, "deleteWhat");
-	if (deleteWhat.length < 1)
-	    throw new IllegalArgumentException("deleteWhat may not be empty");
-	for(int i = 0;i < deleteWhat.length;++i)
-	    if (!deleteWhat[i].isAbsolute())
-		throw new IllegalArgumentException("deleteWhat[" + i + "] must be absolute");
+	super(listener, name);
+	this.toDelete = toDelete;
+	NullCheck.notNullItems(toDelete, "toDelete");
+	NullCheck.notEmptyArray(toDelete, "toDelete");
+	for(int i = 0;i < toDelete.length;++i)
+	    if (!toDelete[i].isAbsolute())
+		throw new IllegalArgumentException("toDelete[" + i + "] must be absolute");
     }
 
     @Override protected Result work() throws IOException
     {
-	/*
-	    for(Path p: deleteWhat)
-	    deleteFileOrDir(p);
-	*/
-	return Result.OK;
-    }
-
-    private void deleteFileOrDir(Path p)
-    {
-	/*
-	    if (interrupted)
-		throw new OperationException(Result.INTERRUPTED);
-	    if (isDirectory(p, false))
+	for(Path p: toDelete)
 	{
-	    final Path[] content = getDirContent(p);
-	    for(Path pp: content)
-		deleteFileOrDir(pp);
+	    final Result res = deleteFileOrDir(p);
+	    if (res != Result.OK)
+		return res;
 	}
-	    delete(p);
-	*/
+	return Result.OK;
     }
 
     @Override public int getPercents()
     {
 	return 0;
     }
-	   }
+}

@@ -80,6 +80,7 @@ class Base
 	return true;
     }
 
+    /*
     boolean copyToClipboard(CommanderArea area)
     {
 	NullCheck.notNull(area, "area");
@@ -99,6 +100,7 @@ class Base
 	luwrain.setClipboard(new RegionContent(new String[]{path.getFileName().toString()}, new Object[]{path}));
 	return true;
     }
+    */
 
     String getOperationResultDescr(Operation op)
     {

@@ -143,7 +143,7 @@ class CommanderApp implements Application, org.luwrain.app.commander.operations.
 
 		@Override public Action[] getAreaActions()
 		{
-		    return Actions.getPanelAreaActions(strings, this);
+		    return actions.getPanelAreaActions(this);
 		}
 	    };
 
@@ -188,7 +188,7 @@ class CommanderApp implements Application, org.luwrain.app.commander.operations.
 
 		@Override public Action[] getAreaActions()
 		{
-		    return Actions.getPanelAreaActions(strings, this);
+		    return actions.getPanelAreaActions(this);
 		}
 	    };
 
@@ -288,12 +288,6 @@ class CommanderApp implements Application, org.luwrain.app.commander.operations.
 			    return selectPartition(Side.LEFT);
 			case F2:
 			    return selectPartition(Side.RIGHT);
-			}
-		    if (!event.isSpecial()  && !event.isModified())
-			switch(Character.toLowerCase(event.getChar()))
-			{
-			case 'w':
-			    return base.copyToClipboard(getPanel(side));
 			}
 		    if (event.isSpecial()  && !event.isModified())
 			switch(event.getSpecial())

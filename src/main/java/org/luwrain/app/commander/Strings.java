@@ -66,4 +66,6 @@ public interface Strings
     String actionSize();
     String dirMayNotBePreviewed();
     String enteredPathExists(String path);
+    String actionCopyToClipboard();
+    String actionPlay();
 }

@@ -44,6 +44,37 @@ class Actions
 	this.layouts = layouts;
     }
 
+    Action[] getPanelAreaActions(CommanderArea area)
+    {
+	NullCheck.notNull(area, "area");
+	final Path[] toProcess = Base.entriesToProcess(area);
+	if (toProcess.length < 1)
+	    return new Action[]{
+		new Action("mkdir", strings.actionMkdir(), new KeyboardEvent(KeyboardEvent.Special.F7)),
+		new Action("hidden-show", strings.actionHiddenShow()), 
+		new Action("hidden-hide", strings.actionHiddenHide()), 
+	    };
+	return new Action[]{
+
+	    new Action("copy", strings.actionCopy(), new KeyboardEvent(KeyboardEvent.Special.F5)),
+	    new Action("move", strings.actionMove(), new KeyboardEvent(KeyboardEvent.Special.F6)),
+	    new Action("mkdir", strings.actionMkdir(), new KeyboardEvent(KeyboardEvent.Special.F7)),
+	    new Action("delete", strings.actionDelete(), new KeyboardEvent(KeyboardEvent.Special.F8)),
+
+	    new Action("open", strings.actionOpen()),
+	    new Action("size", strings.actionSize(), new KeyboardEvent(KeyboardEvent.Special.F3, EnumSet.of(KeyboardEvent.Modifiers.ALT))),
+	    new Action("preview", strings.actionPreview(), new KeyboardEvent(KeyboardEvent.Special.F3, EnumSet.of(KeyboardEvent.Modifiers.SHIFT))),
+	    new Action("play", strings.actionPlay(), new KeyboardEvent(KeyboardEvent.Special.F2, EnumSet.of(KeyboardEvent.Modifiers.SHIFT))),
+	    new Action("edit-text", strings.actionEditAsText(), new KeyboardEvent(KeyboardEvent.Special.F4, EnumSet.of(KeyboardEvent.Modifiers.SHIFT))),
+	    new Action("preview-another-format", strings.actionPreviewAnotherFormat()),
+	    new Action("open-choosing-app", strings.actionOpenChoosingApp()),
+	    new Action("copy-to-clipboard", strings.actionCopyToClipboard(), new KeyboardEvent(KeyboardEvent.Special.F4, EnumSet.of(KeyboardEvent.Modifiers.ALT))),
+
+	    new Action("hidden-show", strings.actionHiddenShow()), 
+	    new Action("hidden-hide", strings.actionHiddenHide()), 
+	};
+    }
+
     boolean showPropertiesArea(InfoAndProperties infoAndProps,
 			       CommanderArea area, SimpleArea propertiesArea)
     {
@@ -57,6 +88,9 @@ class Actions
 	luwrain.announceActiveArea();
 	return true;
     }
+
+
+
 
     boolean onOpenFilesWithApp(String appName, Path[] paths, boolean asUrls)
     {
@@ -83,32 +117,6 @@ class Actions
 		luwrain.launchApp(appName, new String[]{arg});
 	    }
 	return atLeastOne;
-    }
-
-    static Action[] getPanelAreaActions(Strings strings, CommanderArea area)
-    {
-	NullCheck.notNull(area, "area");
-	final Path[] toProcess = Base.entriesToProcess(area);
-	if (toProcess.length < 1)
-	    return new Action[]{
-		new Action("hidden-show", strings.actionHiddenShow()), 
-		new Action("hidden-hide", strings.actionHiddenHide()), 
-	    };
-	return new Action[]{
-	    new Action("open", strings.actionOpen()),
-	    new Action("edit-text", strings.actionEditAsText(), new KeyboardEvent(KeyboardEvent.Special.F4, EnumSet.of(KeyboardEvent.Modifiers.SHIFT))),
-	    new Action("preview", strings.actionPreview(), new KeyboardEvent(KeyboardEvent.Special.F3, EnumSet.of(KeyboardEvent.Modifiers.SHIFT))),
-	    new Action("preview-another-format", strings.actionPreviewAnotherFormat()),
-	    new Action("play", "Воспроизвести в плеере", new KeyboardEvent('p')),
-	    new Action("open-choosing-app", strings.actionOpenChoosingApp()),
-	    new Action("copy", strings.actionCopy(), new KeyboardEvent(KeyboardEvent.Special.F5)),
-	    new Action("move", strings.actionMove(), new KeyboardEvent(KeyboardEvent.Special.F6)),
-	    new Action("mkdir", strings.actionMkdir(), new KeyboardEvent(KeyboardEvent.Special.F7)),
-	    new Action("delete", strings.actionDelete(), new KeyboardEvent(KeyboardEvent.Special.F8)),
-	    new Action("hidden-show", strings.actionHiddenShow()), 
-	    new Action("hidden-hide", strings.actionHiddenHide()), 
-	    new Action("size", strings.actionSize(), new KeyboardEvent(KeyboardEvent.Special.F3, EnumSet.of(KeyboardEvent.Modifiers.ALT))),
-	};
     }
 
     boolean onCopy(CommanderArea copyFromArea, CommanderArea copyToArea, 
