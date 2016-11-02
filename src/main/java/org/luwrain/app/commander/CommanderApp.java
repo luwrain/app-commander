@@ -505,6 +505,7 @@ private boolean closePropertiesArea()
     @Override public void onOperationProgress(Operation operation)
     {
 	NullCheck.notNull(operation, "operation");
+	NullCheck.notNull(operation, "operation");
 	luwrain.runInMainThread(()->onOperationUpdate(operation));
     }
 

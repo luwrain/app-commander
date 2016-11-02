@@ -107,7 +107,7 @@ class Actions
 	    new Action("delete", strings.actionDelete(), new KeyboardEvent(KeyboardEvent.Special.F8)),
 	    new Action("hidden-show", strings.actionHiddenShow()), 
 	    new Action("hidden-hide", strings.actionHiddenHide()), 
-	    new Action("size", strings.actionSize(), new KeyboardEvent(KeyboardEvent.Special.F2, EnumSet.of(KeyboardEvent.Modifiers.SHIFT))),
+	    new Action("size", strings.actionSize(), new KeyboardEvent(KeyboardEvent.Special.F3, EnumSet.of(KeyboardEvent.Modifiers.ALT))),
 	};
     }
 
@@ -163,8 +163,8 @@ ListArea area, AreaLayoutSwitch layouts)
 				      (path)->{
 					  NullCheck.notNull(path, "path");
 					  return true;
-				      },
-				      Popups.loadFilePopupFlags(luwrain), Popups.DEFAULT_POPUP_FLAGS);
+				      });
+				      //				      Popups.loadFilePopupFlags(luwrain), Popups.DEFAULT_POPUP_FLAGS);
 	if (dest == null)
 	    return true;
 	base.launch(Operations.move(listener, moveOperationName(pathsToMove, dest), pathsToMove, dest));

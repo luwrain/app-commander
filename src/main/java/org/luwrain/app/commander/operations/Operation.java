@@ -24,6 +24,7 @@ public interface Operation extends Runnable
     public enum Result {
 	INTERRUPTED,
 	IO_EXCEPTION,
+	MOVE_DEST_NOT_DIR,
 	OK,
     };
 

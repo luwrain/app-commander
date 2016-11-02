@@ -107,6 +107,8 @@ class Base
 	{
 	case OK:
 	    return strings.opResultOk();
+	case MOVE_DEST_NOT_DIR:
+	    return "Целевой путь не указывает на каталог";
 	case INTERRUPTED:
 	    return strings.opResultInterrupted();
 	case IO_EXCEPTION:

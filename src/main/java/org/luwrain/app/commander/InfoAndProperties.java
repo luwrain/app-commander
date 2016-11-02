@@ -80,6 +80,21 @@ public class InfoAndProperties
 	lines.addLine("");
     }
 
+    boolean shortInfo(Path[] paths)
+    {
+	NullCheck.notNullItems(paths, "paths");
+	if (paths.length < 1)
+	    return false;
+	try {
+	luwrain.message(Files.getFileStore(paths[0]).name());
+	}
+	catch(IOException e)
+	{
+	}
+	return true;
+    }
+
+
     boolean calcSize(Path[] paths)
     {
 	NullCheck.notNullItems(paths, "paths");
@@ -97,7 +112,7 @@ public class InfoAndProperties
 		       return;
 		   }
     final long finalRes = res;
-	luwrain.runInMainThread(()->luwrain.message(formatSize(finalRes), Luwrain.MESSAGE_OK));
+	luwrain.runInMainThread(()->luwrain.message(formatSize(finalRes)));
 	}).start();
 	return true;
 }

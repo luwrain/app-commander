@@ -28,16 +28,15 @@ public class Operations
 	return new Copy(listener, opName, copyFrom, copyTo);
     }
 
-    static public Operation move(Listener listener, String opName,
-				 Path[] moveFrom, Path moveTo)
+    static public Operation move(Listener listener, String name,
+				 Path[] toMove, Path moveTo)
     {
-	NullCheck.notNull(opName, "opName");
-	NullCheck.notNullItems(moveFrom, "moveFrom");
+	NullCheck.notNull(name, "name");
+	NullCheck.notNullItems(toMove, "toMove");
+	NullCheck.notEmptyArray(toMove, "toMove");
 	NullCheck.notNull(moveTo, "moveTo");
-	//	return new Copy(listener, opName, copyFrom, copyTo);
-	return null;
+	return new Move(listener, name, toMove, moveTo);
     }
-
 
     static public Operation delete(Listener listener, String opName,
 				 Path[] deleteWhat)
