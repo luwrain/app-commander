@@ -212,7 +212,7 @@ ListArea area, AreaLayoutSwitch layouts)
 	}
 	luwrain.message(strings.mkdirOkMessage(p.getFileName().toString()), Luwrain.MESSAGE_OK);
 	app.refreshPanels();
-	area.find(p, false);
+	area.select(p, false);
 	return true;
     }
 

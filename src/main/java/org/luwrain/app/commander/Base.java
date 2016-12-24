@@ -38,7 +38,7 @@ class Base
     private Strings strings;
     private Settings settings = null;
     final Vector<Operation> operations = new Vector<Operation>();
-    private FixedListModel operationsListModel = new FixedListModel();
+    private ListUtils.FixedModel operationsListModel = new ListUtils.FixedModel();
 
     boolean init(Luwrain luwrain, Strings strings)
     {
@@ -144,7 +144,7 @@ class Base
 	final Path[] marked = area.marked();
 	if (marked.length > 0)
 	    return marked;
-	final CommanderArea.Entry entry = area.selectedEntry();
+	final CommanderArea.Entry entry = area.getSelectedEntry();
 	if (entry == null || entry.getType() == CommanderArea.Entry.Type.PARENT)
 	    return new Path[0];
 	return new Path[]{entry.getPath()};

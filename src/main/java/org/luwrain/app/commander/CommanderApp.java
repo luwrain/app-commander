@@ -103,7 +103,7 @@ class CommanderApp implements Application, org.luwrain.app.commander.operations.
     {
 	final CommanderArea.Params params = new CommanderArea.Params();
 	params.environment = new DefaultControlEnvironment(luwrain);
-	params.selecting = true;
+	params.flags = EnumSet.of(CommanderArea.Flags.MARKING);
 	params.filter = new CommanderUtils.NoHiddenFilter();
 	params.comparator = new CommanderUtils.ByNameComparator();
 	params.clickHandler = (area, path, dir)->onClick(area, path, dir);
@@ -148,7 +148,7 @@ class CommanderApp implements Application, org.luwrain.app.commander.operations.
 	    };
 
 	params.environment = new DefaultControlEnvironment(luwrain);
-	params.selecting = true;
+	params.flags = EnumSet.of(CommanderArea.Flags.MARKING);
 	params.filter = new CommanderUtils.NoHiddenFilter();
 	params.comparator = new CommanderUtils.ByNameComparator();
 	params.clickHandler = (area, path, dir)->onClick(area, path, dir);
