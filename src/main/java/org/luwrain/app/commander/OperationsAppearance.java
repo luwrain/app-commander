@@ -1,7 +1,7 @@
 /*
-   Copyright 2012-2016 Michael Pozhidaev <michael.pozhidaev@gmail.com>
+   Copyright 2012-2017 Michael Pozhidaev <michael.pozhidaev@gmail.com>
 
-   This file is part of the LUWRAIN.
+   This file is part of LUWRAIN.
 
    LUWRAIN is free software; you can redistribute it and/or
    modify it under the terms of the GNU General Public
@@ -18,9 +18,9 @@ package org.luwrain.app.commander;
 
 import java.util.*;
 
+import org.luwrain.base.*;
 import org.luwrain.core.*;
 import org.luwrain.controls.*;
-import org.luwrain.app.commander.operations.Operation;
 
 class OperationsAppearance implements ListArea.Appearance
 {
@@ -44,7 +44,7 @@ Base base)
 	NullCheck.notNull(item, "item");
 	NullCheck.notNull(flags, "flags");
 
-	final Operation op = (Operation)item;
+	final FilesOperation op = (FilesOperation)item;
 	if (op.isFinished())
 	{
 	    luwrain.say(base.getOperationResultDescr(op) + " " + op.getOperationName());
@@ -62,7 +62,7 @@ Base base)
     {
 	NullCheck.notNull(item, "item");
 	NullCheck.notNull(flags, "flags");
-	final Operation op = (Operation)item;
+	final FilesOperation op = (FilesOperation)item;
 	if (op.isFinished())
 	    return base.getOperationResultDescr(op);
 	final int percents = op.getPercents();

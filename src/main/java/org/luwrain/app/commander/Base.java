@@ -1,7 +1,7 @@
 /*
-   Copyright 2012-2016 Michael Pozhidaev <michael.pozhidaev@gmail.com>
+   Copyright 2012-2017 Michael Pozhidaev <michael.pozhidaev@gmail.com>
 
-   This file is part of the LUWRAIN.
+   This file is part of LUWRAIN.
 
    LUWRAIN is free software; you can redistribute it and/or
    modify it under the terms of the GNU General Public
@@ -21,12 +21,12 @@ import java.io.*;
 import java.nio.file.*;
 import java.nio.file.attribute.*;
 
+import org.apache.commons.vfs2.*;
+
+import org.luwrain.base.*;
 import org.luwrain.core.*;
 import org.luwrain.controls.*;
 import org.luwrain.popups.*;
-import org.luwrain.app.commander.operations.Operation;
-import org.luwrain.app.commander.operations.Operations;
-import org.luwrain.app.commander.operations.Listener;
 
 class Base
 {
@@ -37,7 +37,7 @@ class Base
     private Luwrain luwrain;
     private Strings strings;
     private Settings settings = null;
-    final Vector<Operation> operations = new Vector<Operation>();
+    final Vector<FilesOperation> operations = new Vector<FilesOperation>();
     private ListUtils.FixedModel operationsListModel = new ListUtils.FixedModel();
 
     boolean init(Luwrain luwrain, Strings strings)
@@ -50,11 +50,11 @@ class Base
 	return true;
     }
 
-    void launch(Operation op)
+    void launch(FilesOperation op)
     {
 	NullCheck.notNull(op, "op");
 	operations.add(op);
-	operationsListModel.setItems(operations.toArray(new Operation[operations.size()]));
+	operationsListModel.setItems(operations.toArray(new FilesOperation[operations.size()]));
 	new Thread(op).start();
     }
 
@@ -102,10 +102,10 @@ class Base
     }
     */
 
-    String getOperationResultDescr(Operation op)
+    String getOperationResultDescr(FilesOperation op)
     {
 	NullCheck.notNull(op, "op");
-	switch(op.getResult())
+	switch(op.getResult().getType())
 	{
 	case OK:
 	    return strings.opResultOk();
@@ -113,7 +113,7 @@ class Base
 	    return "Целевой путь не указывает на каталог";
 	case INTERRUPTED:
 	    return strings.opResultInterrupted();
-	case IO_EXCEPTION:
+	case EXCEPTION:
 	    return luwrain.i18n().getExceptionDescr(op.getExtInfoIoException());
 	default:
 	    return "";
@@ -127,7 +127,7 @@ class Base
 
     boolean allOperationsFinished()
     {
-	for(Operation op:operations)
+	for(FilesOperation op:operations)
 	    if (!op.isFinished())
 		return false;
 	return true;

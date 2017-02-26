@@ -1,7 +1,7 @@
 /*
-   Copyright 2012-2016 Michael Pozhidaev <michael.pozhidaev@gmail.com>
+   Copyright 2012-2017 Michael Pozhidaev <michael.pozhidaev@gmail.com>
 
-   This file is part of the LUWRAIN.
+   This file is part of LUWRAIN.
 
    LUWRAIN is free software; you can redistribute it and/or
    modify it under the terms of the GNU General Public
@@ -18,35 +18,20 @@ package org.luwrain.app.commander;
 
 import java.nio.file.Path;
 
+import org.luwrain.base.*;
 import org.luwrain.core.*;
 import org.luwrain.core.events.*;
 
 class ConfirmationEvent extends AddressedEnvironmentEvent
 {
-    private final Path path;
-    private ConfirmationChoices answer = null;
+    final Path path;
+    FilesOperation.ConfirmationChoices answer = null;
 
     ConfirmationEvent(Area destArea, Path path)
     {
 	super(destArea, EnvironmentEvent.Code.USER);
 	NullCheck.notNull(path, "path");
 	this.path = path;
-    }
-
-    Path getPath()
-    {
-	return path;
-    }
-
-    void setAnswer(ConfirmationChoices answer)
-    {
-	NullCheck.notNull(answer, "answer");
-	this.answer = answer;
-    }
-
-    ConfirmationChoices getAnswer()              
-    {
-	return answer;
     }
 }
 

@@ -1,7 +1,7 @@
 /*
-   Copyright 2012-2016 Michael Pozhidaev <michael.pozhidaev@gmail.com>
+   Copyright 2012-2017 Michael Pozhidaev <michael.pozhidaev@gmail.com>
 
-   This file is part of the LUWRAIN.
+   This file is part of LUWRAIN.
 
    LUWRAIN is free software; you can redistribute it and/or
    modify it under the terms of the GNU General Public
@@ -18,8 +18,6 @@ package org.luwrain.app.commander;
 
 import java.io.*;
 import java.nio.file.*;
-
-import org.luwrain.app.commander.operations.*;
 
 public interface Strings
 {
@@ -45,10 +43,10 @@ public interface Strings
     String delPopupName();
     String delPopupText(File[] files);
     String delOperationName(File[] filesToDelete);
-    String operationCompletedMessage(Operation op);
+    String operationCompletedMessage(org.luwrain.base.FilesOperation op);
     String notAllOperationsFinished();
     String cancelOperationPopupName();
-    String cancelOperationPopupText(Operation op);
+    String cancelOperationPopupText(org.luwrain.base.FilesOperation op);
     String bytesNum(long num);
     String opResultOk();
     String opResultInterrupted();

@@ -1,7 +1,7 @@
 /*
-   Copyright 2012-2016 Michael Pozhidaev <michael.pozhidaev@gmail.com>
+   Copyright 2012-2017 Michael Pozhidaev <michael.pozhidaev@gmail.com>
 
-   This file is part of the LUWRAIN.
+   This file is part of LUWRAIN.
 
    LUWRAIN is free software; you can redistribute it and/or
    modify it under the terms of the GNU General Public
@@ -20,13 +20,11 @@ import java.io.*;
 import java.nio.file.*;
 import java.util.*;
 
+import org.luwrain.base.*;
 import org.luwrain.core.*;
 import org.luwrain.core.events.*;
 import org.luwrain.controls.*;
 import org.luwrain.popups.Popups;
-
-import org.luwrain.app.commander.operations.Operations;
-import org.luwrain.app.commander.operations.Listener;
 
 class Actions
 {
@@ -120,7 +118,7 @@ class Actions
     }
 
     boolean onCopy(CommanderArea copyFromArea, CommanderArea copyToArea, 
-		 Base base, Listener listener,
+		 Base base, FilesOperation.Listener listener,
 ListArea area, AreaLayoutSwitch layouts)
     {
 	NullCheck.notNull(copyFromArea, "copyFromArea");
@@ -144,14 +142,14 @@ ListArea area, AreaLayoutSwitch layouts)
 	//				      Popups.loadFilePopupFlags(luwrain), Popups.DEFAULT_POPUP_FLAGS);
 	if (dest == null)
 	    return true;
-	base.launch(Operations.copy(listener, copyOperationName(pathsToCopy, dest), pathsToCopy, dest));
+	base.launch(luwrain.getFilesOperations().copy(listener, copyOperationName(pathsToCopy, dest), null/*pathsToCopy*/, null/*dest*/));
 	area.refresh();
 	layouts.show(CommanderApp.OPERATIONS_LAYOUT_INDEX);
 	return true;
     }
 
     boolean onMove(CommanderArea moveFromArea, CommanderArea moveToArea, 
-		   Base base, Listener listener,
+		   Base base, FilesOperation.Listener listener,
 		   ListArea area, AreaLayoutSwitch layouts)
     {
 	NullCheck.notNull(moveFromArea, "moveFromArea");
@@ -175,7 +173,7 @@ ListArea area, AreaLayoutSwitch layouts)
 				      //				      Popups.loadFilePopupFlags(luwrain), Popups.DEFAULT_POPUP_FLAGS);
 	if (dest == null)
 	    return true;
-	base.launch(Operations.move(listener, moveOperationName(pathsToMove, dest), pathsToMove, dest));
+	base.launch(luwrain.getFilesOperations().move(listener, moveOperationName(pathsToMove, dest), null/*pathsToMove*/, null/*dest*/));
 	area.refresh();
 	layouts.show(CommanderApp.OPERATIONS_LAYOUT_INDEX);
 	return true;

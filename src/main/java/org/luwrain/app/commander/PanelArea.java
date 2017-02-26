@@ -16,7 +16,24 @@
 
 package org.luwrain.app.commander;
 
-interface Settings
+import org.apache.commons.vfs2.*;
+
+import org.luwrain.core.*;
+import org.luwrain.controls.*;
+
+class PanelArea extends NgCommanderArea<FileObject>
 {
-    String getZipFilesEncoding(String defValue);
+
+    PanelArea(Params<FileObject> params, FileObject initialLocation)
+    {
+	super(params, initialLocation);
+    }
+
+    static Params<FileObject> createParams(ControlEnvironment environment) throws FileSystemException
+    {
+	NullCheck.notNull(environment, "environment");
+	Params<FileObject> params = CommanderUtilsCommonsVfs.createParams(environment);
+	return params;
+    }
+
 }

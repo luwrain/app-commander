@@ -1,7 +1,7 @@
 /*
-   Copyright 2012-2016 Michael Pozhidaev <michael.pozhidaev@gmail.com>
+   Copyright 2012-2017 Michael Pozhidaev <michael.pozhidaev@gmail.com>
 
-   This file is part of the LUWRAIN.
+   This file is part of LUWRAIN.
 
    LUWRAIN is free software; you can redistribute it and/or
    modify it under the terms of the GNU General Public
@@ -20,15 +20,15 @@ import java.util.*;
 import java.io.*;
 import java.nio.file.*;
 
+import org.luwrain.base.*;
 import org.luwrain.core.*;
 import org.luwrain.core.events.*;
 import org.luwrain.controls.*;
 import org.luwrain.popups.*;
 
 import org.luwrain.app.commander.Base.Side;
-import org.luwrain.app.commander.operations.Operation;
 
-class CommanderApp implements Application, org.luwrain.app.commander.operations.Listener
+class CommanderApp implements Application, FilesOperation.Listener
 {
     static final int NORMAL_LAYOUT_INDEX = 0;
     static final int OPERATIONS_LAYOUT_INDEX = 1;
@@ -36,8 +36,8 @@ class CommanderApp implements Application, org.luwrain.app.commander.operations.
 
     private Luwrain luwrain;
     private Strings strings;
-    private CommanderArea leftPanel;
-    private CommanderArea rightPanel;
+    private PanelArea leftPanel;
+    private PanelArea rightPanel;
     private ListArea operationsArea;
     private SimpleArea propertiesArea;
     private AreaLayoutSwitch layouts;
@@ -62,6 +62,7 @@ class CommanderApp implements Application, org.luwrain.app.commander.operations.
 
     @Override public boolean onLaunch(Luwrain luwrain)
     {
+	Log.debug("proba", "starting");
 	NullCheck.notNull(luwrain, "luwrain");
 	final Object o =  luwrain.i18n().getStrings(Strings.NAME);
 	if (o == null || !(o instanceof Strings))
@@ -73,7 +74,13 @@ class CommanderApp implements Application, org.luwrain.app.commander.operations.
 	infoAndProps.init(luwrain);
 	if (startFrom == null)
 	    startFrom = luwrain.getPathProperty("luwrain.dir.userhome");
+	try {
 	createAreas();
+	}
+	catch(Exception e)
+	{
+	    e.printStackTrace();
+	}
 	layouts = new AreaLayoutSwitch(luwrain);
 	layouts.add(new AreaLayout(AreaLayout.LEFT_RIGHT, leftPanel, rightPanel));
 	layouts.add(new AreaLayout(AreaLayout.LEFT_RIGHT_BOTTOM, leftPanel, rightPanel, operationsArea));
@@ -99,6 +106,7 @@ class CommanderApp implements Application, org.luwrain.app.commander.operations.
     }
     */
 
+    /*
     private void createAreas()
     {
 	final CommanderArea.Params params = new CommanderArea.Params();
@@ -276,6 +284,185 @@ class CommanderApp implements Application, org.luwrain.app.commander.operations.
 		}
 	    };
     }
+    */
+
+    private void createAreas() throws Exception
+    {
+	final PanelArea.Params leftPanelParams = PanelArea.createParams(new DefaultControlEnvironment(luwrain));
+
+	final PanelArea.Params rightPanelParams = PanelArea.createParams(new DefaultControlEnvironment(luwrain));
+
+ 	leftPanel = new PanelArea(leftPanelParams, CommanderUtilsCommonsVfs.prepareInitialLocation(leftPanelParams, "ftp://ftp.altlinux.org/pub")) {
+
+		/*
+		@Override public boolean onKeyboardEvent(KeyboardEvent event)
+		{
+		    NullCheck.notNull(event, "event");
+		    if (onKeyboardEventInPanel(Side.LEFT, event))
+								 return true;
+		    return super.onKeyboardEvent(event);
+		}
+		*/
+
+		/*
+		@Override public boolean onEnvironmentEvent(EnvironmentEvent event)
+		{
+		    switch(event.getCode())
+		    {
+		    case OPEN:
+			return onOpenEvent(event, this);
+		    case INTRODUCE:
+			luwrain.playSound(Sounds.INTRO_REGULAR);
+			luwrain.say(strings.leftPanelName() + " " + getAreaName());
+			return true;
+		    case CLOSE:
+			closeApp();
+			return true;
+		    case ACTION:
+			return onPanelAreaAction(event, Side.LEFT, this);
+		    case PROPERTIES:
+			return actions.showPropertiesArea(infoAndProps, this, propertiesArea);
+		    default:
+			return super.onEnvironmentEvent(event);
+		    }
+		}
+		*/
+
+		@Override public Action[] getAreaActions()
+		{
+		    //		    		    return actions.getPanelAreaActions(this);
+		    return null;
+		}
+	    };
+
+
+ 	rightPanel = new PanelArea(rightPanelParams, CommanderUtilsCommonsVfs.prepareInitialLocation(rightPanelParams, "/")) {
+
+		@Override public boolean onKeyboardEvent(KeyboardEvent event)
+		{
+		    NullCheck.notNull(event, "event");
+		    if (onKeyboardEventInPanel(Side.RIGHT, event))
+			return true;
+		    return super.onKeyboardEvent(event);
+		}
+
+		@Override public boolean onEnvironmentEvent(EnvironmentEvent event)
+		{
+		    switch(event.getCode())
+		    {
+			//		    case OPEN:
+			//			return onOpenEvent(event, this);
+		    case INTRODUCE:
+			luwrain.playSound(Sounds.INTRO_REGULAR);
+			luwrain.say(strings.rightPanelName() + " " + getAreaName());
+			return true;
+		    case CLOSE:
+			closeApp();
+			return true;
+			//case ACTION:
+			//return onPanelAreaAction(event, Side.RIGHT, this);
+			//case PROPERTIES:
+			//return showPropertiesArea(this);
+		    default:
+			return super.onEnvironmentEvent(event);
+}
+		}
+
+
+		@Override public Action[] getAreaActions()
+		{
+		    //		    return actions.getPanelAreaActions(this);
+		    return null;
+		}
+	    };
+
+	final ListArea.Params listParams = new ListArea.Params();
+	listParams.environment = new DefaultControlEnvironment(luwrain);
+	listParams.model = base.getOperationsListModel();
+	listParams.appearance = new OperationsAppearance(luwrain, strings, base);
+	listParams.name = strings.operationsAreaName();
+
+	operationsArea = new ListArea(listParams) {
+
+		@Override public boolean onKeyboardEvent(KeyboardEvent event)
+		{
+		    NullCheck.notNull(event, "event");
+		    if (event.isSpecial() && !event.isModified())
+			switch(event.getSpecial())
+			{
+			case TAB:
+			    gotoLeftPanel();
+			    return true;
+			}
+		    return super.onKeyboardEvent(event);
+		}
+
+		@Override public boolean onEnvironmentEvent(EnvironmentEvent event)
+		{
+		    NullCheck.notNull(event, "event");
+	if (event.getType() != EnvironmentEvent.Type.REGULAR)
+	    return super.onEnvironmentEvent(event);
+	if (event instanceof ConfirmationEvent)
+	    return onConfirmationEvent((ConfirmationEvent)event);
+		    switch(event.getCode())
+		    {
+		    case CLOSE:
+			closeApp();
+			return true;
+		    default:
+			return super.onEnvironmentEvent(event);
+		    }
+		}
+
+    private boolean onConfirmationEvent(ConfirmationEvent event)
+    {
+	NullCheck.notNull(event, "event");
+	Log.debug("commander", "showing confirmation event for " + event.path.toString());
+	final String cancel = "Прервать";
+	final String overwrite = "Перезаписать";
+	final String overwriteAll = "Перезаписать все";
+	final String skip = "Пропустить";
+	final String skipAll = "Пропустить все";
+	final Object res = Popups.fixedList(luwrain, "Подтверждение перезаписи " + event.path.toString(), new String[]{overwrite, overwriteAll, skip, skipAll, cancel});
+	if (res == overwrite || res == overwriteAll)
+	    event.answer = FilesOperation.ConfirmationChoices.OVERWRITE; else
+	    if (res == skip || res == skipAll)
+		event.answer = FilesOperation.ConfirmationChoices.SKIP; else
+		event.answer = FilesOperation.ConfirmationChoices.CANCEL;
+	Log.debug("commander", "popup closed, answer is " + event.answer.toString());
+	return true;
+    }
+	    };
+
+	propertiesArea = new SimpleArea(new DefaultControlEnvironment(luwrain), strings.infoAreaName()){
+		@Override public boolean onKeyboardEvent(KeyboardEvent event)
+		{
+		    NullCheck.notNull(event, "event");
+		    if (event.isSpecial() && !event.isModified())
+			switch(event.getSpecial())
+			{
+			case ESCAPE:
+			    return closePropertiesArea();
+			}
+		    return super.onKeyboardEvent(event);
+		}
+		@Override public boolean onEnvironmentEvent(EnvironmentEvent event)
+		{
+		    NullCheck.notNull(event, "event");
+		    switch(event.getCode())
+		    {
+		    case CLOSE:
+			closeApp();
+			return true;
+		    default:
+			return super.onEnvironmentEvent(event);
+		    }
+		}
+	    };
+    }
+
+
+
 
     private boolean onKeyboardEventInPanel(Side side, KeyboardEvent event)
 		{
@@ -300,6 +487,7 @@ class CommanderApp implements Application, org.luwrain.app.commander.operations.
 
 private boolean onPanelAreaAction(Event event, Side side, CommanderArea area)
     {
+	/*
 	NullCheck.notNull(event, "event");
 	NullCheck.notNull(side, "side");
 	NullCheck.notNull(area, "area");
@@ -330,6 +518,7 @@ private boolean onPanelAreaAction(Event event, Side side, CommanderArea area)
 				  base, this, operationsArea, layouts);
 	if (ActionEvent.isAction(event, "mkdir"))
 	    return actions.mkdir(this, getPanel(side));
+	*/
 	return false;
     }
 
@@ -364,21 +553,21 @@ private boolean onTabInPanel(Side side)
     boolean selectPartition(Side side)
     {
 	NullCheck.notNull(side, "side");
-	org.luwrain.hardware.Partition part = null;
+	org.luwrain.base.Partition part = null;
 	switch(side)
 	{
 	case LEFT:
 	    part = Popups.mountedPartitions(luwrain);
 	    if (part == null)
 		return true;
-	    leftPanel.open(part.file().toPath(), null);
+	    //	    leftPanel.open(part.file().toPath(), null);
 	    luwrain.setActiveArea(leftPanel);
 	    return true;
 	case RIGHT:
 	    part = Popups.mountedPartitions(luwrain);
 	    if (part == null)
 		return true;
-	    rightPanel.open(part.file().toPath(), null);
+	    //	    rightPanel.open(part.file().toPath(), null);
 	    luwrain.setActiveArea(rightPanel);
 	    return true;
 	default:
@@ -411,7 +600,7 @@ private boolean onTabInPanel(Side side)
 	rightPanel.refresh();
     }
 
-    private CommanderArea getPanel(Side side)
+    private PanelArea getPanel(Side side)
     {
 	NullCheck.notNull(side, "side");
 	switch(side)
@@ -425,7 +614,7 @@ private boolean onTabInPanel(Side side)
 	}
     }
 
-    private CommanderArea getAnotherPanel(Side side)
+    private NgCommanderArea getAnotherPanel(Side side)
     {
 	NullCheck.notNull(side, "side");
 	switch(side)
@@ -474,7 +663,7 @@ private boolean closePropertiesArea()
 	return true;
     }
 
-    private void onOperationUpdate(Operation operation)
+    private void onOperationUpdate(FilesOperation operation)
     {
 	NullCheck.notNull(operation, "operation");
 	operationsArea.refresh();
@@ -496,14 +685,14 @@ private boolean closePropertiesArea()
 	luwrain.setActiveArea(operationsArea);
     }
 
-    @Override public void onOperationProgress(Operation operation)
+    @Override public void onOperationProgress(FilesOperation operation)
     {
 	NullCheck.notNull(operation, "operation");
 	NullCheck.notNull(operation, "operation");
 	luwrain.runInMainThread(()->onOperationUpdate(operation));
     }
 
-    @Override public ConfirmationChoices confirmOverwrite(Path path)
+    @Override public FilesOperation.ConfirmationChoices confirmOverwrite(Path path)
     {
 	NullCheck.notNull(path, "path");
 	final ConfirmationEvent event = new ConfirmationEvent(operationsArea, path);
@@ -518,10 +707,10 @@ private boolean closePropertiesArea()
 	    Log.debug("commander", "thread was interrupted while waiting the confirmation for " + path.toString());
 	    Thread.currentThread().interrupt();
 	}
-	if (event.getAnswer() == null)
+	if (event.answer == null)
 	    Log.warning("commander", "confirmation event for " + path.toString() + " returned with null answer"); else
-	    Log.debug("commander", "the confirmation for " + path.toString() + " came:" + event.getAnswer().toString());
-	return event.getAnswer();
+	    Log.debug("commander", "the confirmation for " + path.toString() + " came:" + event.answer.toString());
+	return event.answer;
     }
 
     @Override public AreaLayout getAreasToShow()
