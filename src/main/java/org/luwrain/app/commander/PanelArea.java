@@ -16,23 +16,71 @@
 
 package org.luwrain.app.commander;
 
+import java.util.*;
+import java.io.*;
+
 import org.apache.commons.vfs2.*;
 
 import org.luwrain.core.*;
 import org.luwrain.controls.*;
+import org.luwrain.io.*;
 
 class PanelArea extends NgCommanderArea<FileObject>
 {
 
-    PanelArea(Params<FileObject> params, FileObject initialLocation)
+    PanelArea(Params<FileObject> params)
     {
-	super(params, initialLocation);
+	super(params);
     }
+
+    boolean isLocalDir()
+    {
+	final FileObject o = opened();
+	if (o == null)
+	    return false;
+	return o instanceof org.apache.commons.vfs2.provider.local.LocalFile;
+    }
+
+FileObject[] getFileObjectsToProcess()
+    {
+	final LinkedList<FileObject> res = new LinkedList<FileObject>();
+	for(Object o: getMarked())
+	    res.add((FileObject)o);
+	if (!res.isEmpty())
+	    return res.toArray(new FileObject[res.size()]);
+	final FileObject entry = getSelectedEntry();
+	return entry != null?new FileObject[]{entry}:new FileObject[0];
+    }
+
+File[] getFilesToProcess()
+{
+    if (!isLocalDir())
+	return new File[0];
+    final FileObject[] objects = getFileObjectsToProcess();
+    final File[] res = new File[objects.length];
+    for(int i = 0;i < objects.length;++i)
+	res[i] = new File(objects[i].getName().getPath());
+    return res;
+}
+
+boolean openLocalPath(String path)
+{
+    NullCheck.notNull(path, "path");
+    try {
+open(CommanderUtilsVfs.prepareLocation((CommanderUtilsVfs.Model)getCommanderModel(), path));
+return true;
+    }
+    catch(org.apache.commons.vfs2.FileSystemException e)
+    {
+	Log.error("commander", "opening " + path + ":" + e.getClass().getName() + ":" + e.getMessage());
+	return false;
+    }
+}
 
     static Params<FileObject> createParams(ControlEnvironment environment) throws FileSystemException
     {
 	NullCheck.notNull(environment, "environment");
-	Params<FileObject> params = CommanderUtilsCommonsVfs.createParams(environment);
+	Params<FileObject> params = CommanderUtilsVfs.createParams(environment);
 	return params;
     }
 

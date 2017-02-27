@@ -21,6 +21,8 @@ import java.io.*;
 import java.nio.file.*;
 import java.nio.file.attribute.*;
 
+import org.apache.commons.vfs2.*;
+
 import org.luwrain.core.*;
 
 public class InfoAndProperties
@@ -110,8 +112,9 @@ public class InfoAndProperties
     }
 
 
-    boolean calcSize(Path[] paths)
+    boolean calcSize(FileObject[] fileObjects)
     {
+	/*
 	NullCheck.notNullItems(paths, "paths");
 	if (paths.length < 1)
 	    return false;
@@ -129,6 +132,7 @@ public class InfoAndProperties
     final long finalRes = res;
 	luwrain.runInMainThread(()->luwrain.message(formatSize(finalRes)));
 	}).start();
+	*/
 	return true;
 }
 

@@ -17,8 +17,10 @@
 package org.luwrain.app.commander;
 
 import java.io.*;
-import java.nio.file.*;
+//import java.nio.file.*;
 import java.util.*;
+
+import org.apache.commons.vfs2.*;
 
 import org.luwrain.base.*;
 import org.luwrain.core.*;
@@ -42,15 +44,17 @@ class Actions
 	this.layouts = layouts;
     }
 
-    Action[] getPanelAreaActions(CommanderArea area)
+    Action[] getPanelAreaActions(PanelArea area)
     {
 	NullCheck.notNull(area, "area");
-	final Path[] toProcess = Base.entriesToProcess(area);
+	final FileObject[] toProcess = area.getFileObjectsToProcess();
 	if (toProcess.length < 1)
 	    return new Action[]{
 		new Action("mkdir", strings.actionMkdir(), new KeyboardEvent(KeyboardEvent.Special.F7)),
 		new Action("hidden-show", strings.actionHiddenShow()), 
 		new Action("hidden-hide", strings.actionHiddenHide()), 
+
+		new Action("open-ftp", "Подключиться к FTP-серверу"), 
 	    };
 	return new Action[]{
 
@@ -74,9 +78,10 @@ class Actions
     }
 
     boolean showPropertiesArea(InfoAndProperties infoAndProps,
-			       CommanderArea area, SimpleArea propertiesArea)
+			       PanelArea area, SimpleArea propertiesArea)
     {
 	NullCheck.notNull(area, "area");
+	/*
 	final Path[] paths = Base.entriesToProcess(area);
 	if (paths.length < 1)
 	    return false;
@@ -84,16 +89,15 @@ class Actions
 	infoAndProps.fillProperties(propertiesArea, paths);
 	layouts.show(CommanderApp.PROPERTIES_LAYOUT_INDEX);
 	luwrain.announceActiveArea();
+	*/
 	return true;
     }
 
-
-
-
-    boolean onOpenFilesWithApp(String appName, Path[] paths, boolean asUrls)
+    boolean onOpenFilesWithApp(String appName, FileObject[] paths, boolean asUrls)
     {
 	NullCheck.notEmpty(appName, "appName");
 	NullCheck.notNullItems(paths, "paths");
+	/*
 	boolean atLeastOne = false;
 	for(Path p: paths)
 	    if (!Files.isDirectory(p))
@@ -115,12 +119,15 @@ class Actions
 		luwrain.launchApp(appName, new String[]{arg});
 	    }
 	return atLeastOne;
+	*/
+	return false;
     }
 
-    boolean onCopy(CommanderArea copyFromArea, CommanderArea copyToArea, 
+    boolean onCopy(PanelArea copyFromArea, PanelArea copyToArea, 
 		 Base base, FilesOperation.Listener listener,
 ListArea area, AreaLayoutSwitch layouts)
     {
+	/*
 	NullCheck.notNull(copyFromArea, "copyFromArea");
 	NullCheck.notNull(copyToArea, "copyToArea");
 	NullCheck.notNull(base, "base");
@@ -142,16 +149,20 @@ ListArea area, AreaLayoutSwitch layouts)
 	//				      Popups.loadFilePopupFlags(luwrain), Popups.DEFAULT_POPUP_FLAGS);
 	if (dest == null)
 	    return true;
-	base.launch(luwrain.getFilesOperations().copy(listener, copyOperationName(pathsToCopy, dest), null/*pathsToCopy*/, null/*dest*/));
+	*/
+//	base.launch(luwrain.getFilesOperations().copy(listener, copyOperationName(pathsToCopy, dest), null/*pathsToCopy*/, null/*dest*/));
+/*
 	area.refresh();
 	layouts.show(CommanderApp.OPERATIONS_LAYOUT_INDEX);
+*/
 	return true;
     }
 
-    boolean onMove(CommanderArea moveFromArea, CommanderArea moveToArea, 
+    boolean onMove(PanelArea moveFromArea, PanelArea moveToArea, 
 		   Base base, FilesOperation.Listener listener,
 		   ListArea area, AreaLayoutSwitch layouts)
     {
+	/*
 	NullCheck.notNull(moveFromArea, "moveFromArea");
 	NullCheck.notNull(moveToArea, "moveToArea");
 	NullCheck.notNull(base, "base");
@@ -173,16 +184,18 @@ ListArea area, AreaLayoutSwitch layouts)
 				      //				      Popups.loadFilePopupFlags(luwrain), Popups.DEFAULT_POPUP_FLAGS);
 	if (dest == null)
 	    return true;
-	base.launch(luwrain.getFilesOperations().move(listener, moveOperationName(pathsToMove, dest), null/*pathsToMove*/, null/*dest*/));
+	*/
+	//	base.launch(luwrain.getFilesOperations().move(listener, moveOperationName(pathsToMove, dest), null/*pathsToMove*/, null/*dest*/));
+	/*
 	area.refresh();
 	layouts.show(CommanderApp.OPERATIONS_LAYOUT_INDEX);
+*/
 	return true;
     }
 
-
-
-    boolean mkdir(CommanderApp app, CommanderArea area)
+    boolean mkdir(CommanderApp app, PanelArea area)
     {
+	/*
 	NullCheck.notNull(app, "app");
 	NullCheck.notNull(area, "area");
 	final Path createIn = area.opened();
@@ -211,7 +224,14 @@ ListArea area, AreaLayoutSwitch layouts)
 	luwrain.message(strings.mkdirOkMessage(p.getFileName().toString()), Luwrain.MESSAGE_OK);
 	app.refreshPanels();
 	area.select(p, false);
+	*/
 	return true;
+    }
+
+    boolean onOpenFtp(PanelArea area)
+    {
+	NullCheck.notNull(area, "area");
+	return area.openLocalPath("ftp://ftp.altlinux.org");
     }
 
     private String copyPopupPrefix(Path[] pathsToCopy)

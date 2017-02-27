@@ -137,18 +137,4 @@ class Base
     {
 	return operationsListModel;
     }
-
-    static Path[] entriesToProcess(CommanderArea area)
-    {
-	NullCheck.notNull(area, "area");
-	final Path[] marked = area.marked();
-	if (marked.length > 0)
-	    return marked;
-	final CommanderArea.Entry entry = area.getSelectedEntry();
-	if (entry == null || entry.getType() == CommanderArea.Entry.Type.PARENT)
-	    return new Path[0];
-	return new Path[]{entry.getPath()};
-    }
-
-
 }
