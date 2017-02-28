@@ -18,8 +18,6 @@ package org.luwrain.app.commander;
 
 import java.util.*;
 import java.io.*;
-import java.nio.file.*;
-import java.nio.file.attribute.*;
 
 import org.apache.commons.vfs2.*;
 
@@ -42,10 +40,10 @@ class Base
 
     boolean init(Luwrain luwrain, Strings strings)
     {
-	this.luwrain = luwrain;
-	this.strings = strings;
 	NullCheck.notNull(luwrain, "luwrain");
 	NullCheck.notNull(strings, "strings");
+	this.luwrain = luwrain;
+	this.strings = strings;
 	settings = RegistryProxy.create(luwrain.getRegistry(), REGISTRY_PATH, Settings.class);
 	return true;
     }
@@ -58,49 +56,18 @@ class Base
 	new Thread(op).start();
     }
 
-    Settings getSettings()
+    boolean hasOperations()
     {
-	return settings;
+	return !operations.isEmpty();
     }
 
-    boolean runWithShortcut(Path[] selected)
+    boolean allOperationsFinished()
     {
-	NullCheck.notNullItems(selected, "selected");
-	final String[] shortcuts = luwrain.getAllShortcutNames();
-	Popups.fixedList(luwrain, "Выберите приложение:", shortcuts);
+	for(FilesOperation op:operations)
+	    if (!op.isFinished())
+		return false;
 	return true;
     }
-
-    boolean onClickInFiles(Path[] selected)
-    {
-    	final String fileNames[] = new String[selected.length];
-	for(int i = 0;i < selected.length;++i)
-	    fileNames[i] = selected[i].toString();
-	luwrain.openFiles(fileNames);
-	return true;
-    }
-
-    /*
-    boolean copyToClipboard(CommanderArea area)
-    {
-	NullCheck.notNull(area, "area");
-	final Path[] marked = area.marked();
-	if (marked.length > 0)
-	{
-	    final LinkedList<String> fileNames = new LinkedList<String>();
-	    for(Path p: marked)
-		fileNames.add(p.getFileName().toString());
-	    luwrain.setClipboard(new RegionContent(fileNames.toArray(new String[fileNames.size()]), marked));
-	    return true;
-	}
-	final CommanderArea.Entry entry = area.selectedEntry();
-	if (entry == null || entry.getType() == CommanderArea.Entry.Type.PARENT)
-	    return false;
-	final Path path = entry.getPath();
-	luwrain.setClipboard(new RegionContent(new String[]{path.getFileName().toString()}, new Object[]{path}));
-	return true;
-    }
-    */
 
     String getOperationResultDescr(FilesOperation op)
     {
@@ -120,17 +87,9 @@ class Base
 	}
     }
 
-    boolean hasOperations()
+    Settings getSettings()
     {
-	return !operations.isEmpty();
-    }
-
-    boolean allOperationsFinished()
-    {
-	for(FilesOperation op:operations)
-	    if (!op.isFinished())
-		return false;
-	return true;
+	return settings;
     }
 
     ListArea.Model getOperationsListModel()

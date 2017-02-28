@@ -20,6 +20,8 @@ import java.util.*;
 import java.io.*;
 import java.nio.file.*;
 
+import org.apache.commons.vfs2.*;
+
 import org.luwrain.base.*;
 import org.luwrain.core.*;
 import org.luwrain.core.events.*;
@@ -85,7 +87,7 @@ class CommanderApp implements Application, FilesOperation.Listener
 	layouts.add(new AreaLayout(AreaLayout.LEFT_RIGHT, leftPanel, rightPanel));
 	layouts.add(new AreaLayout(AreaLayout.LEFT_RIGHT_BOTTOM, leftPanel, rightPanel, operationsArea));
 	layouts.add(new AreaLayout(propertiesArea));
-	actions = new Actions(luwrain, strings, layouts);
+	actions = new Actions(luwrain, base, strings, layouts);
 	return true;
     }
 
@@ -108,7 +110,6 @@ class CommanderApp implements Application, FilesOperation.Listener
 
  	leftPanel = new PanelArea(leftPanelParams) {
 
-		/*
 		@Override public boolean onKeyboardEvent(KeyboardEvent event)
 		{
 		    NullCheck.notNull(event, "event");
@@ -116,31 +117,15 @@ class CommanderApp implements Application, FilesOperation.Listener
 								 return true;
 		    return super.onKeyboardEvent(event);
 		}
-		*/
 
 		@Override public boolean onEnvironmentEvent(EnvironmentEvent event)
 		{
 		    NullCheck.notNull(event, "event");
 		    if (event.getType() != EnvironmentEvent.Type.REGULAR)
 			return super.onEnvironmentEvent(event);
-		    switch(event.getCode())
-		    {
-		    case OPEN:
-			return onOpenEvent(event, this);
-		    case INTRODUCE:
-			luwrain.playSound(Sounds.INTRO_REGULAR);
-			luwrain.say(strings.leftPanelName() + " " + getAreaName());
+		    if (onEnvironmentEventInPanel(event, this, Side.LEFT))
 			return true;
-		    case CLOSE:
-			closeApp();
-			return true;
-		    case ACTION:
-			return onPanelAreaAction(event, Side.LEFT, this);
-		    case PROPERTIES:
-			return actions.showPropertiesArea(infoAndProps, this, propertiesArea);
-		    default:
 			return super.onEnvironmentEvent(event);
-		    }
 		}
 
 		@Override public Action[] getAreaActions()
@@ -161,24 +146,12 @@ return actions.getPanelAreaActions(this);
 
 		@Override public boolean onEnvironmentEvent(EnvironmentEvent event)
 		{
-		    switch(event.getCode())
-		    {
-case OPEN:
-return onOpenEvent(event, this);
-		    case INTRODUCE:
-			luwrain.playSound(Sounds.INTRO_REGULAR);
-			luwrain.say(strings.rightPanelName() + " " + getAreaName());
-			return true;
-		    case CLOSE:
-			closeApp();
-			return true;
-case ACTION:
-			return onPanelAreaAction(event, Side.RIGHT, this);
-case PROPERTIES:
-return showPropertiesArea(this);
-		    default:
+		    NullCheck.notNull(event, "event");
+		    if (event.getType() != EnvironmentEvent.Type.REGULAR)
 			return super.onEnvironmentEvent(event);
-}
+		    if (onEnvironmentEventInPanel(event, this, Side.RIGHT))
+			return true;
+			return super.onEnvironmentEvent(event);
 		}
 
 		@Override public Action[] getAreaActions()
@@ -257,6 +230,7 @@ return actions.getPanelAreaActions(this);
 	    };
 
 	propertiesArea = new SimpleArea(new DefaultControlEnvironment(luwrain), strings.infoAreaName()){
+
 		@Override public boolean onKeyboardEvent(KeyboardEvent event)
 		{
 		    NullCheck.notNull(event, "event");
@@ -268,6 +242,7 @@ return actions.getPanelAreaActions(this);
 			}
 		    return super.onKeyboardEvent(event);
 		}
+
 		@Override public boolean onEnvironmentEvent(EnvironmentEvent event)
 		{
 		    NullCheck.notNull(event, "event");
@@ -282,9 +257,6 @@ return actions.getPanelAreaActions(this);
 		}
 	    };
     }
-
-
-
 
     private boolean onKeyboardEventInPanel(Side side, KeyboardEvent event)
 		{
@@ -305,6 +277,31 @@ return actions.getPanelAreaActions(this);
 			    return onTabInPanel(side);
 			}
 		    return false;
+		}
+
+    private boolean onEnvironmentEventInPanel(EnvironmentEvent event, PanelArea area, Side side)
+		{
+		    NullCheck.notNull(event, "event");
+		    NullCheck.notNull(area, "area");
+		    NullCheck.notNull(side, "side");
+		    switch(event.getCode())
+		    {
+case OPEN:
+return onOpenEvent(event, area);
+		    case INTRODUCE:
+			luwrain.playSound(Sounds.INTRO_REGULAR);
+			luwrain.say(strings.rightPanelName() + " " + area.getAreaName());
+			return true;
+		    case CLOSE:
+			closeApp();
+			return true;
+case ACTION:
+			return onPanelAreaAction(event, side, area);
+case PROPERTIES:
+return showPropertiesArea(area);
+		    default:
+			return false;
+}
 		}
 
 private boolean onPanelAreaAction(Event event, Side side, PanelArea area)
@@ -331,11 +328,9 @@ private boolean onPanelAreaAction(Event event, Side side, PanelArea area)
 	    return true;
 	}
 	if (ActionEvent.isAction(event, "copy"))
-	    return actions.onCopy(getPanel(side), getAnotherPanel(side), 
-				base, this, operationsArea, layouts);
+	    return actions.onCopy(getPanel(side), getAnotherPanel(side), this, operationsArea);
 	if (ActionEvent.isAction(event, "move"))
-	    return actions.onMove(getPanel(side), getAnotherPanel(side), 
-				  base, this, operationsArea, layouts);
+	    return actions.onMove(getPanel(side), getAnotherPanel(side), this, operationsArea);
 	if (ActionEvent.isAction(event, "mkdir"))
 	    return actions.mkdir(this, getPanel(side));
 	if (ActionEvent.isAction(event, "open-ftp"))
@@ -343,14 +338,17 @@ private boolean onPanelAreaAction(Event event, Side side, PanelArea area)
 	return false;
     }
 
-    private NgCommanderArea.ClickHandler.Result onClick(NgCommanderArea area, Object path, boolean dir)
+    private PanelArea.ClickHandler.Result onClick(NgCommanderArea area, Object obj, boolean dir)
     {
 	NullCheck.notNull(area, "area");
-	NullCheck.notNull(path, "path");
-	Log.debug("commander", "click on " + path.toString());
+	NullCheck.notNull(obj, "obj");
 	if (dir)
 	    return NgCommanderArea.ClickHandler.Result.OPEN_DIR;
-	//	luwrain.openFile(path.toString());
+	final PanelArea panelArea = (PanelArea)area;
+	if (!panelArea.isLocalDir())
+return PanelArea.ClickHandler.Result.REJECTED;
+	final FileObject fileObject = (FileObject)obj;
+	luwrain.openFile(fileObject.getName().getPath());
 	return NgCommanderArea.ClickHandler.Result.OK;
     }
 

@@ -52,6 +52,12 @@ FileObject[] getFileObjectsToProcess()
 	return entry != null?new FileObject[]{entry}:new FileObject[0];
     }
 
+File getOpenedAsFile()
+{
+    final FileObject obj = opened();
+    return obj != null?new File(obj.getName().getPath()):null;
+}
+
 File[] getFilesToProcess()
 {
     if (!isLocalDir())

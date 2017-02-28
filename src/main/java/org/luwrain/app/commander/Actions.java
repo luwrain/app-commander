@@ -17,7 +17,6 @@
 package org.luwrain.app.commander;
 
 import java.io.*;
-//import java.nio.file.*;
 import java.util.*;
 
 import org.apache.commons.vfs2.*;
@@ -31,15 +30,19 @@ import org.luwrain.popups.Popups;
 class Actions
 {
     private final Luwrain luwrain;
+    private final Base base;
     private final Strings strings;
     private final AreaLayoutSwitch layouts;
 
-    Actions(Luwrain luwrain, Strings strings, AreaLayoutSwitch layouts)
+    Actions(Luwrain luwrain, Base base,
+Strings strings, AreaLayoutSwitch layouts)
     {
 	NullCheck.notNull(luwrain, "luwrain");
+	NullCheck.notNull(base, "base");
 	NullCheck.notNull(strings, "strings");
 	NullCheck.notNull(layouts, "layouts");
 	this.luwrain = luwrain;
+	this.base = base;
 	this.strings = strings;
 	this.layouts = layouts;
     }
@@ -123,73 +126,62 @@ class Actions
 	return false;
     }
 
-    boolean onCopy(PanelArea copyFromArea, PanelArea copyToArea, 
-		 Base base, FilesOperation.Listener listener,
-ListArea area, AreaLayoutSwitch layouts)
+    boolean onCopy(PanelArea copyFromArea, PanelArea copyToArea, FilesOperation.Listener listener, ListArea area/*, AreaLayoutSwitch layouts*/)
     {
-	/*
 	NullCheck.notNull(copyFromArea, "copyFromArea");
 	NullCheck.notNull(copyToArea, "copyToArea");
-	NullCheck.notNull(base, "base");
 	NullCheck.notNull(listener, "listener");
 	NullCheck.notNull(area, "area");
-	NullCheck.notNull(layouts, "layouts");
-	final Path copyFromDir = copyFromArea.opened();
-	final Path[] pathsToCopy = Base.entriesToProcess(copyFromArea);
-	final Path copyTo = copyToArea.opened();
-	if (pathsToCopy.length < 1)
+	if (!copyFromArea.isLocalDir() || !copyToArea.isLocalDir())
 	    return false;
-	final Path dest = Popups.path(luwrain,
-				      strings.copyPopupName(), copyPopupPrefix(pathsToCopy),
-				      copyTo, copyFromDir,
+	final File copyFromDir = copyFromArea.getOpenedAsFile();
+	final File[] filesToCopy = copyFromArea.getFilesToProcess();
+	final File copyTo = copyToArea.getOpenedAsFile();
+	if (filesToCopy.length < 1)
+	    return false;
+	final java.nio.file.Path destPath = Popups.path(luwrain,
+				      strings.copyPopupName(), copyPopupPrefix(filesToCopy),
+							copyTo.toPath(), copyFromDir.toPath(),
 				      (path)->{
 					  NullCheck.notNull(path, "path");
 					  return true;
 				      });
-	//				      Popups.loadFilePopupFlags(luwrain), Popups.DEFAULT_POPUP_FLAGS);
-	if (dest == null)
+	if (destPath == null)
 	    return true;
-	*/
-//	base.launch(luwrain.getFilesOperations().copy(listener, copyOperationName(pathsToCopy, dest), null/*pathsToCopy*/, null/*dest*/));
-/*
+	final File dest = destPath.toFile();
+base.launch(luwrain.getFilesOperations().copy(listener, copyOperationName(filesToCopy, dest), filesToCopy, dest));
 	area.refresh();
 	layouts.show(CommanderApp.OPERATIONS_LAYOUT_INDEX);
-*/
 	return true;
     }
 
     boolean onMove(PanelArea moveFromArea, PanelArea moveToArea, 
-		   Base base, FilesOperation.Listener listener,
-		   ListArea area, AreaLayoutSwitch layouts)
+FilesOperation.Listener listener, ListArea area)
     {
-	/*
 	NullCheck.notNull(moveFromArea, "moveFromArea");
 	NullCheck.notNull(moveToArea, "moveToArea");
-	NullCheck.notNull(base, "base");
 	NullCheck.notNull(listener, "listener");
 	NullCheck.notNull(area, "area");
-	NullCheck.notNull(layouts, "layouts");
-	final Path moveFromDir = moveFromArea.opened();
-	final Path[] pathsToMove = Base.entriesToProcess(moveFromArea);
-	final Path moveTo = moveToArea.opened();
-	if (pathsToMove.length < 1)
+	if (!moveFromArea.isLocalDir() || !moveToArea.isLocalDir())
 	    return false;
-	final Path dest = Popups.path(luwrain,
-				      strings.movePopupName(), movePopupPrefix(pathsToMove),
-				      moveTo, moveFromDir,
+	final File moveFromDir = moveFromArea.getOpenedAsFile();
+	final File[] filesToMove = moveFromArea.getFilesToProcess();
+	final File moveTo = moveToArea.getOpenedAsFile();
+	if (filesToMove.length < 1)
+	    return false;
+	final java.nio.file.Path destPath = Popups.path(luwrain,
+				      strings.movePopupName(), movePopupPrefix(filesToMove),
+					  moveTo.toPath(), moveFromDir.toPath(),
 				      (path)->{
 					  NullCheck.notNull(path, "path");
 					  return true;
 				      });
-				      //				      Popups.loadFilePopupFlags(luwrain), Popups.DEFAULT_POPUP_FLAGS);
-	if (dest == null)
+	if (destPath == null)
 	    return true;
-	*/
-	//	base.launch(luwrain.getFilesOperations().move(listener, moveOperationName(pathsToMove, dest), null/*pathsToMove*/, null/*dest*/));
-	/*
+	final File dest = destPath.toFile();
+base.launch(luwrain.getFilesOperations().move(listener, moveOperationName(filesToMove, dest), filesToMove, dest));
 	area.refresh();
 	layouts.show(CommanderApp.OPERATIONS_LAYOUT_INDEX);
-*/
 	return true;
     }
 
@@ -234,32 +226,32 @@ ListArea area, AreaLayoutSwitch layouts)
 	return area.openLocalPath("ftp://ftp.altlinux.org");
     }
 
-    private String copyPopupPrefix(Path[] pathsToCopy)
+    private String copyPopupPrefix(File[] toCopy)
 	{
-	    return strings.copyPopupPrefix(pathsToCopy.length > 1?luwrain.i18n().getNumberStr(pathsToCopy.length, "items"):pathsToCopy[0].getFileName().toString());
+	    return strings.copyPopupPrefix(toCopy.length > 1?luwrain.i18n().getNumberStr(toCopy.length, "items"):toCopy[0].getName());
 	}
 
-    private String movePopupPrefix(Path[] pathsToMove)
+    private String movePopupPrefix(File[] toMove)
 	{
-	    return strings.movePopupPrefix(pathsToMove.length > 1?luwrain.i18n().getNumberStr(pathsToMove.length, "items"):pathsToMove[0].getFileName().toString());
+	    return strings.movePopupPrefix(toMove.length > 1?luwrain.i18n().getNumberStr(toMove.length, "items"):toMove[0].getName());
 	}
 
-    private String copyOperationName(Path[] pathsToCopy, Path copyTo)
+    private String copyOperationName(File[] whatToCopy, File copyTo)
     {
-	if (pathsToCopy.length < 1)
+	if (whatToCopy.length < 1)
 	    return "";
-	if (pathsToCopy.length > 1)
-	    return strings.copyOperationName(pathsToCopy[0].getFileName().toString() + ",...", copyTo.toString());
-	return strings.copyOperationName(pathsToCopy[0].getFileName().toString(), copyTo.toString());
+	if (whatToCopy.length > 1)
+	    return strings.copyOperationName(whatToCopy[0].getName() + ",...", copyTo.getName());
+	return strings.copyOperationName(whatToCopy[0].getName(), copyTo.getName());
     }
 
-    private String moveOperationName(Path[] pathsToMove, Path moveTo)
+    private String moveOperationName(File[] whatToMove, File moveTo)
     {
-	if (pathsToMove.length < 1)
+	if (whatToMove.length < 1)
 	    return "";
-	if (pathsToMove.length > 1)
-	    return strings.moveOperationName(pathsToMove[0].getFileName().toString() + ",...", moveTo.toString());
-	return strings.moveOperationName(pathsToMove[0].getFileName().toString(), moveTo.toString());
+	if (whatToMove.length > 1)
+	    return strings.moveOperationName(whatToMove[0].getName() + ",...", moveTo.getName());
+	return strings.moveOperationName(whatToMove[0].getName(), moveTo.getName());
     }
 
 }
