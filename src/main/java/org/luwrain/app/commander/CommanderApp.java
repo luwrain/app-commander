@@ -295,7 +295,7 @@ if (startFrom != null && !startFrom.isEmpty())
 		    switch(event.getCode())
 		    {
 case OPEN:
-return onOpenEvent(event, area);
+return actions.onOpenEvent(event, area);
 		    case INTRODUCE:
 			luwrain.playSound(Sounds.INTRO_REGULAR);
 			luwrain.say(strings.rightPanelName() + " " + area.getAreaName());
@@ -344,19 +344,6 @@ private boolean onPanelAreaAction(Event event, Side side, PanelArea area)
 	if (ActionEvent.isAction(event, "open-ftp"))
 	    return actions.onOpenFtp(area);
 	return false;
-    }
-
-    private boolean onOpenEvent(EnvironmentEvent event, PanelArea area)
-    {
-	NullCheck.notNull(event, "event");
-	NullCheck.notNull(area, "area");
-	if (!(event instanceof OpenEvent))
-	    return false;
-	final File f = new File(((OpenEvent)event).path());
-	if (!f.isDirectory())
-	    return false;
-	area.openLocalPath(f.getAbsolutePath());
-	return true;
     }
 
 private boolean onTabInPanel(Side side)

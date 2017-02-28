@@ -22,6 +22,7 @@ import java.io.*;
 import org.apache.commons.vfs2.*;
 
 import org.luwrain.core.*;
+import org.luwrain.core.queries.*;
 import org.luwrain.controls.*;
 import org.luwrain.io.*;
 
@@ -31,6 +32,21 @@ class PanelArea extends NgCommanderArea<FileObject>
     PanelArea(Params<FileObject> params)
     {
 	super(params);
+    }
+
+    @Override public boolean onAreaQuery(AreaQuery query)
+    {
+	NullCheck.notNull(query, "query");
+	if (query.getQueryCode() == AreaQuery.CURRENT_DIR && query instanceof CurrentDirQuery)
+	{
+	    final CurrentDirQuery currentDirQuery = (CurrentDirQuery)query;
+	    final File f = getOpenedAsFile();
+	    if (f == null)
+		return false;
+	    currentDirQuery.answer(f.getAbsolutePath());
+	    return true;
+	}
+	return super.onAreaQuery(query);
     }
 
     boolean isLocalDir()
