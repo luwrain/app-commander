@@ -41,7 +41,7 @@ class PanelArea extends NgCommanderArea<FileObject>
 	return o instanceof org.apache.commons.vfs2.provider.local.LocalFile;
     }
 
-FileObject[] getFileObjectsToProcess()
+    FileObject[] getFileObjectsToProcess()
     {
 	final LinkedList<FileObject> res = new LinkedList<FileObject>();
 	for(Object o: getMarked())
@@ -52,36 +52,50 @@ FileObject[] getFileObjectsToProcess()
 	return entry != null?new FileObject[]{entry}:new FileObject[0];
     }
 
-File getOpenedAsFile()
-{
-    final FileObject obj = opened();
-    return obj != null?new File(obj.getName().getPath()):null;
-}
-
-File[] getFilesToProcess()
-{
-    if (!isLocalDir())
-	return new File[0];
-    final FileObject[] objects = getFileObjectsToProcess();
-    final File[] res = new File[objects.length];
-    for(int i = 0;i < objects.length;++i)
-	res[i] = new File(objects[i].getName().getPath());
-    return res;
-}
-
-boolean openLocalPath(String path)
-{
-    NullCheck.notNull(path, "path");
-    try {
-open(CommanderUtilsVfs.prepareLocation((CommanderUtilsVfs.Model)getCommanderModel(), path));
-return true;
-    }
-    catch(org.apache.commons.vfs2.FileSystemException e)
+    File getOpenedAsFile()
     {
-	Log.error("commander", "opening " + path + ":" + e.getClass().getName() + ":" + e.getMessage());
-	return false;
+	final FileObject obj = opened();
+	return obj != null?new File(obj.getName().getPath()):null;
     }
-}
+
+    File[] getFilesToProcess()
+    {
+	if (!isLocalDir())
+	    return new File[0];
+	final FileObject[] objects = getFileObjectsToProcess();
+	final File[] res = new File[objects.length];
+	for(int i = 0;i < objects.length;++i)
+	    res[i] = new File(objects[i].getName().getPath());
+	return res;
+    }
+
+    boolean openLocalPath(String path)
+    {
+	NullCheck.notNull(path, "path");
+	try {
+	    open(CommanderUtilsVfs.prepareLocation((CommanderUtilsVfs.Model)getCommanderModel(), path));
+	    return true;
+	}
+	catch(org.apache.commons.vfs2.FileSystemException e)
+	{
+	    Log.error("commander", "opening " + path + ":" + e.getClass().getName() + ":" + e.getMessage());
+	    return false;
+	}
+    }
+
+    boolean openInitial(String path)
+    {
+	NullCheck.notNull(path, "path");
+	try {
+	    return open(CommanderUtilsVfs.prepareLocation((CommanderUtilsVfs.Model)getCommanderModel(), path), false);
+	}
+	catch(org.apache.commons.vfs2.FileSystemException e)
+	{
+	    Log.error("commander", "opening " + path + ":" + e.getClass().getName() + ":" + e.getMessage());
+	    return false;
+	}
+    }
+
 
     static Params<FileObject> createParams(ControlEnvironment environment) throws FileSystemException
     {

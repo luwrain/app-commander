@@ -18,7 +18,7 @@ package org.luwrain.app.commander;
 
 import java.util.*;
 import java.io.*;
-import java.nio.file.*;
+import java.io.*;
 
 import org.apache.commons.vfs2.*;
 
@@ -49,7 +49,7 @@ class CommanderApp implements Application, FilesOperation.Listener
     private Actions actions;
     private final InfoAndProperties infoAndProps = new InfoAndProperties();
 
-    private Path startFrom = null;
+    private String startFrom = null;
 
     CommanderApp()
     {
@@ -60,7 +60,7 @@ class CommanderApp implements Application, FilesOperation.Listener
     {
 	NullCheck.notNull(startFrom, "startFrom");
 	if (!startFrom.isEmpty())
-	    this.startFrom = Paths.get(startFrom);
+	    this.startFrom = startFrom;
     }
 
     @Override public boolean onLaunch(Luwrain luwrain)
@@ -75,7 +75,7 @@ class CommanderApp implements Application, FilesOperation.Listener
 	    return false;
 	infoAndProps.init(luwrain);
 	if (startFrom == null)
-	    startFrom = luwrain.getPathProperty("luwrain.dir.userhome");
+	    startFrom = luwrain.getPathProperty("luwrain.dir.userhome").toString();
 	try {
 	createAreas();
 	}
@@ -104,9 +104,9 @@ class CommanderApp implements Application, FilesOperation.Listener
     private void createAreas() throws Exception
     {
 	final PanelArea.Params leftPanelParams = PanelArea.createParams(new DefaultControlEnvironment(luwrain));
-	leftPanelParams.clickHandler = (area, obj, dir)->onClick(area, obj, dir);
-
+	leftPanelParams.clickHandler = (area, obj, dir)->actions.onClick(area, obj, dir);
 	final PanelArea.Params rightPanelParams = PanelArea.createParams(new DefaultControlEnvironment(luwrain));
+	rightPanelParams.clickHandler = (area, obj, dir)->actions.onClick(area, obj, dir);
 
  	leftPanel = new PanelArea(leftPanelParams) {
 
@@ -166,10 +166,18 @@ return actions.getPanelAreaActions(this);
 
 	rightPanel.setLoadingResultHandler((location, wrappers, selectedIndex, announce)->{
 		luwrain.runInMainThread(()->rightPanel.acceptNewLocation(location, wrappers, selectedIndex, announce));
-	    });
 
-	leftPanel.openLocalPath("/");
-	rightPanel.openLocalPath("/");
+ });
+
+if (startFrom != null && !startFrom.isEmpty())
+	   	{
+	leftPanel.openInitial(startFrom);
+	rightPanel.openInitial(startFrom);
+	} else
+	{
+	leftPanel.openInitial("/");
+	rightPanel.openInitial("/");
+	}
 
 	final ListArea.Params listParams = new ListArea.Params();
 	listParams.environment = new DefaultControlEnvironment(luwrain);
@@ -328,9 +336,9 @@ private boolean onPanelAreaAction(Event event, Side side, PanelArea area)
 	    return true;
 	}
 	if (ActionEvent.isAction(event, "copy"))
-	    return actions.onCopy(getPanel(side), getAnotherPanel(side), this, operationsArea);
+	    return actions.onLocalCopy(getPanel(side), getAnotherPanel(side), this, operationsArea);
 	if (ActionEvent.isAction(event, "move"))
-	    return actions.onMove(getPanel(side), getAnotherPanel(side), this, operationsArea);
+	    return actions.onLocalMove(getPanel(side), getAnotherPanel(side), this, operationsArea);
 	if (ActionEvent.isAction(event, "mkdir"))
 	    return actions.mkdir(this, getPanel(side));
 	if (ActionEvent.isAction(event, "open-ftp"))
@@ -338,18 +346,17 @@ private boolean onPanelAreaAction(Event event, Side side, PanelArea area)
 	return false;
     }
 
-    private PanelArea.ClickHandler.Result onClick(NgCommanderArea area, Object obj, boolean dir)
+    private boolean onOpenEvent(EnvironmentEvent event, PanelArea area)
     {
+	NullCheck.notNull(event, "event");
 	NullCheck.notNull(area, "area");
-	NullCheck.notNull(obj, "obj");
-	if (dir)
-	    return NgCommanderArea.ClickHandler.Result.OPEN_DIR;
-	final PanelArea panelArea = (PanelArea)area;
-	if (!panelArea.isLocalDir())
-return PanelArea.ClickHandler.Result.REJECTED;
-	final FileObject fileObject = (FileObject)obj;
-	luwrain.openFile(fileObject.getName().getPath());
-	return NgCommanderArea.ClickHandler.Result.OK;
+	if (!(event instanceof OpenEvent))
+	    return false;
+	final File f = new File(((OpenEvent)event).path());
+	if (!f.isDirectory())
+	    return false;
+	area.openLocalPath(f.getAbsolutePath());
+	return true;
     }
 
 private boolean onTabInPanel(Side side)
@@ -393,25 +400,6 @@ private boolean onTabInPanel(Side side)
 	default:
 	    return false;
 	}
-    }
-
-    private boolean delete(Side panelSide)
-    {
-	/*
-	  File[] filesToDelete = panelSide == PanelArea.Side.LEFT?leftPanel.selectedAsFiles():rightPanel.selectedAsFiles();
-	  if (filesToDelete == null || filesToDelete.length < 1)
-	  return false;
-	  YesNoPopup popup = new YesNoPopup(luwrain, strings.delPopupName(),
-	  strings.delPopupText(filesToDelete), false);
-	  luwrain.popup(popup);
-	  if (popup.closing.cancelled())
-	  return true;
-	  if (!popup.result())
-	  return true;
-	  operations.launch(Operations.delete(operations, strings.delOperationName(filesToDelete), 
-	  filesToDelete));
-	*/
-	return true;
     }
 
     void refreshPanels()
@@ -472,17 +460,11 @@ private boolean closePropertiesArea()
 	return true;
     }
 
-    private boolean onOpenEvent(EnvironmentEvent event, PanelArea area)
+    @Override public void onOperationProgress(FilesOperation operation)
     {
-	NullCheck.notNull(event, "event");
-	NullCheck.notNull(area, "area");
-	if (!(event instanceof OpenEvent))
-	    return false;
-	final Path path = Paths.get(((OpenEvent)event).path());
-	if (!Files.isDirectory(path))
-	    return false;
-	//	area.open(path, null);
-	return true;
+	NullCheck.notNull(operation, "operation");
+	NullCheck.notNull(operation, "operation");
+	luwrain.runInMainThread(()->onOperationUpdate(operation));
     }
 
     private void onOperationUpdate(FilesOperation operation)
@@ -492,29 +474,7 @@ private boolean closePropertiesArea()
 	//	luwrain.onAreaNewBackgroundSound();
     }
 
-    void gotoLeftPanel()
-    {
-	luwrain.setActiveArea(leftPanel);
-    }
-
-    private void gotoRightPanel()
-    {
-	luwrain.setActiveArea(rightPanel);
-    }
-
-    private void gotoOperations()
-    {
-	luwrain.setActiveArea(operationsArea);
-    }
-
-    @Override public void onOperationProgress(FilesOperation operation)
-    {
-	NullCheck.notNull(operation, "operation");
-	NullCheck.notNull(operation, "operation");
-	luwrain.runInMainThread(()->onOperationUpdate(operation));
-    }
-
-    @Override public FilesOperation.ConfirmationChoices confirmOverwrite(Path path)
+    @Override public FilesOperation.ConfirmationChoices confirmOverwrite(java.nio.file.Path path)
     {
 	NullCheck.notNull(path, "path");
 	final ConfirmationEvent event = new ConfirmationEvent(operationsArea, path);
@@ -535,6 +495,21 @@ private boolean closePropertiesArea()
 	return event.answer;
     }
 
+    private void gotoLeftPanel()
+    {
+	luwrain.setActiveArea(leftPanel);
+    }
+
+    private void gotoRightPanel()
+    {
+	luwrain.setActiveArea(rightPanel);
+    }
+
+    private void gotoOperations()
+    {
+	luwrain.setActiveArea(operationsArea);
+    }
+
     @Override public AreaLayout getAreasToShow()
     {
 	return layouts.getCurrentLayout();
@@ -544,5 +519,4 @@ private boolean closePropertiesArea()
     {
 	return strings.appName();
     }
-
 }
