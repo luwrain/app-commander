@@ -399,8 +399,8 @@ private boolean onTabInPanel(Side side)
 
     void refreshPanels()
     {
-	leftPanel.refresh();
-	rightPanel.refresh();
+	leftPanel.reread(false);
+	rightPanel.reread(false);
     }
 
     private PanelArea getPanel(Side side)
@@ -455,18 +455,25 @@ private boolean closePropertiesArea()
 	return true;
     }
 
-    @Override public void onOperationProgress(FilesOperation operation)
-    {
-	NullCheck.notNull(operation, "operation");
-	NullCheck.notNull(operation, "operation");
-	luwrain.runInMainThread(()->onOperationUpdate(operation));
-    }
 
     private void onOperationUpdate(FilesOperation operation)
     {
 	NullCheck.notNull(operation, "operation");
 	operationsArea.refresh();
 	//	luwrain.onAreaNewBackgroundSound();
+	if (operation.isFinished())
+	{
+	    if (operation.getResult().getType() == FilesOperation.Result.Type.OK)
+		luwrain.playSound(Sounds.DONE);
+	    refreshPanels();
+	}
+    }
+
+    @Override public void onOperationProgress(FilesOperation operation)
+    {
+	NullCheck.notNull(operation, "operation");
+	NullCheck.notNull(operation, "operation");
+	luwrain.runInMainThread(()->onOperationUpdate(operation));
     }
 
     @Override public FilesOperation.ConfirmationChoices confirmOverwrite(java.nio.file.Path path)

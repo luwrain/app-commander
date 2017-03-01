@@ -117,7 +117,7 @@ class PanelArea extends NgCommanderArea<FileObject>
     {
 	NullCheck.notNull(environment, "environment");
 	Params<FileObject> params = CommanderUtilsVfs.createParams(environment);
+	params.flags = EnumSet.of(Flags.MARKING);
 	return params;
     }
-
 }

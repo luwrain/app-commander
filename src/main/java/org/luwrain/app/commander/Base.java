@@ -81,7 +81,9 @@ class Base
 	case INTERRUPTED:
 	    return strings.opResultInterrupted();
 	case EXCEPTION:
-	    return luwrain.i18n().getExceptionDescr(op.getExtInfoIoException());
+	    if (op.getResult().getException() != null)
+		return luwrain.i18n().getExceptionDescr(op.getResult().getException());
+	    return "Нет информации об ошибке";
 	default:
 	    return "";
 	}
