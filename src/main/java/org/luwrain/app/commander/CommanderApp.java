@@ -298,7 +298,15 @@ case OPEN:
 return actions.onOpenEvent(event, area);
 		    case INTRODUCE:
 			luwrain.playSound(Sounds.INTRO_REGULAR);
+			switch(side)
+			{
+			case LEFT:
+			luwrain.say(strings.leftPanelName() + " " + area.getAreaName());
+			break;
+			case RIGHT:
 			luwrain.say(strings.rightPanelName() + " " + area.getAreaName());
+			break;
+			}
 			return true;
 		    case CLOSE:
 			closeApp();
@@ -374,14 +382,14 @@ private boolean onTabInPanel(Side side)
 	    part = Popups.mountedPartitions(luwrain);
 	    if (part == null)
 		return true;
-	    //	    leftPanel.open(part.file().toPath(), null);
+	    leftPanel.openLocalPath(part.file().getAbsolutePath());
 	    luwrain.setActiveArea(leftPanel);
 	    return true;
 	case RIGHT:
 	    part = Popups.mountedPartitions(luwrain);
 	    if (part == null)
 		return true;
-	    //	    rightPanel.open(part.file().toPath(), null);
+	    rightPanel.openLocalPath(part.file().getAbsolutePath());
 	    luwrain.setActiveArea(rightPanel);
 	    return true;
 	default:
