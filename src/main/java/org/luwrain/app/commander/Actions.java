@@ -59,10 +59,9 @@ Strings strings, AreaLayoutSwitch layouts)
 	if (toProcess.length < 1)
 	    return new Action[]{
 		new Action("mkdir", strings.actionMkdir(), new KeyboardEvent(KeyboardEvent.Special.F7)),
+		new Action("open-ftp", "Подключиться к FTP-серверу"), 
 		new Action("hidden-show", strings.actionHiddenShow()), 
 		new Action("hidden-hide", strings.actionHiddenHide()), 
-
-		new Action("open-ftp", "Подключиться к FTP-серверу"), 
 	    };
 	return new Action[]{
 
@@ -79,6 +78,8 @@ Strings strings, AreaLayoutSwitch layouts)
 	    new Action("preview-another-format", strings.actionPreviewAnotherFormat()),
 	    new Action("open-choosing-app", strings.actionOpenChoosingApp()),
 	    new Action("copy-to-clipboard", strings.actionCopyToClipboard(), new KeyboardEvent(KeyboardEvent.Special.F4, EnumSet.of(KeyboardEvent.Modifiers.ALT))),
+
+	    new Action("open-ftp", "Подключиться к FTP-серверу"), 
 
 	    new Action("hidden-show", strings.actionHiddenShow()), 
 	    new Action("hidden-hide", strings.actionHiddenHide()), 
@@ -220,8 +221,11 @@ conversations.moveOperationName(filesToMove, dest), filesToMove, dest));
     boolean onOpenFtp(PanelArea area)
     {
 	NullCheck.notNull(area, "area");
-	Log.debug("proba", "webdav");
-	return area.openLocalPath("");
+	final String addr = conversations.ftpAddress();
+	if (addr == null)
+	    return true;
+	area.openLocalPath(addr);
+	return true;
     }
 
 

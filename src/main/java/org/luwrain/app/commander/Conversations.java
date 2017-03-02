@@ -48,24 +48,29 @@ class Conversations
     {
 	final Path res = Popups.path(luwrain,
 				     strings.mkdirPopupName(), strings.mkdirPopupPrefix(), createIn.toPath(), 
-(path)->{
-				       NullCheck.notNull(path, "path");
-				       if (Files.exists(path))
-				       {
-					   luwrain.message(strings.enteredPathExists(path.toString()), Luwrain.MESSAGE_ERROR);
-					   return false;
-				       }
-				       return true;
-				   });
+				     (path)->{
+					 NullCheck.notNull(path, "path");
+					 if (Files.exists(path))
+					 {
+					     luwrain.message(strings.enteredPathExists(path.toString()), Luwrain.MESSAGE_ERROR);
+					     return false;
+					 }
+					 return true;
+				     });
 	return res != null?res.toFile():null;
     }
 
-String copyPopupPrefix(File[] toCopy)
+    String ftpAddress()
+    {
+	return Popups.simple(luwrain, "Подключение к FTP-серверу", "Адрес FTP-сервера:", "ftp://");
+    }
+
+private String copyPopupPrefix(File[] toCopy)
 	{
 	    return strings.copyPopupPrefix(toCopy.length > 1?luwrain.i18n().getNumberStr(toCopy.length, "items"):toCopy[0].getName());
 	}
 
-String movePopupPrefix(File[] toMove)
+private String movePopupPrefix(File[] toMove)
 	{
 	    return strings.movePopupPrefix(toMove.length > 1?luwrain.i18n().getNumberStr(toMove.length, "items"):toMove[0].getName());
 	}

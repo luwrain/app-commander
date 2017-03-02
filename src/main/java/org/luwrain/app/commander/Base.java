@@ -76,6 +76,8 @@ class Base
 	{
 	case OK:
 	    return strings.opResultOk();
+	case SOURCE_PARENT_OF_DEST:
+	    return "Целевой каталог является подкаталогом родительского";
 	case MOVE_DEST_NOT_DIR:
 	    return "Целевой путь не указывает на каталог";
 	case INTERRUPTED:
