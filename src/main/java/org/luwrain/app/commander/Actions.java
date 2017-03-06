@@ -86,18 +86,18 @@ Strings strings, AreaLayoutSwitch layouts)
 	};
     }
 
-PanelArea.ClickHandler.Result onClick(NgCommanderArea area, Object obj, boolean dir)
+PanelArea.ClickHandler.Result onClick(CommanderArea area, Object obj, boolean dir)
     {
 	NullCheck.notNull(area, "area");
 	NullCheck.notNull(obj, "obj");
 	if (dir)
-	    return NgCommanderArea.ClickHandler.Result.OPEN_DIR;
+	    return CommanderArea.ClickHandler.Result.OPEN_DIR;
 	final PanelArea panelArea = (PanelArea)area;
 	if (!panelArea.isLocalDir())
 return PanelArea.ClickHandler.Result.REJECTED;
 	final FileObject fileObject = (FileObject)obj;
 	luwrain.openFile(fileObject.getName().getPath());
-	return NgCommanderArea.ClickHandler.Result.OK;
+	return CommanderArea.ClickHandler.Result.OK;
     }
 
     boolean showPropertiesArea(InfoAndProperties infoAndProps,

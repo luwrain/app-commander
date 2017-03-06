@@ -26,7 +26,7 @@ import org.luwrain.core.queries.*;
 import org.luwrain.controls.*;
 import org.luwrain.io.*;
 
-class PanelArea extends NgCommanderArea<FileObject>
+class PanelArea extends CommanderArea<FileObject>
 {
 
     PanelArea(Params<FileObject> params)
