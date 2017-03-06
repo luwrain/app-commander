@@ -351,7 +351,6 @@ private boolean onPanelAreaAction(Event event, Side side, PanelArea area)
 	    return actions.mkdir(this, getPanel(side));
 	if (ActionEvent.isAction(event, "open-ftp"))
 	    return actions.onOpenFtp(area);
-
 	if (ActionEvent.isAction(event, "volume-info"))
 	    return actions.showVolumeInfo(infoAndProps, area, propertiesArea);
 

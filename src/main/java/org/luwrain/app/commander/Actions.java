@@ -117,11 +117,21 @@ return PanelArea.ClickHandler.Result.REJECTED;
 			       PanelArea area, SimpleArea propertiesArea)
     {
 	NullCheck.notNull(area, "area");
-	//	final FileObject[] paths = area.getFileObjectsToProcess();
-	//	if (paths.length < 1)
-	//	    return false;
+	if (area.isLocalDir())
+	{
+	final File opened = area.getOpenedAsFile();
+	if (opened == null)
+	    return false;
 	propertiesArea.clear();
-	//	infoAndProps.fillProperties(propertiesArea, paths);
+	infoAndProps.fillLocalDirInfo(opened, propertiesArea);
+	} else
+	{
+	    final FileObject fileObj = area.getOpenedAsFileObject();
+	    if (fileObj == null)
+		return false;
+	    propertiesArea.clear();
+	    infoAndProps.fillDirInfo(fileObj, propertiesArea);
+	}
 	layouts.show(CommanderApp.PROPERTIES_LAYOUT_INDEX);
 	luwrain.announceActiveArea();
 	return true;

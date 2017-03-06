@@ -34,9 +34,22 @@ class InfoAndProperties
 	this.luwrain = luwrain;
     }
 
-    void showVolumeInfo(MutableLines lines)
+    void fillLocalDirInfo(File file, MutableLines lines)
     {
+	NullCheck.notNull(file, "file");
+	NullCheck.notNull(lines, "lines");
+	lines.addLine("Каталог: " +  file.getAbsolutePath());
+	lines.addLine("Свободно: " + formatSize(file.getFreeSpace()));
     }
+
+    void fillDirInfo(FileObject fileObj, MutableLines lines)
+    {
+	NullCheck.notNull(fileObj, "fileObj");
+	NullCheck.notNull(lines, "lines");
+	lines.addLine("URL: " + fileObj.toString());
+	lines.addLine("");
+    }
+
 
     /*
     void fillProperties(MutableLines lines, Path[] items)

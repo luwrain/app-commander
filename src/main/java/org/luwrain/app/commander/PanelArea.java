@@ -74,6 +74,12 @@ class PanelArea extends CommanderArea<FileObject>
 	return obj != null?new File(obj.getName().getPath()):null;
     }
 
+    FileObject getOpenedAsFileObject()
+    {
+	return opened();
+    }
+
+
     File[] getFilesToProcess()
     {
 	if (!isLocalDir())
