@@ -60,6 +60,7 @@ Strings strings, AreaLayoutSwitch layouts)
 	    return new Action[]{
 		new Action("mkdir", strings.actionMkdir(), new KeyboardEvent(KeyboardEvent.Special.F7)),
 		new Action("open-ftp", "Подключиться к FTP-серверу"), 
+		new Action("volume-info", "Показать информацию о разделе", new KeyboardEvent(KeyboardEvent.Special.F10)), 
 		new Action("hidden-show", strings.actionHiddenShow()), 
 		new Action("hidden-hide", strings.actionHiddenHide()), 
 	    };
@@ -69,7 +70,6 @@ Strings strings, AreaLayoutSwitch layouts)
 	    new Action("move", strings.actionMove(), new KeyboardEvent(KeyboardEvent.Special.F6)),
 	    new Action("mkdir", strings.actionMkdir(), new KeyboardEvent(KeyboardEvent.Special.F7)),
 	    new Action("delete", strings.actionDelete(), new KeyboardEvent(KeyboardEvent.Special.F8)),
-
 	    new Action("open", strings.actionOpen()),
 	    new Action("size", strings.actionSize(), new KeyboardEvent(KeyboardEvent.Special.F3, EnumSet.of(KeyboardEvent.Modifiers.ALT))),
 	    new Action("preview", strings.actionPreview(), new KeyboardEvent(KeyboardEvent.Special.F3, EnumSet.of(KeyboardEvent.Modifiers.SHIFT))),
@@ -78,9 +78,8 @@ Strings strings, AreaLayoutSwitch layouts)
 	    new Action("preview-another-format", strings.actionPreviewAnotherFormat()),
 	    new Action("open-choosing-app", strings.actionOpenChoosingApp()),
 	    new Action("copy-to-clipboard", strings.actionCopyToClipboard(), new KeyboardEvent(KeyboardEvent.Special.F4, EnumSet.of(KeyboardEvent.Modifiers.ALT))),
-
 	    new Action("open-ftp", "Подключиться к FTP-серверу"), 
-
+		new Action("volume-info", "Показать информацию о разделе", new KeyboardEvent(KeyboardEvent.Special.F10)), 
 	    new Action("hidden-show", strings.actionHiddenShow()), 
 	    new Action("hidden-hide", strings.actionHiddenHide()), 
 	};
@@ -100,21 +99,34 @@ return PanelArea.ClickHandler.Result.REJECTED;
 	return CommanderArea.ClickHandler.Result.OK;
     }
 
-    boolean showPropertiesArea(InfoAndProperties infoAndProps,
+    boolean showFileObjectsProperties(InfoAndProperties infoAndProps,
 			       PanelArea area, SimpleArea propertiesArea)
     {
 	NullCheck.notNull(area, "area");
-	/*
-	final Path[] paths = Base.entriesToProcess(area);
+	final FileObject[] paths = area.getFileObjectsToProcess();
 	if (paths.length < 1)
 	    return false;
 	propertiesArea.clear();
-	infoAndProps.fillProperties(propertiesArea, paths);
+	//	infoAndProps.fillProperties(propertiesArea, paths);
 	layouts.show(CommanderApp.PROPERTIES_LAYOUT_INDEX);
 	luwrain.announceActiveArea();
-	*/
 	return true;
     }
+
+    boolean showVolumeInfo(InfoAndProperties infoAndProps,
+			       PanelArea area, SimpleArea propertiesArea)
+    {
+	NullCheck.notNull(area, "area");
+	//	final FileObject[] paths = area.getFileObjectsToProcess();
+	//	if (paths.length < 1)
+	//	    return false;
+	propertiesArea.clear();
+	//	infoAndProps.fillProperties(propertiesArea, paths);
+	layouts.show(CommanderApp.PROPERTIES_LAYOUT_INDEX);
+	luwrain.announceActiveArea();
+	return true;
+    }
+
 
     boolean onOpenFilesWithApp(String appName, FileObject[] paths, boolean asUrls)
     {

@@ -18,14 +18,13 @@ package org.luwrain.app.commander;
 
 import java.util.*;
 import java.io.*;
-import java.nio.file.*;
 import java.nio.file.attribute.*;
 
 import org.apache.commons.vfs2.*;
 
 import org.luwrain.core.*;
 
-public class InfoAndProperties
+class InfoAndProperties
 {
     private Luwrain luwrain;
 
@@ -35,6 +34,11 @@ public class InfoAndProperties
 	this.luwrain = luwrain;
     }
 
+    void showVolumeInfo(MutableLines lines)
+    {
+    }
+
+    /*
     void fillProperties(MutableLines lines, Path[] items)
     {
 	NullCheck.notNull(lines, "lines");
@@ -110,21 +114,21 @@ public class InfoAndProperties
 	}
 	return true;
     }
+    */
 
 
     boolean calcSize(FileObject[] fileObjects)
     {
-	/*
-	NullCheck.notNullItems(paths, "paths");
-	if (paths.length < 1)
+	NullCheck.notNullItems(fileObjects, "fileObjects");
+	if (fileObjects.length < 1)
 	    return false;
 	new Thread(()->{
 		   long res = 0;
 		   try {
-		       for(Path p: paths)
-			   res += getTotalSize(p);
+		       for(FileObject obj: fileObjects)
+			   res += getTotalSize(obj);
 		   }
-		   catch(IOException e)
+		   catch(org.apache.commons.vfs2.FileSystemException e)
 		   {
 		       luwrain.crash(e);
 		       return;
@@ -132,7 +136,6 @@ public class InfoAndProperties
     final long finalRes = res;
 	luwrain.runInMainThread(()->luwrain.message(formatSize(finalRes)));
 	}).start();
-	*/
 	return true;
 }
 
@@ -156,18 +159,20 @@ public class InfoAndProperties
 	return "" + size;
     }
 
-    static public long getTotalSize(Path p) throws IOException
+    static public long getTotalSize(FileObject fileObj) throws org.apache.commons.vfs2.FileSystemException
     {
-	NullCheck.notNull(p, "p");
-	if (Files.isRegularFile(p, LinkOption.NOFOLLOW_LINKS))
-	    return Files.size(p);
-	if (!Files.isDirectory(p, LinkOption.NOFOLLOW_LINKS))
+	NullCheck.notNull(fileObj, "fileObj");
+
+	if (!fileObj.isFolder() && !fileObj.isFile())
 	    return 0;
+	if (fileObj instanceof org.apache.commons.vfs2.provider.local.LocalFile &&
+java.nio.file.Files.isSymbolicLink(java.nio.file.Paths.get(fileObj.getName().getPath())))
+	    return 0;
+	if (!fileObj.isFolder())
+	    return fileObj.getContent().getSize();
 	long res = 0;
-        try (DirectoryStream<Path> directoryStream = Files.newDirectoryStream(p)) {
-		for (Path pp : directoryStream) 
-		    res += getTotalSize(pp);
-	    } 
+	for(FileObject child: fileObj.getChildren())
+		    res += getTotalSize(child);
 	return res;
     }
 }
