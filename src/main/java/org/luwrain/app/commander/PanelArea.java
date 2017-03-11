@@ -118,12 +118,26 @@ class PanelArea extends CommanderArea<FileObject>
 	}
     }
 
+    void showHidden()
+    {
+	setCommanderFilter(new CommanderUtilsVfs.AllEntriesFilter());
+	reread(false);
+    }
+
+    void hideHidden()
+    {
+	setCommanderFilter(new CommanderUtilsVfs.NoHiddenFilter());
+	reread(false);
+    }
+
+
 
     static Params<FileObject> createParams(ControlEnvironment environment) throws FileSystemException
     {
 	NullCheck.notNull(environment, "environment");
 	Params<FileObject> params = CommanderUtilsVfs.createParams(environment);
 	params.flags = EnumSet.of(Flags.MARKING);
+	params.filter = new CommanderUtilsVfs.NoHiddenFilter();
 	return params;
     }
 }

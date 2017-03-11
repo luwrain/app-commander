@@ -333,14 +333,12 @@ private boolean onPanelAreaAction(Event event, Side side, PanelArea area)
 	    return actions.onOpenFilesWithApp("reader", area.getFileObjectsToProcess(), true);
 	if (ActionEvent.isAction(event, "hidden-show"))
 	{
-	    //		setFilter(new CommanderFilters.AllFiles());
-	    //		refresh();
+	    area.showHidden();
 	    return true;
 	}
 	if (ActionEvent.isAction(event, "hidden-hide"))
 	{
-	    //		setFilter(new CommanderFilters.NoHidden());
-	    //		refresh();
+	    area.hideHidden();
 	    return true;
 	}
 	if (ActionEvent.isAction(event, "copy"))

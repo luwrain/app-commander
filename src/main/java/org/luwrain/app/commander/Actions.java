@@ -55,17 +55,21 @@ Strings strings, AreaLayoutSwitch layouts)
     Action[] getPanelAreaActions(PanelArea area)
     {
 	NullCheck.notNull(area, "area");
+
+	final Action hiddenShow = new Action("hidden-show", strings.actionHiddenShow(), new KeyboardEvent('=')); 
+	final Action hiddenHide = new Action("hidden-hide", strings.actionHiddenHide(), new KeyboardEvent('-')); 
+
 	final FileObject[] toProcess = area.getFileObjectsToProcess();
 	if (toProcess.length < 1)
 	    return new Action[]{
 		new Action("mkdir", strings.actionMkdir(), new KeyboardEvent(KeyboardEvent.Special.F7)),
 		new Action("open-ftp", "Подключиться к FTP-серверу"), 
 		new Action("volume-info", "Показать информацию о разделе", new KeyboardEvent(KeyboardEvent.Special.F10)), 
-		new Action("hidden-show", strings.actionHiddenShow()), 
-		new Action("hidden-hide", strings.actionHiddenHide()), 
+		hiddenShow,
+		hiddenHide,
 	    };
-	return new Action[]{
 
+	return new Action[]{
 	    new Action("copy", strings.actionCopy(), new KeyboardEvent(KeyboardEvent.Special.F5)),
 	    new Action("move", strings.actionMove(), new KeyboardEvent(KeyboardEvent.Special.F6)),
 	    new Action("mkdir", strings.actionMkdir(), new KeyboardEvent(KeyboardEvent.Special.F7)),
@@ -80,12 +84,12 @@ Strings strings, AreaLayoutSwitch layouts)
 	    new Action("copy-to-clipboard", strings.actionCopyToClipboard(), new KeyboardEvent(KeyboardEvent.Special.F4, EnumSet.of(KeyboardEvent.Modifiers.ALT))),
 	    new Action("open-ftp", "Подключиться к FTP-серверу"), 
 		new Action("volume-info", "Показать информацию о разделе", new KeyboardEvent(KeyboardEvent.Special.F10)), 
-	    new Action("hidden-show", strings.actionHiddenShow()), 
-	    new Action("hidden-hide", strings.actionHiddenHide()), 
+	    hiddenShow,
+	    hiddenHide,
 	};
     }
 
-PanelArea.ClickHandler.Result onClick(CommanderArea area, Object obj, boolean dir)
+    PanelArea.ClickHandler.Result onClick(CommanderArea area, Object obj, boolean dir)
     {
 	NullCheck.notNull(area, "area");
 	NullCheck.notNull(obj, "obj");
@@ -93,14 +97,14 @@ PanelArea.ClickHandler.Result onClick(CommanderArea area, Object obj, boolean di
 	    return CommanderArea.ClickHandler.Result.OPEN_DIR;
 	final PanelArea panelArea = (PanelArea)area;
 	if (!panelArea.isLocalDir())
-return PanelArea.ClickHandler.Result.REJECTED;
+	    return PanelArea.ClickHandler.Result.REJECTED;
 	final FileObject fileObject = (FileObject)obj;
 	luwrain.openFile(fileObject.getName().getPath());
 	return CommanderArea.ClickHandler.Result.OK;
     }
 
     boolean showFileObjectsProperties(InfoAndProperties infoAndProps,
-			       PanelArea area, SimpleArea propertiesArea)
+				      PanelArea area, SimpleArea propertiesArea)
     {
 	NullCheck.notNull(area, "area");
 	final FileObject[] paths = area.getFileObjectsToProcess();
@@ -114,16 +118,16 @@ return PanelArea.ClickHandler.Result.REJECTED;
     }
 
     boolean showVolumeInfo(InfoAndProperties infoAndProps,
-			       PanelArea area, SimpleArea propertiesArea)
+			   PanelArea area, SimpleArea propertiesArea)
     {
 	NullCheck.notNull(area, "area");
 	if (area.isLocalDir())
 	{
-	final File opened = area.getOpenedAsFile();
-	if (opened == null)
-	    return false;
-	propertiesArea.clear();
-	infoAndProps.fillLocalDirInfo(opened, propertiesArea);
+	    final File opened = area.getOpenedAsFile();
+	    if (opened == null)
+		return false;
+	    propertiesArea.clear();
+	    infoAndProps.fillLocalDirInfo(opened, propertiesArea);
 	} else
 	{
 	    final FileObject fileObj = area.getOpenedAsFileObject();
@@ -137,43 +141,42 @@ return PanelArea.ClickHandler.Result.REJECTED;
 	return true;
     }
 
-
     boolean onOpenFilesWithApp(String appName, FileObject[] paths, boolean asUrls)
     {
 	NullCheck.notEmpty(appName, "appName");
 	NullCheck.notNullItems(paths, "paths");
 	/*
-	boolean atLeastOne = false;
-	for(Path p: paths)
-	    if (!Files.isDirectory(p))
-	    {
-		atLeastOne = true;
-		String arg;
-		if (asUrls)
-		{
-		    try {
-			arg = p.toUri().toURL().toString();
-		    }
-		    catch(java.net.MalformedURLException e)
-		    {
-			e.printStackTrace();
-			arg = p.toString();
-		    }
-		} else
-		    arg = p.toString();
-		luwrain.launchApp(appName, new String[]{arg});
-	    }
-	return atLeastOne;
+	  boolean atLeastOne = false;
+	  for(Path p: paths)
+	  if (!Files.isDirectory(p))
+	  {
+	  atLeastOne = true;
+	  String arg;
+	  if (asUrls)
+	  {
+	  try {
+	  arg = p.toUri().toURL().toString();
+	  }
+	  catch(java.net.MalformedURLException e)
+	  {
+	  e.printStackTrace();
+	  arg = p.toString();
+	  }
+	  } else
+	  arg = p.toString();
+	  luwrain.launchApp(appName, new String[]{arg});
+	  }
+	  return atLeastOne;
 	*/
 	return false;
     }
 
-    boolean onLocalCopy(PanelArea copyFromArea, PanelArea copyToArea, FilesOperation.Listener listener, ListArea area/*, AreaLayoutSwitch layouts*/)
+    boolean onLocalCopy(PanelArea copyFromArea, PanelArea copyToArea, FilesOperation.Listener listener, ListArea operationsArea)
     {
 	NullCheck.notNull(copyFromArea, "copyFromArea");
 	NullCheck.notNull(copyToArea, "copyToArea");
 	NullCheck.notNull(listener, "listener");
-	NullCheck.notNull(area, "area");
+	NullCheck.notNull(operationsArea, "operationsArea");
 	if (!copyFromArea.isLocalDir() || !copyToArea.isLocalDir())
 	    return false;
 	final File copyFromDir = copyFromArea.getOpenedAsFile();
@@ -184,9 +187,9 @@ return PanelArea.ClickHandler.Result.REJECTED;
 	final File dest = conversations.copyPopup(copyFromDir, filesToCopy, copyTo);
 	if (dest == null)
 	    return true;
-base.launch(luwrain.getFilesOperations().copy(listener, 
-conversations.copyOperationName(filesToCopy, dest), filesToCopy, dest));
-	area.refresh();
+	base.launch(luwrain.getFilesOperations().copy(listener, 
+						      conversations.copyOperationName(filesToCopy, dest), filesToCopy, dest));
+	operationsArea.refresh();
 	layouts.show(CommanderApp.OPERATIONS_LAYOUT_INDEX);
 	return true;
     }
@@ -222,7 +225,6 @@ conversations.moveOperationName(filesToMove, dest), filesToMove, dest));
 	final File createIn = area.getOpenedAsFile();
 	if (createIn == null)
 	    return false;
-
 	final File newDir = conversations.mkdirPopup(createIn);
 	if (newDir == null)
 	    return true;
@@ -235,7 +237,6 @@ conversations.moveOperationName(filesToMove, dest), filesToMove, dest));
 	    return true;
 	}
 	luwrain.message(strings.mkdirOkMessage(newDir.getName()), Luwrain.MESSAGE_OK);
-	Log.debug("mkdir", "rereading for " + newDir.getName());
 	area.reread(newDir.getName(), false);
 	return true;
     }
