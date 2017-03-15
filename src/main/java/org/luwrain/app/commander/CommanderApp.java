@@ -334,11 +334,13 @@ private boolean onPanelAreaAction(Event event, Side side, PanelArea area)
 	if (ActionEvent.isAction(event, "hidden-show"))
 	{
 	    area.showHidden();
+	    luwrain.message("Скрытые файлы показаны");
 	    return true;
 	}
 	if (ActionEvent.isAction(event, "hidden-hide"))
 	{
 	    area.hideHidden();
+	    luwrain.message("Скрытые файлы убраны");
 	    return true;
 	}
 	if (ActionEvent.isAction(event, "copy"))
