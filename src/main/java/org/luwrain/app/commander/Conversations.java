@@ -22,42 +22,43 @@ class Conversations
 
     File copyPopup(File copyFromDir, File[] filesToCopy, File copyTo)
     {
-	final Path res = Popups.path(luwrain,
+	final File res = Popups.path(luwrain,
 				     strings.copyPopupName(), copyPopupPrefix(filesToCopy),
 				     copyTo.toPath(), copyFromDir.toPath(),
-				     (path)->{
-					 NullCheck.notNull(path, "path");
+				     (fileToCheck, announce)->{
+					 NullCheck.notNull(fileToCheck, "fileToCheck");
 					 return true;
 				     });
-	return res != null?res.toFile():null;
+	return res != null?res:null;
     }
 
     File movePopup(File moveFromDir, File[] filesToMove, File moveTo)
     {
-	final Path res = Popups.path(luwrain,
+	final File res = Popups.path(luwrain,
 				     strings.movePopupName(), movePopupPrefix(filesToMove),
 				     moveTo.toPath(), moveFromDir.toPath(),
-				     (path)->{
-					 NullCheck.notNull(path, "path");
+				     (fileToCheck, announce)->{
+					 NullCheck.notNull(fileToCheck, "fileToCheck");
 					 return true;
 				     });
-	return res != null?res.toFile():null;
+	return res != null?res:null;
     }
 
     File mkdirPopup(File createIn)
     {
-	final Path res = Popups.path(luwrain,
+	final File res = Popups.path(luwrain,
 				     strings.mkdirPopupName(), strings.mkdirPopupPrefix(), createIn.toPath(), 
-				     (path)->{
-					 NullCheck.notNull(path, "path");
-					 if (Files.exists(path))
+				     (fileToCheck, announce)->{
+					 NullCheck.notNull(fileToCheck, "fileToCheck");
+					 if (fileToCheck.exists())
 					 {
-					     luwrain.message(strings.enteredPathExists(path.toString()), Luwrain.MESSAGE_ERROR);
+					     if (announce)
+						 luwrain.message(strings.enteredPathExists(fileToCheck.getAbsolutePath()), Luwrain.MESSAGE_ERROR);
 					     return false;
 					 }
 					 return true;
 				     });
-	return res != null?res.toFile():null;
+	return res != null?res:null;
     }
 
     String ftpAddress()
