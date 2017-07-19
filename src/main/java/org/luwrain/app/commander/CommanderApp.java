@@ -39,18 +39,18 @@ class CommanderApp implements Application, FilesOperation.Listener
 
     private Luwrain luwrain;
     private Strings strings;
+    private final Base base = new Base();
+    private Actions actions;
+    private ActionList actionList = null;
+    private final InfoAndProperties infoAndProps = new InfoAndProperties();
+
     private PanelArea leftPanel;
     private PanelArea rightPanel;
     private ListArea operationsArea;
     private SimpleArea propertiesArea;
     private AreaLayoutSwitch layouts;
 
-    private final Base base = new Base();
-    private Actions actions;
-    private ActionList actionList = null;
-    private final InfoAndProperties infoAndProps = new InfoAndProperties();
-
-    private String startFrom = null;
+    private final String startFrom;
 
     CommanderApp()
     {
@@ -61,7 +61,8 @@ class CommanderApp implements Application, FilesOperation.Listener
     {
 	NullCheck.notNull(startFrom, "startFrom");
 	if (!startFrom.isEmpty())
-	    this.startFrom = startFrom;
+	    this.startFrom = startFrom; else
+	    this.startFrom = null;
     }
 
     @Override public boolean onLaunch(Luwrain luwrain)
@@ -75,10 +76,10 @@ class CommanderApp implements Application, FilesOperation.Listener
 	if (!base.init(luwrain, strings))
 	    return false;
 	infoAndProps.init(luwrain);
-	if (startFrom == null)
-	    startFrom = luwrain.getFileProperty("luwrain.dir.userhome").getAbsolutePath();
 	try {
-	createAreas();
+	    if (startFrom != null && !startFrom.isEmpty())
+		createAreas(startFrom); else
+		createAreas(luwrain.getFileProperty("luwrain.dir.userhome").getAbsolutePath());
 	}
 	catch(Exception e)
 	{
@@ -93,18 +94,10 @@ class CommanderApp implements Application, FilesOperation.Listener
 	return true;
     }
 
-    void closeApp()
+    private void createAreas(String startFrom) throws Exception
     {
-	if (!base.allOperationsFinished())
-	{
-	    luwrain.message(strings.notAllOperationsFinished(), Luwrain.MESSAGE_ERROR);
-	    return;
-	}
-	luwrain.closeApp();
-    }
+	NullCheck.notEmpty(startFrom, "startFrom");
 
-    private void createAreas() throws Exception
-    {
 	final PanelArea.Params leftPanelParams = PanelArea.createParams(new DefaultControlEnvironment(luwrain));
 	leftPanelParams.clickHandler = (area, obj, dir)->actions.onClick(area, obj, dir);
 	final PanelArea.Params rightPanelParams = PanelArea.createParams(new DefaultControlEnvironment(luwrain));
@@ -156,15 +149,8 @@ class CommanderApp implements Application, FilesOperation.Listener
 		luwrain.runInMainThread(()->rightPanel.acceptNewLocation(location, wrappers, selectedIndex, announce));
  });
 
-if (startFrom != null && !startFrom.isEmpty())
-	   	{
 	leftPanel.openInitial(startFrom);
 	rightPanel.openInitial(startFrom);
-	} else
-	{
-	leftPanel.openInitial("/");
-	rightPanel.openInitial("/");
-	}
 
 	final ListArea.Params listParams = new ListArea.Params();
 	listParams.environment = new DefaultControlEnvironment(luwrain);
@@ -275,82 +261,74 @@ if (startFrom != null && !startFrom.isEmpty())
 		}
 
     private boolean onEnvironmentEventInPanel(EnvironmentEvent event, PanelArea area, Side side)
-		{
-		    NullCheck.notNull(event, "event");
-		    NullCheck.notNull(area, "area");
-		    NullCheck.notNull(side, "side");
-		    switch(event.getCode())
-		    {
-case OPEN:
-return actions.onOpenEvent(event, area);
-		    case INTRODUCE:
-			luwrain.playSound(Sounds.INTRO_REGULAR);
-			switch(side)
-			{
-			case LEFT:
-			luwrain.say(strings.leftPanelName() + " " + area.getAreaName());
-			break;
-			case RIGHT:
-			luwrain.say(strings.rightPanelName() + " " + area.getAreaName());
-			break;
-			}
-			return true;
-		    case CLOSE:
-			closeApp();
-			return true;
-case ACTION:
-			return onPanelAreaAction(event, side, area);
-case PROPERTIES:
-return showPropertiesArea(area);
-		    default:
-			return false;
-}
-		}
-
-private boolean onPanelAreaAction(Event event, Side side, PanelArea area)
     {
 	NullCheck.notNull(event, "event");
-	NullCheck.notNull(side, "side");
 	NullCheck.notNull(area, "area");
-	if (ActionEvent.isAction(event, "edit-text"))
-	    return actions.onOpenFilesWithApp("notepad", area.getFileObjectsToProcess(), false);
-	if (ActionEvent.isAction(event, "size"))
-	    return infoAndProps.calcSize(area.getFileObjectsToProcess());
-	if (ActionEvent.isAction(event, "preview"))
-	    return actions.onOpenFilesWithApp("reader", area.getFileObjectsToProcess(), true);
-	if (ActionEvent.isAction(event, "hidden-show"))
+	NullCheck.notNull(side, "side");
+	switch(event.getCode())
 	{
-	    area.showHidden();
-	    luwrain.message("Скрытые файлы показаны");
+	case OPEN:
+	    return actions.onOpenEvent(event, area);
+	case INTRODUCE:
+	    luwrain.playSound(Sounds.INTRO_REGULAR);
+	    switch(side)
+	    {
+	    case LEFT:
+		luwrain.say(strings.leftPanelName() + " " + area.getAreaName());
+		break;
+	    case RIGHT:
+		luwrain.say(strings.rightPanelName() + " " + area.getAreaName());
+		break;
+	    }
 	    return true;
-	}
-	if (ActionEvent.isAction(event, "hidden-hide"))
-	{
-	    area.hideHidden();
-	    luwrain.message("Скрытые файлы убраны");
+	case CLOSE:
+	    closeApp();
 	    return true;
+	case ACTION:
+	    {
+		if (ActionEvent.isAction(event, "edit-text"))
+		    return actions.onOpenFilesWithApp("notepad", area.getFileObjectsToProcess(), false);
+		if (ActionEvent.isAction(event, "size"))
+		    return infoAndProps.calcSize(area.getFileObjectsToProcess());
+		if (ActionEvent.isAction(event, "preview"))
+		    return actions.onOpenFilesWithApp("reader", area.getFileObjectsToProcess(), true);
+		if (ActionEvent.isAction(event, "hidden-show"))
+		{
+		    area.showHidden();
+		    luwrain.message("Скрытые файлы показаны");
+		    return true;
+		}
+		if (ActionEvent.isAction(event, "hidden-hide"))
+		{
+		    area.hideHidden();
+		    luwrain.message("Скрытые файлы убраны");
+		    return true;
+		}
+		if (ActionEvent.isAction(event, "copy"))
+		{
+		    if (actions.onLocalCopy(getPanel(side), getAnotherPanel(side), this))
+		    {
+			operationsArea.refresh();
+			layouts.show(OPERATIONS_LAYOUT_INDEX);
+			return true;
+		    }
+		    return false;
+		}
+		if (ActionEvent.isAction(event, "move"))
+		    return actions.onLocalMove(getPanel(side), getAnotherPanel(side), this, operationsArea);
+		if (ActionEvent.isAction(event, "mkdir"))
+		    return actions.mkdir(this, getPanel(side));
+		if (ActionEvent.isAction(event, "open-ftp"))
+		    return actions.onOpenFtp(area);
+		if (ActionEvent.isAction(event, "volume-info"))
+		    return actions.showVolumeInfo(infoAndProps, area, propertiesArea);
+		return false;
+	    }
+	case PROPERTIES:
+	    return showPropertiesArea(area);
+	default:
+	    return false;
 	}
-	if (ActionEvent.isAction(event, "copy"))
-	{
-	    if (actions.onLocalCopy(getPanel(side), getAnotherPanel(side), this))
-	{
-	operationsArea.refresh();
-	layouts.show(OPERATIONS_LAYOUT_INDEX);
-	return true;
-	}
-	return false;
-	}
-	if (ActionEvent.isAction(event, "move"))
-	    return actions.onLocalMove(getPanel(side), getAnotherPanel(side), this, operationsArea);
-	if (ActionEvent.isAction(event, "mkdir"))
-	    return actions.mkdir(this, getPanel(side));
-	if (ActionEvent.isAction(event, "open-ftp"))
-	    return actions.onOpenFtp(area);
-	if (ActionEvent.isAction(event, "volume-info"))
-	    return actions.showVolumeInfo(infoAndProps, area, propertiesArea);
-
-
-	return false;
     }
 
 private boolean onTabInPanel(Side side)
@@ -454,7 +432,6 @@ private boolean closePropertiesArea()
 	return true;
     }
 
-
     private void onOperationUpdate(FilesOperation operation)
     {
 	NullCheck.notNull(operation, "operation");
@@ -519,5 +496,15 @@ private boolean closePropertiesArea()
     @Override public String getAppName()
     {
 	return strings.appName();
+    }
+
+    void closeApp()
+    {
+	if (!base.allOperationsFinished())
+	{
+	    luwrain.message(strings.notAllOperationsFinished(), Luwrain.MESSAGE_ERROR);
+	    return;
+	}
+	luwrain.closeApp();
     }
 }
