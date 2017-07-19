@@ -47,6 +47,7 @@ class CommanderApp implements Application, FilesOperation.Listener
 
     private final Base base = new Base();
     private Actions actions;
+    private ActionList actionList = null;
     private final InfoAndProperties infoAndProps = new InfoAndProperties();
 
     private String startFrom = null;
@@ -75,7 +76,7 @@ class CommanderApp implements Application, FilesOperation.Listener
 	    return false;
 	infoAndProps.init(luwrain);
 	if (startFrom == null)
-	    startFrom = luwrain.getPathProperty("luwrain.dir.userhome").toString();
+	    startFrom = luwrain.getFileProperty("luwrain.dir.userhome").getAbsolutePath();
 	try {
 	createAreas();
 	}
@@ -87,7 +88,8 @@ class CommanderApp implements Application, FilesOperation.Listener
 	layouts.add(new AreaLayout(AreaLayout.LEFT_RIGHT, leftPanel, rightPanel));
 	layouts.add(new AreaLayout(AreaLayout.LEFT_RIGHT_BOTTOM, leftPanel, rightPanel, operationsArea));
 	layouts.add(new AreaLayout(propertiesArea));
-	actions = new Actions(luwrain, base, strings, layouts);
+	this.actions = new Actions(luwrain, base, strings, layouts);
+	this.actionList = new ActionList(strings);
 	return true;
     }
 
@@ -108,8 +110,7 @@ class CommanderApp implements Application, FilesOperation.Listener
 	final PanelArea.Params rightPanelParams = PanelArea.createParams(new DefaultControlEnvironment(luwrain));
 	rightPanelParams.clickHandler = (area, obj, dir)->actions.onClick(area, obj, dir);
 
- 	leftPanel = new PanelArea(leftPanelParams) {
-
+ 	leftPanel = new PanelArea(leftPanelParams, actionList) {
 		@Override public boolean onKeyboardEvent(KeyboardEvent event)
 		{
 		    NullCheck.notNull(event, "event");
@@ -117,7 +118,6 @@ class CommanderApp implements Application, FilesOperation.Listener
 								 return true;
 		    return super.onKeyboardEvent(event);
 		}
-
 		@Override public boolean onEnvironmentEvent(EnvironmentEvent event)
 		{
 		    NullCheck.notNull(event, "event");
@@ -127,15 +127,9 @@ class CommanderApp implements Application, FilesOperation.Listener
 			return true;
 			return super.onEnvironmentEvent(event);
 		}
-
-		@Override public Action[] getAreaActions()
-		{
-return actions.getPanelAreaActions(this);
-		}
 	    };
 
- 	rightPanel = new PanelArea(rightPanelParams) {
-
+ 	rightPanel = new PanelArea(rightPanelParams, actionList) {
 		@Override public boolean onKeyboardEvent(KeyboardEvent event)
 		{
 		    NullCheck.notNull(event, "event");
@@ -143,7 +137,6 @@ return actions.getPanelAreaActions(this);
 			return true;
 		    return super.onKeyboardEvent(event);
 		}
-
 		@Override public boolean onEnvironmentEvent(EnvironmentEvent event)
 		{
 		    NullCheck.notNull(event, "event");
@@ -153,11 +146,6 @@ return actions.getPanelAreaActions(this);
 			return true;
 			return super.onEnvironmentEvent(event);
 		}
-
-		@Override public Action[] getAreaActions()
-		{
-return actions.getPanelAreaActions(this);
-		}
 	    };
 
 	leftPanel.setLoadingResultHandler((location, wrappers, selectedIndex, announce)->{
@@ -166,7 +154,6 @@ return actions.getPanelAreaActions(this);
 
 	rightPanel.setLoadingResultHandler((location, wrappers, selectedIndex, announce)->{
 		luwrain.runInMainThread(()->rightPanel.acceptNewLocation(location, wrappers, selectedIndex, announce));
-
  });
 
 if (startFrom != null && !startFrom.isEmpty())
@@ -344,7 +331,15 @@ private boolean onPanelAreaAction(Event event, Side side, PanelArea area)
 	    return true;
 	}
 	if (ActionEvent.isAction(event, "copy"))
-	    return actions.onLocalCopy(getPanel(side), getAnotherPanel(side), this, operationsArea);
+	{
+	    if (actions.onLocalCopy(getPanel(side), getAnotherPanel(side), this))
+	{
+	operationsArea.refresh();
+	layouts.show(OPERATIONS_LAYOUT_INDEX);
+	return true;
+	}
+	return false;
+	}
 	if (ActionEvent.isAction(event, "move"))
 	    return actions.onLocalMove(getPanel(side), getAnotherPanel(side), this, operationsArea);
 	if (ActionEvent.isAction(event, "mkdir"))
@@ -386,14 +381,14 @@ private boolean onTabInPanel(Side side)
 	    part = Popups.mountedPartitions(luwrain);
 	    if (part == null)
 		return true;
-	    leftPanel.openLocalPath(part.file().getAbsolutePath());
+	    leftPanel.openLocalPath(part.getPartFile().getAbsolutePath());
 	    luwrain.setActiveArea(leftPanel);
 	    return true;
 	case RIGHT:
 	    part = Popups.mountedPartitions(luwrain);
 	    if (part == null)
 		return true;
-	    rightPanel.openLocalPath(part.file().getAbsolutePath());
+	    rightPanel.openLocalPath(part.getPartFile().getAbsolutePath());
 	    luwrain.setActiveArea(rightPanel);
 	    return true;
 	default:

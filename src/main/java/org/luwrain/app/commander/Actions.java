@@ -39,7 +39,7 @@ class Actions
     private final Conversations conversations;
 
     Actions(Luwrain luwrain, Base base,
-Strings strings, AreaLayoutSwitch layouts)
+	    Strings strings, AreaLayoutSwitch layouts)
     {
 	NullCheck.notNull(luwrain, "luwrain");
 	NullCheck.notNull(base, "base");
@@ -52,41 +52,93 @@ Strings strings, AreaLayoutSwitch layouts)
 	this.conversations = new Conversations(luwrain, strings);
     }
 
-    Action[] getPanelAreaActions(PanelArea area)
+    boolean onLocalCopy(PanelArea copyFromArea, PanelArea copyToArea, FilesOperation.Listener listener)
     {
+	NullCheck.notNull(copyFromArea, "copyFromArea");
+	NullCheck.notNull(copyToArea, "copyToArea");
+	NullCheck.notNull(listener, "listener");
+	if (!copyFromArea.isLocalDir() || !copyToArea.isLocalDir())
+	    return false;
+	final File copyFromDir = copyFromArea.getOpenedAsFile();
+	if (copyFromDir == null)
+	    return false;
+	final File[] filesToCopy = copyFromArea.getFilesToProcess();
+	if (filesToCopy.length < 1)
+	    return false;
+	final File copyToDir = copyToArea.getOpenedAsFile();
+	if (copyToDir == null)
+	    return false;
+	final File dest = conversations.copyPopup(copyFromDir, filesToCopy, copyToDir);
+	if (dest == null)
+	    return true;
+	base.launch(luwrain.getFilesOperations().copy(listener, conversations.copyOperationName(filesToCopy, dest), filesToCopy, dest));
+	return true;
+    }
+
+    boolean onLocalMove(PanelArea moveFromArea, PanelArea moveToArea, 
+FilesOperation.Listener listener, ListArea area)
+    {
+	NullCheck.notNull(moveFromArea, "moveFromArea");
+	NullCheck.notNull(moveToArea, "moveToArea");
+	NullCheck.notNull(listener, "listener");
 	NullCheck.notNull(area, "area");
+	if (!moveFromArea.isLocalDir() || !moveToArea.isLocalDir())
+	    return false;
+	final File moveFromDir = moveFromArea.getOpenedAsFile();
+	final File[] filesToMove = moveFromArea.getFilesToProcess();
+	final File moveTo = moveToArea.getOpenedAsFile();
+	if (filesToMove.length < 1)
+	    return false;
+	final File dest = conversations.movePopup(moveFromDir, filesToMove, moveTo);
+	if (dest == null)
+	    return true;
+base.launch(luwrain.getFilesOperations().move(listener, 
+conversations.moveOperationName(filesToMove, dest), filesToMove, dest));
+	area.refresh();
+	layouts.show(CommanderApp.OPERATIONS_LAYOUT_INDEX);
+	return true;
+    }
 
-	final Action hiddenShow = new Action("hidden-show", strings.actionHiddenShow(), new KeyboardEvent('=')); 
-	final Action hiddenHide = new Action("hidden-hide", strings.actionHiddenHide(), new KeyboardEvent('-')); 
+    boolean mkdir(CommanderApp app, PanelArea area)
+    {
+	NullCheck.notNull(app, "app");
+	NullCheck.notNull(area, "area");
+	final File createIn = area.getOpenedAsFile();
+	if (createIn == null)
+	    return false;
+	final File newDir = conversations.mkdirPopup(createIn);
+	if (newDir == null)
+	    return true;
+	try {
+	    java.nio.file.Files.createDirectories(newDir.toPath());
+	}
+	catch (IOException e)
+	{
+	    luwrain.message(strings.mkdirErrorMessage(luwrain.i18n().getExceptionDescr(e)), Luwrain.MESSAGE_ERROR);
+	    return true;
+	}
+	luwrain.message(strings.mkdirOkMessage(newDir.getName()), Luwrain.MESSAGE_OK);
+	area.reread(newDir.getName(), false);
+	return true;
+    }
 
-	final FileObject[] toProcess = area.getFileObjectsToProcess();
-	if (toProcess.length < 1)
-	    return new Action[]{
-		new Action("mkdir", strings.actionMkdir(), new KeyboardEvent(KeyboardEvent.Special.F7)),
-		new Action("open-ftp", "Подключиться к FTP-серверу"), 
-		new Action("volume-info", "Показать информацию о разделе", new KeyboardEvent(KeyboardEvent.Special.F10)), 
-		hiddenShow,
-		hiddenHide,
-	    };
-
-	return new Action[]{
-	    new Action("copy", strings.actionCopy(), new KeyboardEvent(KeyboardEvent.Special.F5)),
-	    new Action("move", strings.actionMove(), new KeyboardEvent(KeyboardEvent.Special.F6)),
-	    new Action("mkdir", strings.actionMkdir(), new KeyboardEvent(KeyboardEvent.Special.F7)),
-	    new Action("delete", strings.actionDelete(), new KeyboardEvent(KeyboardEvent.Special.F8)),
-	    new Action("open", strings.actionOpen()),
-	    new Action("size", strings.actionSize(), new KeyboardEvent(KeyboardEvent.Special.F3, EnumSet.of(KeyboardEvent.Modifiers.ALT))),
-	    new Action("preview", strings.actionPreview(), new KeyboardEvent(KeyboardEvent.Special.F3, EnumSet.of(KeyboardEvent.Modifiers.SHIFT))),
-	    new Action("play", strings.actionPlay(), new KeyboardEvent(KeyboardEvent.Special.F2, EnumSet.of(KeyboardEvent.Modifiers.SHIFT))),
-	    new Action("edit-text", strings.actionEditAsText(), new KeyboardEvent(KeyboardEvent.Special.F4, EnumSet.of(KeyboardEvent.Modifiers.SHIFT))),
-	    new Action("preview-another-format", strings.actionPreviewAnotherFormat()),
-	    new Action("open-choosing-app", strings.actionOpenChoosingApp()),
-	    new Action("copy-to-clipboard", strings.actionCopyToClipboard(), new KeyboardEvent(KeyboardEvent.Special.F4, EnumSet.of(KeyboardEvent.Modifiers.ALT))),
-	    new Action("open-ftp", "Подключиться к FTP-серверу"), 
-		new Action("volume-info", "Показать информацию о разделе", new KeyboardEvent(KeyboardEvent.Special.F10)), 
-	    hiddenShow,
-	    hiddenHide,
-	};
+    private boolean ddelete(Side panelSide)
+    {
+	/*
+	  File[] filesToDelete = panelSide == PanelArea.Side.LEFT?leftPanel.selectedAsFiles():rightPanel.selectedAsFiles();
+	  if (filesToDelete == null || filesToDelete.length < 1)
+	  return false;
+	  YesNoPopup popup = new YesNoPopup(luwrain, strings.delPopupName(),
+	  strings.delPopupText(filesToDelete), false);
+	  luwrain.popup(popup);
+	  if (popup.closing.cancelled())
+	  return true;
+	  if (!popup.result())
+	  return true;
+	  operations.launch(Operations.delete(operations, strings.delOperationName(filesToDelete), 
+	  filesToDelete));
+	*/
+	return true;
     }
 
     PanelArea.ClickHandler.Result onClick(CommanderArea area, Object obj, boolean dir)
@@ -171,75 +223,6 @@ Strings strings, AreaLayoutSwitch layouts)
 	return false;
     }
 
-    boolean onLocalCopy(PanelArea copyFromArea, PanelArea copyToArea, FilesOperation.Listener listener, ListArea operationsArea)
-    {
-	NullCheck.notNull(copyFromArea, "copyFromArea");
-	NullCheck.notNull(copyToArea, "copyToArea");
-	NullCheck.notNull(listener, "listener");
-	NullCheck.notNull(operationsArea, "operationsArea");
-	if (!copyFromArea.isLocalDir() || !copyToArea.isLocalDir())
-	    return false;
-	final File copyFromDir = copyFromArea.getOpenedAsFile();
-	final File[] filesToCopy = copyFromArea.getFilesToProcess();
-	final File copyTo = copyToArea.getOpenedAsFile();
-	if (filesToCopy.length < 1)
-	    return false;
-	final File dest = conversations.copyPopup(copyFromDir, filesToCopy, copyTo);
-	if (dest == null)
-	    return true;
-	base.launch(luwrain.getFilesOperations().copy(listener, 
-						      conversations.copyOperationName(filesToCopy, dest), filesToCopy, dest));
-	operationsArea.refresh();
-	layouts.show(CommanderApp.OPERATIONS_LAYOUT_INDEX);
-	return true;
-    }
-
-    boolean onLocalMove(PanelArea moveFromArea, PanelArea moveToArea, 
-FilesOperation.Listener listener, ListArea area)
-    {
-	NullCheck.notNull(moveFromArea, "moveFromArea");
-	NullCheck.notNull(moveToArea, "moveToArea");
-	NullCheck.notNull(listener, "listener");
-	NullCheck.notNull(area, "area");
-	if (!moveFromArea.isLocalDir() || !moveToArea.isLocalDir())
-	    return false;
-	final File moveFromDir = moveFromArea.getOpenedAsFile();
-	final File[] filesToMove = moveFromArea.getFilesToProcess();
-	final File moveTo = moveToArea.getOpenedAsFile();
-	if (filesToMove.length < 1)
-	    return false;
-	final File dest = conversations.movePopup(moveFromDir, filesToMove, moveTo);
-	if (dest == null)
-	    return true;
-base.launch(luwrain.getFilesOperations().move(listener, 
-conversations.moveOperationName(filesToMove, dest), filesToMove, dest));
-	area.refresh();
-	layouts.show(CommanderApp.OPERATIONS_LAYOUT_INDEX);
-	return true;
-    }
-
-    boolean mkdir(CommanderApp app, PanelArea area)
-    {
-	NullCheck.notNull(app, "app");
-	NullCheck.notNull(area, "area");
-	final File createIn = area.getOpenedAsFile();
-	if (createIn == null)
-	    return false;
-	final File newDir = conversations.mkdirPopup(createIn);
-	if (newDir == null)
-	    return true;
-	try {
-	    java.nio.file.Files.createDirectories(newDir.toPath());
-	}
-	catch (IOException e)
-	{
-	    luwrain.message(strings.mkdirErrorMessage(luwrain.i18n().getExceptionDescr(e)), Luwrain.MESSAGE_ERROR);
-	    return true;
-	}
-	luwrain.message(strings.mkdirOkMessage(newDir.getName()), Luwrain.MESSAGE_OK);
-	area.reread(newDir.getName(), false);
-	return true;
-    }
 
     boolean onOpenFtp(PanelArea area)
     {
@@ -252,24 +235,6 @@ conversations.moveOperationName(filesToMove, dest), filesToMove, dest));
     }
 
 
-    private boolean ddelete(Side panelSide)
-    {
-	/*
-	  File[] filesToDelete = panelSide == PanelArea.Side.LEFT?leftPanel.selectedAsFiles():rightPanel.selectedAsFiles();
-	  if (filesToDelete == null || filesToDelete.length < 1)
-	  return false;
-	  YesNoPopup popup = new YesNoPopup(luwrain, strings.delPopupName(),
-	  strings.delPopupText(filesToDelete), false);
-	  luwrain.popup(popup);
-	  if (popup.closing.cancelled())
-	  return true;
-	  if (!popup.result())
-	  return true;
-	  operations.launch(Operations.delete(operations, strings.delOperationName(filesToDelete), 
-	  filesToDelete));
-	*/
-	return true;
-    }
 
     static boolean onOpenEvent(EnvironmentEvent event, PanelArea area)
     {

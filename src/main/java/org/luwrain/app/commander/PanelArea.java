@@ -18,6 +18,7 @@ package org.luwrain.app.commander;
 
 import java.util.*;
 import java.io.*;
+import java.net.*;
 
 import org.apache.commons.vfs2.*;
 
@@ -28,10 +29,13 @@ import org.luwrain.io.*;
 
 class PanelArea extends CommanderArea<FileObject>
 {
+    private final ActionList actionList;
 
-    PanelArea(Params<FileObject> params)
+    PanelArea(Params<FileObject> params, ActionList actionList)
     {
 	super(params);
+	NullCheck.notNull(actionList, "actionList");
+	this.actionList = actionList;
     }
 
     @Override public boolean onAreaQuery(AreaQuery query)
@@ -68,17 +72,27 @@ class PanelArea extends CommanderArea<FileObject>
 	return entry != null?new FileObject[]{entry}:new FileObject[0];
     }
 
-    File getOpenedAsFile()
+    Object[] getObjectsToProcess()
     {
-	final FileObject obj = opened();
-	return obj != null?new File(obj.getName().getPath()):null;
+	final FileObject[] objs = getFileObjectsToProcess();
+	final List res = new LinkedList();
+	for(FileObject f: objs)
+	{
+	    if (f instanceof org.apache.commons.vfs2.provider.local.LocalFile)
+		res.add(new File(f.getName().getPath()));
+	    if (f instanceof org.apache.commons.vfs2.provider.ftp.FtpFileObject)
+	    {
+		try {
+		    res.add(new java.net.URL(f.getName().getPath()));
+		}
+		catch(MalformedURLException e)
+		{
+		    //FIXME:
+		}
+	    }
+	}
+	return res.toArray(new Object[res.size()]);
     }
-
-    FileObject getOpenedAsFileObject()
-    {
-	return opened();
-    }
-
 
     File[] getFilesToProcess()
     {
@@ -90,6 +104,20 @@ class PanelArea extends CommanderArea<FileObject>
 	    res[i] = new File(objects[i].getName().getPath());
 	return res;
     }
+
+    File getOpenedAsFile()
+    {
+	if (!isLocalDir())
+	    return null;
+	final FileObject obj = opened();
+	return obj != null?new File(obj.getName().getPath()):null;
+    }
+
+    FileObject getOpenedAsFileObject()
+    {
+	return opened();
+    }
+
 
     boolean openLocalPath(String path)
     {
@@ -130,7 +158,10 @@ class PanelArea extends CommanderArea<FileObject>
 	reread(false);
     }
 
-
+		@Override public Action[] getAreaActions()
+		{
+return actionList.getPanelAreaActions(this);
+		}
 
     static Params<FileObject> createParams(ControlEnvironment environment) throws FileSystemException
     {

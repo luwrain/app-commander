@@ -24,7 +24,7 @@ class Conversations
     {
 	final File res = Popups.path(luwrain,
 				     strings.copyPopupName(), copyPopupPrefix(filesToCopy),
-				     copyTo.toPath(), copyFromDir.toPath(),
+				     copyTo, copyFromDir,
 				     (fileToCheck, announce)->{
 					 NullCheck.notNull(fileToCheck, "fileToCheck");
 					 return true;
@@ -36,7 +36,7 @@ class Conversations
     {
 	final File res = Popups.path(luwrain,
 				     strings.movePopupName(), movePopupPrefix(filesToMove),
-				     moveTo.toPath(), moveFromDir.toPath(),
+				     moveTo, moveFromDir,
 				     (fileToCheck, announce)->{
 					 NullCheck.notNull(fileToCheck, "fileToCheck");
 					 return true;
@@ -47,7 +47,7 @@ class Conversations
     File mkdirPopup(File createIn)
     {
 	final File res = Popups.path(luwrain,
-				     strings.mkdirPopupName(), strings.mkdirPopupPrefix(), createIn.toPath(), 
+				     strings.mkdirPopupName(), strings.mkdirPopupPrefix(), createIn, 
 				     (fileToCheck, announce)->{
 					 NullCheck.notNull(fileToCheck, "fileToCheck");
 					 if (fileToCheck.exists())
