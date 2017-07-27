@@ -23,6 +23,7 @@ import java.nio.file.attribute.*;
 import org.apache.commons.vfs2.*;
 
 import org.luwrain.core.*;
+import org.luwrain.controls.*;
 
 class InfoAndProperties
 {

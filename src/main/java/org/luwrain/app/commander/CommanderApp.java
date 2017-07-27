@@ -65,16 +65,16 @@ class CommanderApp implements Application, FilesOperation.Listener
 	    this.startFrom = null;
     }
 
-    @Override public boolean onLaunch(Luwrain luwrain)
+    @Override public InitResult onLaunchApp(Luwrain luwrain)
     {
 	NullCheck.notNull(luwrain, "luwrain");
 	final Object o =  luwrain.i18n().getStrings(Strings.NAME);
 	if (o == null || !(o instanceof Strings))
-	    return false;
+	    return new InitResult(InitResult.Type.NO_STRINGS_OBJ, Strings.NAME);
 	strings = (Strings)o;
 	this.luwrain = luwrain;
 	if (!base.init(luwrain, strings))
-	    return false;
+	    return new InitResult(InitResult.Type.FAILURE);
 	infoAndProps.init(luwrain);
 	try {
 	    if (startFrom != null && !startFrom.isEmpty())
@@ -91,7 +91,7 @@ class CommanderApp implements Application, FilesOperation.Listener
 	layouts.add(new AreaLayout(propertiesArea));
 	this.actions = new Actions(luwrain, base, strings, layouts);
 	this.actionList = new ActionList(strings);
-	return true;
+	return new InitResult();
     }
 
     private void createAreas(String startFrom) throws Exception
@@ -153,7 +153,7 @@ class CommanderApp implements Application, FilesOperation.Listener
 	rightPanel.openInitial(startFrom);
 
 	final ListArea.Params listParams = new ListArea.Params();
-	listParams.environment = new DefaultControlEnvironment(luwrain);
+	listParams.context = new DefaultControlEnvironment(luwrain);
 	listParams.model = base.getOperationsListModel();
 	listParams.appearance = new OperationsAppearance(luwrain, strings, base);
 	listParams.name = strings.operationsAreaName();
@@ -488,7 +488,7 @@ private boolean closePropertiesArea()
 	luwrain.setActiveArea(operationsArea);
     }
 
-    @Override public AreaLayout getAreasToShow()
+    @Override public AreaLayout getAreaLayout()
     {
 	return layouts.getCurrentLayout();
     }
@@ -498,7 +498,7 @@ private boolean closePropertiesArea()
 	return strings.appName();
     }
 
-    void closeApp()
+    @Override public void closeApp()
     {
 	if (!base.allOperationsFinished())
 	{
