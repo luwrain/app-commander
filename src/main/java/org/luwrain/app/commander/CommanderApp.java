@@ -33,22 +33,17 @@ import org.luwrain.app.commander.Base.Side;
 
 class CommanderApp implements Application, FilesOperation.Listener
 {
-    static final int NORMAL_LAYOUT_INDEX = 0;
-    static final int OPERATIONS_LAYOUT_INDEX = 1;
-    static final int PROPERTIES_LAYOUT_INDEX = 2;
-
-    private Luwrain luwrain;
-    private Strings strings;
-    private final Base base = new Base();
-    private Actions actions;
+    private Luwrain luwrain = null;
+    private Strings strings = null;
+    private Base base = null;
+    private Actions actions = null;
     private ActionList actionList = null;
-    private final InfoAndProperties infoAndProps = new InfoAndProperties();
+    private InfoAndProperties infoAndProps = null;
 
-    private PanelArea leftPanel;
-    private PanelArea rightPanel;
-    private ListArea operationsArea;
-    private SimpleArea propertiesArea;
-    private AreaLayoutSwitch layouts;
+    private PanelArea leftPanel = null;
+    private PanelArea rightPanel = null;
+    private ListArea operationsArea = null;
+    private AreaLayoutHelper layout = null;
 
     private final String startFrom;
 
@@ -73,8 +68,11 @@ class CommanderApp implements Application, FilesOperation.Listener
 	    return new InitResult(InitResult.Type.NO_STRINGS_OBJ, Strings.NAME);
 	strings = (Strings)o;
 	this.luwrain = luwrain;
+	this.base = new Base();
 	if (!base.init(luwrain, strings))
 	    return new InitResult(InitResult.Type.FAILURE);
+	this.actionList = new ActionList(strings);
+	this.infoAndProps = new InfoAndProperties();
 	infoAndProps.init(luwrain);
 	try {
 	    if (startFrom != null && !startFrom.isEmpty())
@@ -84,13 +82,10 @@ class CommanderApp implements Application, FilesOperation.Listener
 	catch(Exception e)
 	{
 	    e.printStackTrace();
+	    return new InitResult(e);
 	}
-	layouts = new AreaLayoutSwitch(luwrain);
-	layouts.add(new AreaLayout(AreaLayout.LEFT_RIGHT, leftPanel, rightPanel));
-	layouts.add(new AreaLayout(AreaLayout.LEFT_RIGHT_BOTTOM, leftPanel, rightPanel, operationsArea));
-	layouts.add(new AreaLayout(propertiesArea));
-	this.actions = new Actions(luwrain, base, strings, layouts);
-	this.actionList = new ActionList(strings);
+	layout = new AreaLayoutHelper(()->luwrain.onNewAreaLayout(), new AreaLayout(AreaLayout.LEFT_RIGHT_BOTTOM, leftPanel, rightPanel, operationsArea));
+	this.actions = new Actions(luwrain, base, strings);
 	return new InitResult();
     }
 
@@ -210,33 +205,6 @@ class CommanderApp implements Application, FilesOperation.Listener
     }
 	    };
 
-	propertiesArea = new SimpleArea(new DefaultControlEnvironment(luwrain), strings.infoAreaName()){
-
-		@Override public boolean onKeyboardEvent(KeyboardEvent event)
-		{
-		    NullCheck.notNull(event, "event");
-		    if (event.isSpecial() && !event.isModified())
-			switch(event.getSpecial())
-			{
-			case ESCAPE:
-			    return closePropertiesArea();
-			}
-		    return super.onKeyboardEvent(event);
-		}
-
-		@Override public boolean onEnvironmentEvent(EnvironmentEvent event)
-		{
-		    NullCheck.notNull(event, "event");
-		    switch(event.getCode())
-		    {
-		    case CLOSE:
-			closeApp();
-			return true;
-		    default:
-			return super.onEnvironmentEvent(event);
-		    }
-		}
-	    };
     }
 
     private boolean onKeyboardEventInPanel(Side side, KeyboardEvent event)
@@ -309,7 +277,6 @@ class CommanderApp implements Application, FilesOperation.Listener
 		    if (actions.onLocalCopy(getPanel(side), getAnotherPanel(side), this))
 		    {
 			operationsArea.refresh();
-			layouts.show(OPERATIONS_LAYOUT_INDEX);
 			return true;
 		    }
 		    return false;
@@ -320,8 +287,8 @@ class CommanderApp implements Application, FilesOperation.Listener
 		    return actions.mkdir(this, getPanel(side));
 		if (ActionEvent.isAction(event, "open-ftp"))
 		    return actions.onOpenFtp(area);
-		if (ActionEvent.isAction(event, "volume-info"))
-		    return actions.showVolumeInfo(infoAndProps, area, propertiesArea);
+		//		if (ActionEvent.isAction(event, "volume-info"))
+		//		    return actions.showVolumeInfo(infoAndProps, area, propertiesArea);
 		return false;
 	    }
 	case PROPERTIES:
@@ -410,24 +377,38 @@ private boolean onTabInPanel(Side side)
 
     private boolean showPropertiesArea(PanelArea area)
     {
-	/*
 	NullCheck.notNull(area, "area");
-	final Path[] paths = Base.entriesToProcess(area);
-	if (paths.length < 1)
-	    return false;
-	propertiesArea.clear();
-	infoAndProps.fillProperties(propertiesArea, paths);
-	layouts.show(PROPERTIES_LAYOUT_INDEX);
-	luwrain.announceActiveArea();
-	*/
-	return true;
-    }
-
-private boolean closePropertiesArea()
-    {
-	if (base.hasOperations())
-	    layouts.show(OPERATIONS_LAYOUT_INDEX); else
-	    layouts.show(NORMAL_LAYOUT_INDEX);
+	final SimpleArea propertiesArea = new SimpleArea(new DefaultControlEnvironment(luwrain), strings.infoAreaName()){
+		@Override public boolean onKeyboardEvent(KeyboardEvent event)
+		{
+		    NullCheck.notNull(event, "event");
+		    if (event.isSpecial() && !event.isModified())
+			switch(event.getSpecial())
+			{
+			case ESCAPE:
+			    layout.closeTempArea();
+			    luwrain.announceActiveArea();
+			    return true;
+			}
+		    return super.onKeyboardEvent(event);
+		}
+		@Override public boolean onEnvironmentEvent(EnvironmentEvent event)
+		{
+		    NullCheck.notNull(event, "event");
+		    if (event.getType() != EnvironmentEvent.Type.REGULAR)
+			return super.onEnvironmentEvent(event);
+		    switch(event.getCode())
+		    {
+		    case CLOSE:
+			closeApp();
+			return true;
+		    default:
+			return super.onEnvironmentEvent(event);
+		    }
+		}
+	    };
+	//FIXME:filling
+	layout.openTempArea(propertiesArea);
 	luwrain.announceActiveArea();
 	return true;
     }
@@ -490,7 +471,7 @@ private boolean closePropertiesArea()
 
     @Override public AreaLayout getAreaLayout()
     {
-	return layouts.getCurrentLayout();
+	return layout.getLayout();
     }
 
     @Override public String getAppName()

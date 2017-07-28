@@ -34,21 +34,17 @@ class Actions
     private final Luwrain luwrain;
     private final Base base;
     private final Strings strings;
-    private final AreaLayoutSwitch layouts;
 
     private final Conversations conversations;
 
-    Actions(Luwrain luwrain, Base base,
-	    Strings strings, AreaLayoutSwitch layouts)
+    Actions(Luwrain luwrain, Base base, Strings strings)
     {
 	NullCheck.notNull(luwrain, "luwrain");
 	NullCheck.notNull(base, "base");
 	NullCheck.notNull(strings, "strings");
-	NullCheck.notNull(layouts, "layouts");
 	this.luwrain = luwrain;
 	this.base = base;
 	this.strings = strings;
-	this.layouts = layouts;
 	this.conversations = new Conversations(luwrain, strings);
     }
 
@@ -95,7 +91,6 @@ FilesOperation.Listener listener, ListArea area)
 base.launch(luwrain.getFilesOperations().move(listener, 
 conversations.moveOperationName(filesToMove, dest), filesToMove, dest));
 	area.refresh();
-	layouts.show(CommanderApp.OPERATIONS_LAYOUT_INDEX);
 	return true;
     }
 
@@ -155,8 +150,7 @@ conversations.moveOperationName(filesToMove, dest), filesToMove, dest));
 	return CommanderArea.ClickHandler.Result.OK;
     }
 
-    boolean showFileObjectsProperties(InfoAndProperties infoAndProps,
-				      PanelArea area, SimpleArea propertiesArea)
+    boolean showFileObjectsProperties(InfoAndProperties infoAndProps, PanelArea area, SimpleArea propertiesArea)
     {
 	NullCheck.notNull(area, "area");
 	final FileObject[] paths = area.getFileObjectsToProcess();
@@ -164,8 +158,6 @@ conversations.moveOperationName(filesToMove, dest), filesToMove, dest));
 	    return false;
 	propertiesArea.clear();
 	//	infoAndProps.fillProperties(propertiesArea, paths);
-	layouts.show(CommanderApp.PROPERTIES_LAYOUT_INDEX);
-	luwrain.announceActiveArea();
 	return true;
     }
 
@@ -188,7 +180,6 @@ conversations.moveOperationName(filesToMove, dest), filesToMove, dest));
 	    propertiesArea.clear();
 	    infoAndProps.fillDirInfo(fileObj, propertiesArea);
 	}
-	layouts.show(CommanderApp.PROPERTIES_LAYOUT_INDEX);
 	luwrain.announceActiveArea();
 	return true;
     }
