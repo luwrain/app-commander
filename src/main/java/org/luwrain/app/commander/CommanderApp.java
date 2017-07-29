@@ -173,8 +173,6 @@ class CommanderApp implements Application, FilesOperation.Listener
 		    NullCheck.notNull(event, "event");
 	if (event.getType() != EnvironmentEvent.Type.REGULAR)
 	    return super.onEnvironmentEvent(event);
-	if (event instanceof ConfirmationEvent)
-	    return onConfirmationEvent((ConfirmationEvent)event);
 		    switch(event.getCode())
 		    {
 		    case CLOSE:
@@ -184,25 +182,6 @@ class CommanderApp implements Application, FilesOperation.Listener
 			return super.onEnvironmentEvent(event);
 		    }
 		}
-
-    private boolean onConfirmationEvent(ConfirmationEvent event)
-    {
-	NullCheck.notNull(event, "event");
-	Log.debug("commander", "showing confirmation event for " + event.path.toString());
-	final String cancel = "Прервать";
-	final String overwrite = "Перезаписать";
-	final String overwriteAll = "Перезаписать все";
-	final String skip = "Пропустить";
-	final String skipAll = "Пропустить все";
-	final Object res = Popups.fixedList(luwrain, "Подтверждение перезаписи " + event.path.toString(), new String[]{overwrite, overwriteAll, skip, skipAll, cancel});
-	if (res == overwrite || res == overwriteAll)
-	    event.answer = FilesOperation.ConfirmationChoices.OVERWRITE; else
-	    if (res == skip || res == skipAll)
-		event.answer = FilesOperation.ConfirmationChoices.SKIP; else
-		event.answer = FilesOperation.ConfirmationChoices.CANCEL;
-	Log.debug("commander", "popup closed, answer is " + event.answer.toString());
-	return true;
-    }
 	    };
 
     }
@@ -436,22 +415,7 @@ private boolean onTabInPanel(Side side)
     @Override public FilesOperation.ConfirmationChoices confirmOverwrite(java.nio.file.Path path)
     {
 	NullCheck.notNull(path, "path");
-	final ConfirmationEvent event = new ConfirmationEvent(operationsArea, path);
-	Log.debug("commander", "sending confirmation event for " + path.toString());
-	luwrain.enqueueEvent(event);
-	Log.debug("commander", "starting to wait the event to be processed for " + path.toString());
-	try {
-	    event.waitForBeProcessed();
-	}
-	catch(InterruptedException e)
-	{
-	    Log.debug("commander", "thread was interrupted while waiting the confirmation for " + path.toString());
-	    Thread.currentThread().interrupt();
-	}
-	if (event.answer == null)
-	    Log.warning("commander", "confirmation event for " + path.toString() + " returned with null answer"); else
-	    Log.debug("commander", "the confirmation for " + path.toString() + " came:" + event.answer.toString());
-	return event.answer;
+	return (FilesOperation.ConfirmationChoices)luwrain.runUiSafelySync(()->actions.conversations.overrideConfirmation(path.toFile()));
     }
 
     private void gotoLeftPanel()

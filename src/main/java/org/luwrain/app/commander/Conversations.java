@@ -4,6 +4,7 @@ package org.luwrain.app.commander;
 import java.io.*;
 import java.nio.file.*;
 
+import org.luwrain.base.FilesOperation;
 import org.luwrain.core.*;
 import org.luwrain.popups.Popups;
 
@@ -94,4 +95,19 @@ String moveOperationName(File[] whatToMove, File moveTo)
 	return strings.moveOperationName(whatToMove[0].getName(), moveTo.getName());
     }
 
+    FilesOperation.ConfirmationChoices overrideConfirmation(File file)
+    {
+	NullCheck.notNull(file, "file");
+	final String cancel = "Прервать";
+	final String overwrite = "Перезаписать";
+	final String overwriteAll = "Перезаписать все";
+	final String skip = "Пропустить";
+	final String skipAll = "Пропустить все";
+	final Object res = Popups.fixedList(luwrain, "Подтверждение перезаписи " + file.getAbsolutePath(), new String[]{overwrite, overwriteAll, skip, skipAll, cancel});
+	if (res == overwrite || res == overwriteAll)
+	    return FilesOperation.ConfirmationChoices.OVERWRITE;
+	if (res == skip || res == skipAll)
+	    return FilesOperation.ConfirmationChoices.SKIP;
+	return FilesOperation.ConfirmationChoices.CANCEL;
+    }
 }

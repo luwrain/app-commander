@@ -35,7 +35,7 @@ class Actions
     private final Base base;
     private final Strings strings;
 
-    private final Conversations conversations;
+    final Conversations conversations;
 
     Actions(Luwrain luwrain, Base base, Strings strings)
     {
