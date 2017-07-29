@@ -415,7 +415,7 @@ private boolean onTabInPanel(Side side)
     @Override public FilesOperation.ConfirmationChoices confirmOverwrite(java.nio.file.Path path)
     {
 	NullCheck.notNull(path, "path");
-	return (FilesOperation.ConfirmationChoices)luwrain.runUiSafelySync(()->actions.conversations.overrideConfirmation(path.toFile()));
+	return (FilesOperation.ConfirmationChoices)luwrain.callUiSafely(()->actions.conversations.overrideConfirmation(path.toFile()));
     }
 
     private void gotoLeftPanel()
