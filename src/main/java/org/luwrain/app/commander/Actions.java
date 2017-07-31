@@ -56,13 +56,13 @@ class Actions
 	if (!copyFromArea.isLocalDir() || !copyToArea.isLocalDir())
 	    return false;
 	final File copyFromDir = copyFromArea.getOpenedAsFile();
-	if (copyFromDir == null)
+	if (copyFromDir == null || !copyFromDir.isAbsolute())
 	    return false;
 	final File[] filesToCopy = copyFromArea.getFilesToProcess();
 	if (filesToCopy.length < 1)
 	    return false;
 	final File copyToDir = copyToArea.getOpenedAsFile();
-	if (copyToDir == null)
+	if (copyToDir == null || !copyToDir.isAbsolute())
 	    return false;
 	final File dest = conversations.copyPopup(copyFromDir, filesToCopy, copyToDir);
 	if (dest == null)

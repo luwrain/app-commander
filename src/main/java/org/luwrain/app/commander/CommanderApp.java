@@ -365,7 +365,7 @@ private boolean onTabInPanel(Side side)
 			switch(event.getSpecial())
 			{
 			case ESCAPE:
-			    layout.closeTempArea();
+			    layout.closeTempLayout();
 			    luwrain.announceActiveArea();
 			    return true;
 			}
