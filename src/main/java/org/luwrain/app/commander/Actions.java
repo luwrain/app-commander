@@ -48,6 +48,20 @@ class Actions
 	this.conversations = new Conversations(luwrain, strings);
     }
 
+    PanelArea.ClickHandler.Result onClick(CommanderArea area, Object obj, boolean dir)
+    {
+	NullCheck.notNull(area, "area");
+	NullCheck.notNull(obj, "obj");
+	if (dir)
+	    return PanelArea.ClickHandler.Result.OPEN_DIR;
+	final PanelArea panelArea = (PanelArea)area;
+	if (!panelArea.isLocalDir())//FIXME:
+	    return PanelArea.ClickHandler.Result.REJECTED;
+	final FileObject fileObject = (FileObject)obj;
+	luwrain.openFile(fileObject.getName().getPath());
+	return CommanderArea.ClickHandler.Result.OK;
+    }
+
     boolean onLocalCopy(PanelArea copyFromArea, PanelArea copyToArea, FilesOperation.Listener listener)
     {
 	NullCheck.notNull(copyFromArea, "copyFromArea");
@@ -71,13 +85,11 @@ class Actions
 	return true;
     }
 
-    boolean onLocalMove(PanelArea moveFromArea, PanelArea moveToArea, 
-FilesOperation.Listener listener, ListArea area)
+    boolean onLocalMove(PanelArea moveFromArea, PanelArea moveToArea, FilesOperation.Listener listener)
     {
 	NullCheck.notNull(moveFromArea, "moveFromArea");
 	NullCheck.notNull(moveToArea, "moveToArea");
 	NullCheck.notNull(listener, "listener");
-	NullCheck.notNull(area, "area");
 	if (!moveFromArea.isLocalDir() || !moveToArea.isLocalDir())
 	    return false;
 	final File moveFromDir = moveFromArea.getOpenedAsFile();
@@ -90,7 +102,6 @@ FilesOperation.Listener listener, ListArea area)
 	    return true;
 base.launch(luwrain.getFilesOperations().move(listener, 
 conversations.moveOperationName(filesToMove, dest), filesToMove, dest));
-	area.refresh();
 	return true;
     }
 
@@ -98,27 +109,30 @@ conversations.moveOperationName(filesToMove, dest), filesToMove, dest));
     {
 	NullCheck.notNull(app, "app");
 	NullCheck.notNull(area, "area");
+	if (!area.isLocalDir())
+	    return false;
 	final File createIn = area.getOpenedAsFile();
-	if (createIn == null)
+	if (createIn == null || !createIn.isAbsolute())
 	    return false;
 	final File newDir = conversations.mkdirPopup(createIn);
 	if (newDir == null)
 	    return true;
 	try {
-	    java.nio.file.Files.createDirectories(newDir.toPath());
+	    java.nio.file.Files.createDirectories(newDir.toPath());//FIXME:
 	}
 	catch (IOException e)
 	{
-	    luwrain.message(strings.mkdirErrorMessage(luwrain.i18n().getExceptionDescr(e)), Luwrain.MESSAGE_ERROR);
+	    luwrain.message(strings.mkdirErrorMessage(luwrain.i18n().getExceptionDescr(e)), Luwrain.MessageType.ERROR);
 	    return true;
 	}
-	luwrain.message(strings.mkdirOkMessage(newDir.getName()), Luwrain.MESSAGE_OK);
+	luwrain.message(strings.mkdirOkMessage(newDir.getName()), Luwrain.MessageType.OK);
 	area.reread(newDir.getName(), false);
 	return true;
     }
 
-    private boolean ddelete(Side panelSide)
+boolean ddelete(PanelArea area)
     {
+	NullCheck.notNull(area, "area");
 	/*
 	  File[] filesToDelete = panelSide == PanelArea.Side.LEFT?leftPanel.selectedAsFiles():rightPanel.selectedAsFiles();
 	  if (filesToDelete == null || filesToDelete.length < 1)
@@ -136,19 +150,6 @@ conversations.moveOperationName(filesToMove, dest), filesToMove, dest));
 	return true;
     }
 
-    PanelArea.ClickHandler.Result onClick(CommanderArea area, Object obj, boolean dir)
-    {
-	NullCheck.notNull(area, "area");
-	NullCheck.notNull(obj, "obj");
-	if (dir)
-	    return CommanderArea.ClickHandler.Result.OPEN_DIR;
-	final PanelArea panelArea = (PanelArea)area;
-	if (!panelArea.isLocalDir())
-	    return PanelArea.ClickHandler.Result.REJECTED;
-	final FileObject fileObject = (FileObject)obj;
-	luwrain.openFile(fileObject.getName().getPath());
-	return CommanderArea.ClickHandler.Result.OK;
-    }
 
     boolean showFileObjectsProperties(InfoAndProperties infoAndProps, PanelArea area, SimpleArea propertiesArea)
     {

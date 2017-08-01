@@ -31,7 +31,7 @@ import org.luwrain.popups.*;
 
 import org.luwrain.app.commander.Base.Side;
 
-class CommanderApp implements Application, FilesOperation.Listener
+class CommanderApp implements Application
 {
     private Luwrain luwrain = null;
     private Strings strings = null;
@@ -162,7 +162,7 @@ class CommanderApp implements Application, FilesOperation.Listener
 			switch(event.getSpecial())
 			{
 			case TAB:
-			    gotoLeftPanel();
+			    luwrain.setActiveArea(leftPanel);
 			    return true;
 			}
 		    return super.onKeyboardEvent(event);
@@ -202,7 +202,10 @@ class CommanderApp implements Application, FilesOperation.Listener
 			switch(event.getSpecial())
 			{
 			case TAB:
-			    return onTabInPanel(side);
+			    {
+				luwrain.setActiveArea(getAnotherPanel(side));
+			    return true;
+			    }
 			}
 		    return false;
 		}
@@ -253,7 +256,7 @@ class CommanderApp implements Application, FilesOperation.Listener
 		}
 		if (ActionEvent.isAction(event, "copy"))
 		{
-		    if (actions.onLocalCopy(getPanel(side), getAnotherPanel(side), this))
+		    if (actions.onLocalCopy(getPanel(side), getAnotherPanel(side), createFilesOperationListener()))
 		    {
 			operationsArea.refresh();
 			return true;
@@ -261,7 +264,14 @@ class CommanderApp implements Application, FilesOperation.Listener
 		    return false;
 		}
 		if (ActionEvent.isAction(event, "move"))
-		    return actions.onLocalMove(getPanel(side), getAnotherPanel(side), this, operationsArea);
+		{
+		    if (actions.onLocalMove(getPanel(side), getAnotherPanel(side), createFilesOperationListener()))
+		    {
+			operationsArea.refresh();
+			return true;
+		    }
+		    return false;
+		}
 		if (ActionEvent.isAction(event, "mkdir"))
 		    return actions.mkdir(this, getPanel(side));
 		if (ActionEvent.isAction(event, "open-ftp"))
@@ -277,25 +287,24 @@ class CommanderApp implements Application, FilesOperation.Listener
 	}
     }
 
-private boolean onTabInPanel(Side side)
+    private FilesOperation.Listener createFilesOperationListener()
     {
-	NullCheck.notNull(side, "side");
-	switch(side)
-	{
-	case LEFT:
-	    luwrain.setActiveArea(rightPanel);
-	    return true;
-	case RIGHT:
-	    if (base.hasOperations())
-		luwrain.setActiveArea(operationsArea); else
-		luwrain.setActiveArea(leftPanel);
-	    return true;
-	default:
-	    return false;
-	}
+	return new FilesOperation.Listener(){
+	    @Override public void onOperationProgress(FilesOperation operation)
+	    {
+		NullCheck.notNull(operation, "operation");
+		NullCheck.notNull(operation, "operation");
+		luwrain.runInMainThread(()->onOperationUpdate(operation));
+	    }
+	    @Override public FilesOperation.ConfirmationChoices confirmOverwrite(java.nio.file.Path path)
+	    {
+		NullCheck.notNull(path, "path");
+		return (FilesOperation.ConfirmationChoices)luwrain.callUiSafely(()->actions.conversations.overrideConfirmation(path.toFile()));
+	    }
+	};
     }
 
-    boolean selectPartition(Side side)
+    private boolean selectPartition(Side side)
     {
 	NullCheck.notNull(side, "side");
 	org.luwrain.base.Partition part = null;
@@ -320,7 +329,7 @@ private boolean onTabInPanel(Side side)
 	}
     }
 
-    void refreshPanels()
+    private void refreshPanels()
     {
 	leftPanel.reread(false);
 	rightPanel.reread(false);
@@ -403,34 +412,6 @@ private boolean onTabInPanel(Side side)
 		luwrain.playSound(Sounds.DONE);
 	    refreshPanels();
 	}
-    }
-
-    @Override public void onOperationProgress(FilesOperation operation)
-    {
-	NullCheck.notNull(operation, "operation");
-	NullCheck.notNull(operation, "operation");
-	luwrain.runInMainThread(()->onOperationUpdate(operation));
-    }
-
-    @Override public FilesOperation.ConfirmationChoices confirmOverwrite(java.nio.file.Path path)
-    {
-	NullCheck.notNull(path, "path");
-	return (FilesOperation.ConfirmationChoices)luwrain.callUiSafely(()->actions.conversations.overrideConfirmation(path.toFile()));
-    }
-
-    private void gotoLeftPanel()
-    {
-	luwrain.setActiveArea(leftPanel);
-    }
-
-    private void gotoRightPanel()
-    {
-	luwrain.setActiveArea(rightPanel);
-    }
-
-    private void gotoOperations()
-    {
-	luwrain.setActiveArea(operationsArea);
     }
 
     @Override public AreaLayout getAreaLayout()
