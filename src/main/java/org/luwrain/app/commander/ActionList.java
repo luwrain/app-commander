@@ -34,7 +34,7 @@ class ActionList
 	    new Action("copy", strings.actionCopy(), new KeyboardEvent(KeyboardEvent.Special.F5)),
 	    new Action("move", strings.actionMove(), new KeyboardEvent(KeyboardEvent.Special.F6)),
 	    new Action("mkdir", strings.actionMkdir(), new KeyboardEvent(KeyboardEvent.Special.F7)),
-	    new Action("delete", strings.actionDelete(), new KeyboardEvent(KeyboardEvent.Special.F8)),
+	    new Action("delete", strings.actionDelete(), new KeyboardEvent(KeyboardEvent.Special.DELETE)),
 	    new Action("open", strings.actionOpen()),
 	    new Action("size", strings.actionSize(), new KeyboardEvent(KeyboardEvent.Special.F3, EnumSet.of(KeyboardEvent.Modifiers.ALT))),
 	    new Action("preview", strings.actionPreview(), new KeyboardEvent(KeyboardEvent.Special.F3, EnumSet.of(KeyboardEvent.Modifiers.SHIFT))),

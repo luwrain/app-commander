@@ -6,7 +6,7 @@ import java.nio.file.*;
 
 import org.luwrain.base.FilesOperation;
 import org.luwrain.core.*;
-import org.luwrain.popups.Popups;
+import org.luwrain.popups.*;
 
 class Conversations
 {
@@ -60,6 +60,17 @@ class Conversations
 					 return true;
 				     });
 	return res != null?res:null;
+    }
+
+    boolean deleteConfirmation(File[] files)
+    {
+	NullCheck.notNullItems(files, "files");
+	final String text = strings.delPopupText(luwrain.i18n().getNumberStr(files.length, "items"));
+	final YesNoPopup popup = new YesNoPopup(luwrain, strings.delPopupName(), text, false, Popups.DEFAULT_POPUP_FLAGS);
+	  luwrain.popup(popup);
+	  if (popup.wasCancelled())
+	  return false;
+	  return popup.result();
     }
 
     String ftpAddress()

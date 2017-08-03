@@ -72,8 +72,7 @@ class CommanderApp implements Application
 	if (!base.init(luwrain, strings))
 	    return new InitResult(InitResult.Type.FAILURE);
 	this.actionList = new ActionList(strings);
-	this.infoAndProps = new InfoAndProperties();
-	infoAndProps.init(luwrain);
+	this.infoAndProps = new InfoAndProperties(luwrain);
 	try {
 	    if (startFrom != null && !startFrom.isEmpty())
 		createAreas(startFrom); else
@@ -84,7 +83,10 @@ class CommanderApp implements Application
 	    e.printStackTrace();
 	    return new InitResult(e);
 	}
-	layout = new AreaLayoutHelper(()->luwrain.onNewAreaLayout(), new AreaLayout(AreaLayout.LEFT_RIGHT_BOTTOM, leftPanel, rightPanel, operationsArea));
+	layout = new AreaLayoutHelper(()->{
+		luwrain.onNewAreaLayout();
+		luwrain.announceActiveArea();
+	    }, new AreaLayout(AreaLayout.LEFT_RIGHT_BOTTOM, leftPanel, rightPanel, operationsArea));
 	this.actions = new Actions(luwrain, base, strings);
 	return new InitResult();
     }
@@ -274,10 +276,12 @@ class CommanderApp implements Application
 		}
 		if (ActionEvent.isAction(event, "mkdir"))
 		    return actions.mkdir(this, getPanel(side));
+		if (ActionEvent.isAction(event, "delete"))
+return actions.onLocalDelete(area);
 		if (ActionEvent.isAction(event, "open-ftp"))
 		    return actions.onOpenFtp(area);
-		//		if (ActionEvent.isAction(event, "volume-info"))
-		//		    return actions.showVolumeInfo(infoAndProps, area, propertiesArea);
+		if (ActionEvent.isAction(event, "volume-info"))
+		    return showVolumeInfo(area);
 		return false;
 	    }
 	case PROPERTIES:
@@ -302,6 +306,43 @@ class CommanderApp implements Application
 		return (FilesOperation.ConfirmationChoices)luwrain.callUiSafely(()->actions.conversations.overrideConfirmation(path.toFile()));
 	    }
 	};
+    }
+
+    private boolean showVolumeInfo(PanelArea area)
+    {
+	NullCheck.notNull(area, "area");
+	final SimpleArea propsArea = new SimpleArea(new DefaultControlEnvironment(luwrain), strings.infoAreaName()){
+		@Override public boolean onKeyboardEvent(KeyboardEvent event)
+		{
+		    NullCheck.notNull(event, "event");
+		    if (event.isSpecial() && !event.isModified())
+			switch(event.getSpecial())
+			{
+			case ESCAPE:
+			    layout.closeTempLayout();
+			    return true;
+			}
+		    return super.onKeyboardEvent(event);
+		}
+		@Override public boolean onEnvironmentEvent(EnvironmentEvent event)
+		{
+		    NullCheck.notNull(event, "event");
+		    if (event.getType() != EnvironmentEvent.Type.REGULAR)
+			return super.onEnvironmentEvent(event);
+		    switch(event.getCode())
+		    {
+		    case CLOSE:
+			closeApp();
+			return true;
+		    default:
+			return super.onEnvironmentEvent(event);
+		    }
+		}
+	    };
+	if (!actions.showVolumeInfo(infoAndProps, area, propsArea))
+	    return false;
+	layout.openTempArea(propsArea);
+	return true;
     }
 
     private boolean selectPartition(Side side)

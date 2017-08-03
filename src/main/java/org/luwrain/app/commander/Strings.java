@@ -41,7 +41,7 @@ public interface Strings
     String mkdirErrorMessage(String comment);
     String mkdirOkMessage(String dirName);
     String delPopupName();
-    String delPopupText(File[] files);
+    String delPopupText(String whatToDelete);
     String delOperationName(File[] filesToDelete);
     String operationCompletedMessage(org.luwrain.base.FilesOperation op);
     String notAllOperationsFinished();

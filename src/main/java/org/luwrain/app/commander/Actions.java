@@ -130,23 +130,19 @@ conversations.moveOperationName(filesToMove, dest), filesToMove, dest));
 	return true;
     }
 
-boolean ddelete(PanelArea area)
+boolean onLocalDelete(PanelArea area)
     {
 	NullCheck.notNull(area, "area");
-	/*
-	  File[] filesToDelete = panelSide == PanelArea.Side.LEFT?leftPanel.selectedAsFiles():rightPanel.selectedAsFiles();
-	  if (filesToDelete == null || filesToDelete.length < 1)
-	  return false;
-	  YesNoPopup popup = new YesNoPopup(luwrain, strings.delPopupName(),
-	  strings.delPopupText(filesToDelete), false);
-	  luwrain.popup(popup);
-	  if (popup.closing.cancelled())
-	  return true;
-	  if (!popup.result())
-	  return true;
-	  operations.launch(Operations.delete(operations, strings.delOperationName(filesToDelete), 
-	  filesToDelete));
-	*/
+	if (!area.isLocalDir())
+	    return false;
+	final File[] files = area.getFilesToProcess();
+	if (files.length == 0)
+	    return false;
+	if (!conversations.deleteConfirmation(files))
+	    return true;
+
+	//	  operations.launch(Operations.delete(operations, strings.delOperationName(filesToDelete), 
+	//	  filesToDelete));
 	return true;
     }
 
@@ -162,26 +158,24 @@ boolean ddelete(PanelArea area)
 	return true;
     }
 
-    boolean showVolumeInfo(InfoAndProperties infoAndProps,
-			   PanelArea area, SimpleArea propertiesArea)
+    boolean showVolumeInfo(InfoAndProperties infoAndProps, PanelArea area, SimpleArea propsArea)
     {
+	NullCheck.notNull(infoAndProps, "infoAndProps");
 	NullCheck.notNull(area, "area");
+	NullCheck.notNull(propsArea, "propsArea");
 	if (area.isLocalDir())
 	{
 	    final File opened = area.getOpenedAsFile();
 	    if (opened == null)
 		return false;
-	    propertiesArea.clear();
-	    infoAndProps.fillLocalDirInfo(opened, propertiesArea);
+	    infoAndProps.fillLocalVolumeInfo(opened, propsArea);
 	} else
 	{
 	    final FileObject fileObj = area.getOpenedAsFileObject();
 	    if (fileObj == null)
 		return false;
-	    propertiesArea.clear();
-	    infoAndProps.fillDirInfo(fileObj, propertiesArea);
+	    infoAndProps.fillDirInfo(fileObj, propsArea);
 	}
-	luwrain.announceActiveArea();
 	return true;
     }
 

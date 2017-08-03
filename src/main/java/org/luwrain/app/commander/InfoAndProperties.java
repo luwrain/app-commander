@@ -27,15 +27,15 @@ import org.luwrain.controls.*;
 
 class InfoAndProperties
 {
-    private Luwrain luwrain;
+    private final Luwrain luwrain;
 
-    void init(Luwrain luwrain)
+    InfoAndProperties(Luwrain luwrain)
     {
 	NullCheck.notNull(luwrain, "luwrain");
 	this.luwrain = luwrain;
     }
 
-    void fillLocalDirInfo(File file, MutableLines lines)
+    void fillLocalVolumeInfo(File file, MutableLines lines)
     {
 	NullCheck.notNull(file, "file");
 	NullCheck.notNull(lines, "lines");
@@ -50,7 +50,6 @@ class InfoAndProperties
 	lines.addLine("URL: " + fileObj.toString());
 	lines.addLine("");
     }
-
 
     /*
     void fillProperties(MutableLines lines, Path[] items)
@@ -137,21 +136,21 @@ class InfoAndProperties
 	if (fileObjects.length < 1)
 	    return false;
 	new Thread(()->{
-		   long res = 0;
-		   try {
-		       for(FileObject obj: fileObjects)
-			   res += getTotalSize(obj);
-		   }
-		   catch(org.apache.commons.vfs2.FileSystemException e)
-		   {
-		       luwrain.crash(e);
-		       return;
-		   }
-    final long finalRes = res;
-	luwrain.runInMainThread(()->luwrain.message(formatSize(finalRes)));
+		long res = 0;
+		try {
+		    for(FileObject obj: fileObjects)
+			res += getTotalSize(obj);
+		}
+		catch(org.apache.commons.vfs2.FileSystemException e)
+		{
+		    luwrain.crash(e);
+		    return;
+		}
+		final long finalRes = res;
+		luwrain.message(formatSize(finalRes), Luwrain.MessageType.DONE);
 	}).start();
 	return true;
-}
+    }
 
     static private String formatSize(long size)
     {
@@ -176,17 +175,16 @@ class InfoAndProperties
     static public long getTotalSize(FileObject fileObj) throws org.apache.commons.vfs2.FileSystemException
     {
 	NullCheck.notNull(fileObj, "fileObj");
-
 	if (!fileObj.isFolder() && !fileObj.isFile())
 	    return 0;
 	if (fileObj instanceof org.apache.commons.vfs2.provider.local.LocalFile &&
-java.nio.file.Files.isSymbolicLink(java.nio.file.Paths.get(fileObj.getName().getPath())))
+	    java.nio.file.Files.isSymbolicLink(java.nio.file.Paths.get(fileObj.getName().getPath())))
 	    return 0;
 	if (!fileObj.isFolder())
 	    return fileObj.getContent().getSize();
 	long res = 0;
 	for(FileObject child: fileObj.getChildren())
-		    res += getTotalSize(child);
+	    res += getTotalSize(child);
 	return res;
     }
 }
