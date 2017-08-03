@@ -105,7 +105,7 @@ class CommanderApp implements Application
 		{
 		    NullCheck.notNull(event, "event");
 		    if (onKeyboardEventInPanel(Side.LEFT, event))
-								 return true;
+			return true;
 		    return super.onKeyboardEvent(event);
 		}
 		@Override public boolean onEnvironmentEvent(EnvironmentEvent event)
@@ -115,7 +115,7 @@ class CommanderApp implements Application
 			return super.onEnvironmentEvent(event);
 		    if (onEnvironmentEventInPanel(event, this, Side.LEFT))
 			return true;
-			return super.onEnvironmentEvent(event);
+		    return super.onEnvironmentEvent(event);
 		}
 	    };
 
@@ -134,17 +134,16 @@ class CommanderApp implements Application
 			return super.onEnvironmentEvent(event);
 		    if (onEnvironmentEventInPanel(event, this, Side.RIGHT))
 			return true;
-			return super.onEnvironmentEvent(event);
+		    return super.onEnvironmentEvent(event);
 		}
 	    };
 
 	leftPanel.setLoadingResultHandler((location, wrappers, selectedIndex, announce)->{
 		luwrain.runInMainThread(()->leftPanel.acceptNewLocation(location, wrappers, selectedIndex, announce));
 	    });
-
 	rightPanel.setLoadingResultHandler((location, wrappers, selectedIndex, announce)->{
 		luwrain.runInMainThread(()->rightPanel.acceptNewLocation(location, wrappers, selectedIndex, announce));
- });
+	    });
 
 	leftPanel.openInitial(startFrom);
 	rightPanel.openInitial(startFrom);
@@ -156,7 +155,6 @@ class CommanderApp implements Application
 	listParams.name = strings.operationsAreaName();
 
 	operationsArea = new ListArea(listParams) {
-
 		@Override public boolean onKeyboardEvent(KeyboardEvent event)
 		{
 		    NullCheck.notNull(event, "event");
@@ -169,12 +167,11 @@ class CommanderApp implements Application
 			}
 		    return super.onKeyboardEvent(event);
 		}
-
 		@Override public boolean onEnvironmentEvent(EnvironmentEvent event)
 		{
 		    NullCheck.notNull(event, "event");
-	if (event.getType() != EnvironmentEvent.Type.REGULAR)
-	    return super.onEnvironmentEvent(event);
+		    if (event.getType() != EnvironmentEvent.Type.REGULAR)
+			return super.onEnvironmentEvent(event);
 		    switch(event.getCode())
 		    {
 		    case CLOSE:
@@ -185,32 +182,31 @@ class CommanderApp implements Application
 		    }
 		}
 	    };
-
     }
 
     private boolean onKeyboardEventInPanel(Side side, KeyboardEvent event)
+    {
+	NullCheck.notNull(side, "side");
+	NullCheck.notNull(event, "event");
+	if (event.isSpecial() && event.withAltOnly())
+	    switch(event.getSpecial())
+	    {
+	    case F1:
+		return selectPartition(Side.LEFT);
+	    case F2:
+		return selectPartition(Side.RIGHT);
+	    }
+	if (event.isSpecial()  && !event.isModified())
+	    switch(event.getSpecial())
+	    {
+	    case TAB:
 		{
-		    NullCheck.notNull(side, "side");
-		    NullCheck.notNull(event, "event");
-		    if (event.isSpecial() && event.withAltOnly())
-			switch(event.getSpecial())
-			{
-			case F1:
-			    return selectPartition(Side.LEFT);
-			case F2:
-			    return selectPartition(Side.RIGHT);
-			}
-		    if (event.isSpecial()  && !event.isModified())
-			switch(event.getSpecial())
-			{
-			case TAB:
-			    {
-				luwrain.setActiveArea(getAnotherPanel(side));
-			    return true;
-			    }
-			}
-		    return false;
+		    luwrain.setActiveArea(getAnotherPanel(side));
+		    return true;
 		}
+	    }
+	return false;
+    }
 
     private boolean onEnvironmentEventInPanel(EnvironmentEvent event, PanelArea area, Side side)
     {
@@ -277,7 +273,7 @@ class CommanderApp implements Application
 		if (ActionEvent.isAction(event, "mkdir"))
 		    return actions.mkdir(this, getPanel(side));
 		if (ActionEvent.isAction(event, "delete"))
-return actions.onLocalDelete(area);
+		    return actions.onLocalDelete(area);
 		if (ActionEvent.isAction(event, "open-ftp"))
 		    return actions.onOpenFtp(area);
 		if (ActionEvent.isAction(event, "volume-info"))
