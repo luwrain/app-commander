@@ -19,12 +19,28 @@ package org.luwrain.app.commander;
 import java.util.*;
 
 import org.luwrain.core.*;
+import org.luwrain.app.term.TermApp;
 
 public class Extension extends org.luwrain.core.extensions.EmptyExtension
 {
     @Override public Command[] getCommands(Luwrain luwrain)
     {
 	return new Command[]{
+
+	    new Command(){
+		@Override public String getName()
+		{
+		    return "term";
+		}
+		@Override public void onCommand(Luwrain luwrain)
+		{
+		    final String currentDir = luwrain.currentAreaDir();
+		    if (currentDir != null && !currentDir.isEmpty())
+			luwrain.launchApp("term", new String[]{currentDir}); else
+			luwrain.launchApp("term", new String[]{luwrain.getFileProperty("luwrain.dir.userhome").getAbsolutePath()});
+		}
+	    },
+
 	    new Command(){
 		@Override public String getName()
 		{
@@ -34,12 +50,15 @@ public class Extension extends org.luwrain.core.extensions.EmptyExtension
 		{
 		    luwrain.launchApp("commander");
 		}
-	    }};
+	    },
+
+	};
     }
 
     @Override public Shortcut[] getShortcuts(Luwrain luwrain)
     {
 	return new Shortcut[]{
+
 	    new Shortcut() {
 		@Override public String getName()
 		{
@@ -57,6 +76,22 @@ public class Extension extends org.luwrain.core.extensions.EmptyExtension
 			return new Application[]{new CommanderApp()};
 		    return v.toArray(new Application[v.size()]);
 		}
-	    }};
+	    },
+
+	    new Shortcut() {
+		@Override public String getName()
+		{
+		    return "term";
+		}
+		@Override public Application[] prepareApp(String[] args)
+		{
+		    if (args != null && args.length > 0 && 
+			args[0] != null && !args[0].isEmpty())
+			return new Application[]{new TermApp(args[0])};
+		    return new Application[]{new TermApp("/")};
+		}
+	    }
+
+	};
     }
 }
