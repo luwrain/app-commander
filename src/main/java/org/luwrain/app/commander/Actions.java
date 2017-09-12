@@ -18,6 +18,7 @@ package org.luwrain.app.commander;
 
 import java.io.*;
 import java.util.*;
+import java.net.*;
 
 import org.apache.commons.vfs2.*;
 
@@ -26,6 +27,7 @@ import org.luwrain.core.*;
 import org.luwrain.core.events.*;
 import org.luwrain.controls.*;
 import org.luwrain.popups.Popups;
+import org.luwrain.util.*;
 
 import org.luwrain.app.commander.Base.Side;
 
@@ -220,7 +222,34 @@ boolean onLocalDelete(PanelArea area)
 	return true;
     }
 
-
+    boolean onCopyUrls(PanelArea panelArea)
+    {
+	NullCheck.notNull(panelArea, "panelArea");
+	final Object[] objs = panelArea.getObjectsToProcess();
+	final List<URL> res = new LinkedList<URL>();
+	Log.debug("proba", "" + objs.length);
+	for(Object o: objs)
+	{
+	    if (o instanceof URL)
+	    {
+		res.add((URL)o);
+		continue;
+	    }
+	    if (o instanceof File)
+	    {
+		res.add(Urls.toUrl((File)o));
+		continue;
+	    }
+	}
+	if (res.isEmpty())
+	    return false;
+	final URL[] urls = res.toArray(new URL[res.size()]);
+	luwrain.getClipboard().set(urls);
+	if (urls.length == 1)
+	    luwrain.message(urls[0].toString(), Luwrain.MessageType.OK); else
+	    luwrain.playSound(Sounds.OK);
+	return true;
+    }
 
     static boolean onOpenEvent(EnvironmentEvent event, PanelArea area)
     {

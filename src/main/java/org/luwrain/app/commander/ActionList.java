@@ -40,7 +40,7 @@ class ActionList
 	if (toProcess.length < 1)
 	    return new Action[]{
 		new Action("mkdir", strings.actionMkdir(), new KeyboardEvent(KeyboardEvent.Special.F7)),
-		new Action("open-ftp", "Подключиться к FTP-серверу"), 
+		new Action("open-ftp", "Подключиться к FTP-серверу", new KeyboardEvent(KeyboardEvent.Special.F9)), 
 		new Action("volume-info", "Показать информацию о разделе", new KeyboardEvent(KeyboardEvent.Special.F10)), 
 		hiddenShow,
 		hiddenHide,
@@ -52,12 +52,12 @@ class ActionList
 	    new Action("delete", strings.actionDelete(), new KeyboardEvent(KeyboardEvent.Special.DELETE)),
 	    new Action("open", strings.actionOpen()),
 	    new Action("size", strings.actionSize(), new KeyboardEvent(KeyboardEvent.Special.F3, EnumSet.of(KeyboardEvent.Modifiers.ALT))),
+	    new Action("copy-url", "Скопировать URL", new KeyboardEvent(KeyboardEvent.Special.F4, EnumSet.of(KeyboardEvent.Modifiers.ALT))),
 	    new Action("preview", strings.actionPreview(), new KeyboardEvent(KeyboardEvent.Special.F3, EnumSet.of(KeyboardEvent.Modifiers.SHIFT))),
 	    new Action("play", strings.actionPlay(), new KeyboardEvent(KeyboardEvent.Special.F2, EnumSet.of(KeyboardEvent.Modifiers.SHIFT))),
 	    new Action("edit-text", strings.actionEditAsText(), new KeyboardEvent(KeyboardEvent.Special.F4, EnumSet.of(KeyboardEvent.Modifiers.SHIFT))),
 	    new Action("preview-another-format", strings.actionPreviewAnotherFormat()),
 	    new Action("open-choosing-app", strings.actionOpenChoosingApp()),
-	    new Action("copy-to-clipboard", strings.actionCopyToClipboard(), new KeyboardEvent(KeyboardEvent.Special.F4, EnumSet.of(KeyboardEvent.Modifiers.ALT))),
 	    new Action("open-ftp", "Подключиться к FTP-серверу"), 
 	    new Action("volume-info", "Показать информацию о разделе", new KeyboardEvent(KeyboardEvent.Special.F10)), 
 	    hiddenShow,

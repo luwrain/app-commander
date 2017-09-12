@@ -63,7 +63,7 @@ class PanelArea extends CommanderArea<FileObject>
 
     FileObject[] getFileObjectsToProcess()
     {
-	final LinkedList<FileObject> res = new LinkedList<FileObject>();
+	final List<FileObject> res = new LinkedList<FileObject>();
 	for(Object o: getMarked())
 	    res.add((FileObject)o);
 	if (!res.isEmpty())
@@ -83,7 +83,12 @@ class PanelArea extends CommanderArea<FileObject>
 	    if (f instanceof org.apache.commons.vfs2.provider.ftp.FtpFileObject)
 	    {
 		try {
-		    res.add(new java.net.URL(f.getName().getPath()));
+
+final org.apache.commons.vfs2.provider.ftp.FtpFileObject ftpFile = (org.apache.commons.vfs2.provider.ftp.FtpFileObject)f;
+		    //		    Log.debug("proba", ftpFile.getName().getPath());
+//		    Log.debug("proba", ftpFile.getFileSystem().getRootURI());
+final java.net.URL root = new java.net.URL(ftpFile.getFileSystem().getRootURI());
+res.add(new java.net.URL(root, f.getName().getPath()));
 		}
 		catch(MalformedURLException e)
 		{

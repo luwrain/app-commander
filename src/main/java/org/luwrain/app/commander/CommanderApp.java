@@ -238,6 +238,11 @@ class CommanderApp implements Application
 		    return actions.onOpenFilesWithApp("notepad", area.getFileObjectsToProcess(), false);
 		if (ActionEvent.isAction(event, "size"))
 		    return infoAndProps.calcSize(area.getFileObjectsToProcess());
+
+		if (ActionEvent.isAction(event, "copy-url"))
+		    return actions.onCopyUrls(area);
+
+
 		if (ActionEvent.isAction(event, "preview"))
 		    return actions.onOpenFilesWithApp("reader", area.getFileObjectsToProcess(), true);
 		if (ActionEvent.isAction(event, "hidden-show"))
