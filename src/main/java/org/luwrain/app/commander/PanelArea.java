@@ -83,10 +83,7 @@ class PanelArea extends CommanderArea<FileObject>
 	    if (f instanceof org.apache.commons.vfs2.provider.ftp.FtpFileObject)
 	    {
 		try {
-
 final org.apache.commons.vfs2.provider.ftp.FtpFileObject ftpFile = (org.apache.commons.vfs2.provider.ftp.FtpFileObject)f;
-		    //		    Log.debug("proba", ftpFile.getName().getPath());
-//		    Log.debug("proba", ftpFile.getFileSystem().getRootURI());
 final java.net.URL root = new java.net.URL(ftpFile.getFileSystem().getRootURI());
 res.add(new java.net.URL(root, f.getName().getPath()));
 		}
@@ -122,7 +119,6 @@ res.add(new java.net.URL(root, f.getName().getPath()));
     {
 	return opened();
     }
-
 
     boolean openLocalPath(String path)
     {
@@ -168,12 +164,53 @@ res.add(new java.net.URL(root, f.getName().getPath()));
 return actionList.getPanelAreaActions(this);
 		}
 
-    static Params<FileObject> createParams(ControlEnvironment environment) throws FileSystemException
-    {
-	NullCheck.notNull(environment, "environment");
-	Params<FileObject> params = CommanderUtilsVfs.createParams(environment);
-	params.flags = EnumSet.of(Flags.MARKING);
-	params.filter = new CommanderUtilsVfs.NoHiddenFilter();
-	return params;
-    }
+		static Params<FileObject> createParams(ControlEnvironment environment) throws FileSystemException
+		{
+		    NullCheck.notNull(environment, "environment");
+		    Params<FileObject> params = CommanderUtilsVfs.createParams(environment);
+		    params.flags = EnumSet.of(Flags.MARKING);
+		    params.filter = new CommanderUtilsVfs.NoHiddenFilter();
+		    params.clipboardSaver = (area,model,appearance,fromIndex,toIndex,clipboard)->{
+			NullCheck.notNull(model, "model");
+			NullCheck.notNull(clipboard, "clipboard");
+			if (fromIndex < 0 || toIndex < 0)
+			    throw new IllegalArgumentException("fromIndex and toIndex may not be negative");
+			final int count = model.getItemCount();
+			if (fromIndex >= toIndex || fromIndex >= count || toIndex > count)
+			    return false;
+			final List<String> names = new LinkedList<String>();
+			final List<Serializable> res = new LinkedList<Serializable>();
+			for(int i = fromIndex;i < toIndex;++i)
+			{
+			    final FileObject fileObj = (FileObject)model.getItem(i);
+			    final Serializable obj = fileObjectToJavaObject(fileObj);
+			    if (obj == null)
+				continue;
+			    names.add(fileObj.getName().getBaseName());
+			    res.add(obj);
+			}
+			return clipboard.set(res.toArray(new Serializable[res.size()]), names.toArray(new String[names.size()]));
+		    };
+		    return params;
+		}
+
+		static private Serializable fileObjectToJavaObject(FileObject obj)
+		{
+		    NullCheck.notNull(obj, "obj");
+		    if (obj instanceof org.apache.commons.vfs2.provider.local.LocalFile)
+			return new File(obj.getName().getPath());
+		    if (obj instanceof org.apache.commons.vfs2.provider.ftp.FtpFileObject)
+		    {
+			try {
+			    final org.apache.commons.vfs2.provider.ftp.FtpFileObject ftpFile = (org.apache.commons.vfs2.provider.ftp.FtpFileObject)obj;
+			    final java.net.URL root = new java.net.URL(ftpFile.getFileSystem().getRootURI());
+			    return new java.net.URL(root, obj.getName().getPath());
+			}
+			catch(MalformedURLException e)
+			{
+			    //FIXME:
+			}
+		    }
+		    return null;
+		}
 }
