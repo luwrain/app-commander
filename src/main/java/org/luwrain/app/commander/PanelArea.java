@@ -182,7 +182,10 @@ return actionList.getPanelAreaActions(this);
 			final List<Serializable> res = new LinkedList<Serializable>();
 			for(int i = fromIndex;i < toIndex;++i)
 			{
-			    final FileObject fileObj = (FileObject)model.getItem(i);
+			    final CommanderArea.Wrapper<FileObject> wrapper = (CommanderArea.Wrapper<FileObject>)model.getItem(i);
+			    if (wrapper == null || wrapper.obj == null)
+				return false;
+			    final FileObject fileObj = wrapper.obj;
 			    final Serializable obj = fileObjectToJavaObject(fileObj);
 			    if (obj == null)
 				continue;
