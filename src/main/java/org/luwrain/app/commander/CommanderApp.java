@@ -68,9 +68,7 @@ class CommanderApp implements Application
 	    return new InitResult(InitResult.Type.NO_STRINGS_OBJ, Strings.NAME);
 	strings = (Strings)o;
 	this.luwrain = luwrain;
-	this.base = new Base();
-	if (!base.init(luwrain, strings))
-	    return new InitResult(InitResult.Type.FAILURE);
+	this.base = new Base(luwrain, strings);
 	this.actionList = new ActionList(strings);
 	this.infoAndProps = new InfoAndProperties(luwrain);
 	try {
@@ -138,11 +136,11 @@ class CommanderApp implements Application
 		}
 	    };
 
-	leftPanel.setLoadingResultHandler((location, wrappers, selectedIndex, announce)->{
-		luwrain.runInMainThread(()->leftPanel.acceptNewLocation(location, wrappers, selectedIndex, announce));
+	leftPanel.setLoadingResultHandler((location, data, selectedIndex, announce)->{
+		luwrain.runInMainThread(()->leftPanel.acceptNewLocation(location, data, selectedIndex, announce));
 	    });
-	rightPanel.setLoadingResultHandler((location, wrappers, selectedIndex, announce)->{
-		luwrain.runInMainThread(()->rightPanel.acceptNewLocation(location, wrappers, selectedIndex, announce));
+	rightPanel.setLoadingResultHandler((location, data, selectedIndex, announce)->{
+		luwrain.runInMainThread(()->rightPanel.acceptNewLocation(location, data, selectedIndex, announce));
 	    });
 
 	leftPanel.openInitial(startFrom);
@@ -150,7 +148,7 @@ class CommanderApp implements Application
 
 	final ListArea.Params listParams = new ListArea.Params();
 	listParams.context = new DefaultControlEnvironment(luwrain);
-	listParams.model = base.getOperationsListModel();
+	listParams.model = base.createOperationsListModel();
 	listParams.appearance = new OperationsAppearance(luwrain, strings, base);
 	listParams.name = strings.operationsAreaName();
 
@@ -201,7 +199,9 @@ class CommanderApp implements Application
 	    {
 	    case TAB:
 		{
-		    luwrain.setActiveArea(getAnotherPanel(side));
+		    if (side == Side.RIGHT && !base.operations.isEmpty())
+					    luwrain.setActiveArea(operationsArea); else
+		    		    luwrain.setActiveArea(getAnotherPanel(side));
 		    return true;
 		}
 	    }

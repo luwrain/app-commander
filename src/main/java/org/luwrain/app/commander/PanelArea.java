@@ -149,7 +149,7 @@ res.add(new java.net.URL(root, f.getName().getPath()));
 
     void showHidden()
     {
-	setCommanderFilter(new CommanderUtilsVfs.AllEntriesFilter());
+	setCommanderFilter(new CommanderUtils.AllEntriesFilter());
 	reread(false);
     }
 
@@ -182,6 +182,7 @@ return actionList.getPanelAreaActions(this);
 			final List<Serializable> res = new LinkedList<Serializable>();
 			for(int i = fromIndex;i < toIndex;++i)
 			{
+			    /*
 			    final CommanderArea.Wrapper<FileObject> wrapper = (CommanderArea.Wrapper<FileObject>)model.getItem(i);
 			    if (wrapper == null || wrapper.obj == null)
 				return false;
@@ -191,6 +192,7 @@ return actionList.getPanelAreaActions(this);
 				continue;
 			    names.add(fileObj.getName().getBaseName());
 			    res.add(obj);
+			    */
 			}
 			return clipboard.set(res.toArray(new Serializable[res.size()]), names.toArray(new String[names.size()]));
 		    };

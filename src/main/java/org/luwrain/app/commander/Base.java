@@ -32,33 +32,25 @@ class Base
 
     static private final String REGISTRY_PATH = "/org/luwrain/app/commander";
 
-    private Luwrain luwrain;
-    private Strings strings;
-    private Settings settings = null;
+    private final Luwrain luwrain;
+    private final Strings strings;
+    final Settings settings;
     final Vector<FilesOperation> operations = new Vector<FilesOperation>();
-    private ListUtils.FixedModel operationsListModel = new ListUtils.FixedModel();
 
-    boolean init(Luwrain luwrain, Strings strings)
+    Base (Luwrain luwrain, Strings strings)
     {
 	NullCheck.notNull(luwrain, "luwrain");
 	NullCheck.notNull(strings, "strings");
 	this.luwrain = luwrain;
 	this.strings = strings;
-	settings = RegistryProxy.create(luwrain.getRegistry(), REGISTRY_PATH, Settings.class);
-	return true;
+	this.settings = RegistryProxy.create(luwrain.getRegistry(), REGISTRY_PATH, Settings.class);
     }
 
     void launch(FilesOperation op)
     {
 	NullCheck.notNull(op, "op");
 	operations.add(op);
-	operationsListModel.setItems(operations.toArray(new FilesOperation[operations.size()]));
 	new Thread(op).start();
-    }
-
-    boolean hasOperations()
-    {
-	return !operations.isEmpty();
     }
 
     boolean allOperationsFinished()
@@ -96,8 +88,25 @@ class Base
 	return settings;
     }
 
-    ListArea.Model getOperationsListModel()
+    ListArea.Model createOperationsListModel()
     {
-	return operationsListModel;
+	return new OperationsListModel();
     }
-}
+
+    private class OperationsListModel implements ListArea.Model
+    {
+	@Override public Object getItem(int index)
+	{
+	    if (index < 0)
+		throw new IllegalArgumentException("index (" + index + ") may not be negative");
+	    return operations.get(index);
+	}
+	@Override public int getItemCount()
+	{
+	    return operations.size();
+	}
+	@Override public void refresh()
+	{
+	}
+    }
+    }
