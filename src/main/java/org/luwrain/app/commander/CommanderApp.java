@@ -71,6 +71,7 @@ class CommanderApp implements Application
 	this.base = new Base(luwrain, strings);
 	this.actionList = new ActionList(strings);
 	this.infoAndProps = new InfoAndProperties(luwrain);
+	this.actions = new Actions(luwrain, base, strings);
 	try {
 	    if (startFrom != null && !startFrom.isEmpty())
 		createAreas(startFrom); else
@@ -85,7 +86,6 @@ class CommanderApp implements Application
 		luwrain.onNewAreaLayout();
 		luwrain.announceActiveArea();
 	    }, new AreaLayout(AreaLayout.LEFT_RIGHT_BOTTOM, leftPanel, rightPanel, operationsArea));
-	this.actions = new Actions(luwrain, base, strings);
 	return new InitResult();
     }
 
@@ -151,6 +151,13 @@ class CommanderApp implements Application
 	listParams.model = base.createOperationsListModel();
 	listParams.appearance = new OperationsAppearance(luwrain, strings, base);
 	listParams.name = strings.operationsAreaName();
+	listParams.clickHandler = (area,index,obj)->{
+	    if (!base.closeOperation(index))
+		return false;
+	    area.redraw();
+	    luwrain.playSound(Sounds.OK);
+	    return true;
+	};
 
 	operationsArea = new ListArea(listParams) {
 		@Override public boolean onKeyboardEvent(KeyboardEvent event)
@@ -179,6 +186,10 @@ class CommanderApp implements Application
 			return super.onEnvironmentEvent(event);
 		    }
 		}
+		@Override protected String noContentStr()
+		{
+		    return "Файловые операции отсутствуют";//FIXME:
+		}
 	    };
     }
 
@@ -200,8 +211,8 @@ class CommanderApp implements Application
 	    case TAB:
 		{
 		    if (side == Side.RIGHT && !base.operations.isEmpty())
-					    luwrain.setActiveArea(operationsArea); else
-		    		    luwrain.setActiveArea(getAnotherPanel(side));
+			luwrain.setActiveArea(operationsArea); else
+			luwrain.setActiveArea(getAnotherPanel(side));
 		    return true;
 		}
 	    }
@@ -238,11 +249,8 @@ class CommanderApp implements Application
 		    return actions.onOpenFilesWithApp("notepad", area.getFileObjectsToProcess(), false);
 		if (ActionEvent.isAction(event, "size"))
 		    return infoAndProps.calcSize(area.getFileObjectsToProcess());
-
 		if (ActionEvent.isAction(event, "copy-url"))
 		    return actions.onCopyUrls(area);
-
-
 		if (ActionEvent.isAction(event, "preview"))
 		    return actions.onOpenFilesWithApp("reader", area.getFileObjectsToProcess(), true);
 		if (ActionEvent.isAction(event, "hidden-show"))
@@ -261,7 +269,7 @@ class CommanderApp implements Application
 		{
 		    if (actions.onLocalCopy(getPanel(side), getAnotherPanel(side), createFilesOperationListener()))
 		    {
-			operationsArea.refresh();
+			operationsArea.redraw();
 			return true;
 		    }
 		    return false;
@@ -446,7 +454,7 @@ class CommanderApp implements Application
     private void onOperationUpdate(FilesOperation operation)
     {
 	NullCheck.notNull(operation, "operation");
-	operationsArea.refresh();
+	operationsArea.redraw();
 	//	luwrain.onAreaNewBackgroundSound();
 	if (operation.isFinished())
 	{

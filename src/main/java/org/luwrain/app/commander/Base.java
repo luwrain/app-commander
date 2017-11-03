@@ -61,6 +61,16 @@ class Base
 	return true;
     }
 
+    boolean closeOperation(int index)
+    {
+	if (index < 0 || index >= operations.size())
+	    throw new IllegalArgumentException("index (" + index + ") must be positive and less than the number of operations (" + operations.size() + ")");
+	if (!operations.get(index).isFinished())
+	    return false;
+	operations.remove(index);
+	return true;
+    }
+
     String getOperationResultDescr(FilesOperation op)
     {
 	NullCheck.notNull(op, "op");
@@ -81,11 +91,6 @@ class Base
 	default:
 	    return "";
 	}
-    }
-
-    Settings getSettings()
-    {
-	return settings;
     }
 
     ListArea.Model createOperationsListModel()
