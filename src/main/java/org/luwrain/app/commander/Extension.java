@@ -19,7 +19,6 @@ package org.luwrain.app.commander;
 import java.util.*;
 
 import org.luwrain.core.*;
-import org.luwrain.app.term.TermApp;
 
 public class Extension extends org.luwrain.core.extensions.EmptyExtension
 {
@@ -60,7 +59,7 @@ public class Extension extends org.luwrain.core.extensions.EmptyExtension
 	return new Shortcut[]{
 
 	    new Shortcut() {
-		@Override public String getName()
+		@Override public String getExtObjName()
 		{
 		    return "commander";
 		}
@@ -78,19 +77,6 @@ public class Extension extends org.luwrain.core.extensions.EmptyExtension
 		}
 	    },
 
-	    new Shortcut() {
-		@Override public String getName()
-		{
-		    return "term";
-		}
-		@Override public Application[] prepareApp(String[] args)
-		{
-		    if (args != null && args.length > 0 && 
-			args[0] != null && !args[0].isEmpty())
-			return new Application[]{new TermApp(args[0])};
-		    return new Application[]{new TermApp("/")};
-		}
-	    }
 
 	};
     }

@@ -69,7 +69,7 @@ class Conversations
 					 if (fileToCheck.exists())
 					 {
 					     if (announce)
-						 luwrain.message(strings.enteredPathExists(fileToCheck.getAbsolutePath()), Luwrain.MESSAGE_ERROR);
+						 luwrain.message(strings.enteredPathExists(fileToCheck.getAbsolutePath()), Luwrain.MessageType.ERROR);
 					     return false;
 					 }
 					 return true;

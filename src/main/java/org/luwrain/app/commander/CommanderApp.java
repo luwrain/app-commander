@@ -478,7 +478,7 @@ class CommanderApp implements Application
     {
 	if (!base.allOperationsFinished())
 	{
-	    luwrain.message(strings.notAllOperationsFinished(), Luwrain.MESSAGE_ERROR);
+	    luwrain.message(strings.notAllOperationsFinished(), Luwrain.MessageType.ERROR);
 	    return;
 	}
 	luwrain.closeApp();
