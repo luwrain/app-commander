@@ -1,5 +1,5 @@
 /*
-   Copyright 2012-2017 Michael Pozhidaev <michael.pozhidaev@gmail.com>
+   Copyright 2012-2018 Michael Pozhidaev <michael.pozhidaev@gmail.com>
 
    This file is part of LUWRAIN.
 
@@ -357,7 +357,7 @@ class CommanderApp implements Application
     private boolean selectPartition(Side side)
     {
 	NullCheck.notNull(side, "side");
-	org.luwrain.base.Partition part = null;
+	org.luwrain.base.hardware.Partition part = null;
 	switch(side)
 	{
 	case LEFT:
