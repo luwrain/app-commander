@@ -59,9 +59,18 @@ class Actions
 	final PanelArea panelArea = (PanelArea)area;
 	if (!panelArea.isLocalDir())//FIXME:
 	    return PanelArea.ClickHandler.Result.REJECTED;
+	try {
+	    //Maybe it's better to make a separate method translating FileObject to java.io.File
 	final FileObject fileObject = (FileObject)obj;
-	luwrain.openFile(fileObject.getName().getPath());
+	final File file = org.luwrain.util.Urls.toFile(fileObject.getURL());
+	luwrain.openFile(file.getAbsolutePath());
 	return CommanderArea.ClickHandler.Result.OK;
+	}
+	catch(Exception e)
+	{
+	    luwrain.crash(e);
+	    	    return PanelArea.ClickHandler.Result.REJECTED;
+	}
     }
 
     boolean onLocalCopy(PanelArea copyFromArea, PanelArea copyToArea, FilesOperation.Listener listener)
