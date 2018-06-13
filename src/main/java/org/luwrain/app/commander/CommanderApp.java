@@ -357,21 +357,21 @@ class CommanderApp implements Application
     private boolean selectPartition(Side side)
     {
 	NullCheck.notNull(side, "side");
-	org.luwrain.base.hardware.Partition part = null;
+	File file = null;
 	switch(side)
 	{
 	case LEFT:
-	    part = Popups.mountedPartitions(luwrain);
-	    if (part == null)
+	    file = Popups.disksVolumes(luwrain, "Выберите раздел:");//FIXME:
+	    if (file == null)
 		return true;
-	    leftPanel.openLocalPath(part.getPartFile().getAbsolutePath());
+	    leftPanel.openLocalPath(file.getAbsolutePath());
 	    luwrain.setActiveArea(leftPanel);
 	    return true;
 	case RIGHT:
-	    part = Popups.mountedPartitions(luwrain);
-	    if (part == null)
+	    file = Popups.disksVolumes(luwrain, "Выберите раздел:");//FIXME:
+	    if (file == null)
 		return true;
-	    rightPanel.openLocalPath(part.getPartFile().getAbsolutePath());
+	    rightPanel.openLocalPath(file.getAbsolutePath());
 	    luwrain.setActiveArea(rightPanel);
 	    return true;
 	default:
