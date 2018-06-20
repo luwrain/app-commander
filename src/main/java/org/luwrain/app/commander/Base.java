@@ -17,6 +17,7 @@
 package org.luwrain.app.commander;
 
 import java.util.*;
+import java.util.concurrent.*;
 import java.io.*;
 
 import org.apache.commons.vfs2.*;
@@ -50,7 +51,7 @@ class Base
     {
 	NullCheck.notNull(op, "op");
 	operations.add(op);
-	new Thread(op).start();
+	luwrain.executeBkg(new FutureTask(op, null));
     }
 
     boolean allOperationsFinished()
