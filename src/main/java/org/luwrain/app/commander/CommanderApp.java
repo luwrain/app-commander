@@ -106,14 +106,14 @@ class CommanderApp implements Application
 			return true;
 		    return super.onKeyboardEvent(event);
 		}
-		@Override public boolean onEnvironmentEvent(EnvironmentEvent event)
+		@Override public boolean onSystemEvent(EnvironmentEvent event)
 		{
 		    NullCheck.notNull(event, "event");
 		    if (event.getType() != EnvironmentEvent.Type.REGULAR)
-			return super.onEnvironmentEvent(event);
-		    if (onEnvironmentEventInPanel(event, this, Side.LEFT))
+			return super.onSystemEvent(event);
+		    if (onSystemEventInPanel(event, this, Side.LEFT))
 			return true;
-		    return super.onEnvironmentEvent(event);
+		    return super.onSystemEvent(event);
 		}
 	    };
 
@@ -125,14 +125,14 @@ class CommanderApp implements Application
 			return true;
 		    return super.onKeyboardEvent(event);
 		}
-		@Override public boolean onEnvironmentEvent(EnvironmentEvent event)
+		@Override public boolean onSystemEvent(EnvironmentEvent event)
 		{
 		    NullCheck.notNull(event, "event");
 		    if (event.getType() != EnvironmentEvent.Type.REGULAR)
-			return super.onEnvironmentEvent(event);
-		    if (onEnvironmentEventInPanel(event, this, Side.RIGHT))
+			return super.onSystemEvent(event);
+		    if (onSystemEventInPanel(event, this, Side.RIGHT))
 			return true;
-		    return super.onEnvironmentEvent(event);
+		    return super.onSystemEvent(event);
 		}
 	    };
 
@@ -172,18 +172,18 @@ class CommanderApp implements Application
 			}
 		    return super.onKeyboardEvent(event);
 		}
-		@Override public boolean onEnvironmentEvent(EnvironmentEvent event)
+		@Override public boolean onSystemEvent(EnvironmentEvent event)
 		{
 		    NullCheck.notNull(event, "event");
 		    if (event.getType() != EnvironmentEvent.Type.REGULAR)
-			return super.onEnvironmentEvent(event);
+			return super.onSystemEvent(event);
 		    switch(event.getCode())
 		    {
 		    case CLOSE:
 			closeApp();
 			return true;
 		    default:
-			return super.onEnvironmentEvent(event);
+			return super.onSystemEvent(event);
 		    }
 		}
 		@Override protected String noContentStr()
@@ -219,7 +219,7 @@ class CommanderApp implements Application
 	return false;
     }
 
-    private boolean onEnvironmentEventInPanel(EnvironmentEvent event, PanelArea area, Side side)
+    private boolean onSystemEventInPanel(EnvironmentEvent event, PanelArea area, Side side)
     {
 	NullCheck.notNull(event, "event");
 	NullCheck.notNull(area, "area");
@@ -333,18 +333,18 @@ class CommanderApp implements Application
 			}
 		    return super.onKeyboardEvent(event);
 		}
-		@Override public boolean onEnvironmentEvent(EnvironmentEvent event)
+		@Override public boolean onSystemEvent(EnvironmentEvent event)
 		{
 		    NullCheck.notNull(event, "event");
 		    if (event.getType() != EnvironmentEvent.Type.REGULAR)
-			return super.onEnvironmentEvent(event);
+			return super.onSystemEvent(event);
 		    switch(event.getCode())
 		    {
 		    case CLOSE:
 			closeApp();
 			return true;
 		    default:
-			return super.onEnvironmentEvent(event);
+			return super.onSystemEvent(event);
 		    }
 		}
 	    };
@@ -430,18 +430,18 @@ class CommanderApp implements Application
 			}
 		    return super.onKeyboardEvent(event);
 		}
-		@Override public boolean onEnvironmentEvent(EnvironmentEvent event)
+		@Override public boolean onSystemEvent(EnvironmentEvent event)
 		{
 		    NullCheck.notNull(event, "event");
 		    if (event.getType() != EnvironmentEvent.Type.REGULAR)
-			return super.onEnvironmentEvent(event);
+			return super.onSystemEvent(event);
 		    switch(event.getCode())
 		    {
 		    case CLOSE:
 			closeApp();
 			return true;
 		    default:
-			return super.onEnvironmentEvent(event);
+			return super.onSystemEvent(event);
 		    }
 		}
 	    };
