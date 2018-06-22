@@ -137,10 +137,10 @@ class CommanderApp implements Application
 	    };
 
 	leftPanel.setLoadingResultHandler((location, data, selectedIndex, announce)->{
-		luwrain.runInMainThread(()->leftPanel.acceptNewLocation(location, data, selectedIndex, announce));
+		luwrain.runUiSafely(()->leftPanel.acceptNewLocation(location, data, selectedIndex, announce));
 	    });
 	rightPanel.setLoadingResultHandler((location, data, selectedIndex, announce)->{
-		luwrain.runInMainThread(()->rightPanel.acceptNewLocation(location, data, selectedIndex, announce));
+		luwrain.runUiSafely(()->rightPanel.acceptNewLocation(location, data, selectedIndex, announce));
 	    });
 
 	leftPanel.openInitial(startFrom);
@@ -307,7 +307,7 @@ class CommanderApp implements Application
 	    {
 		NullCheck.notNull(operation, "operation");
 		NullCheck.notNull(operation, "operation");
-		luwrain.runInMainThread(()->onOperationUpdate(operation));
+		luwrain.runUiSafely(()->onOperationUpdate(operation));
 	    }
 	    @Override public FilesOperation.ConfirmationChoices confirmOverwrite(java.nio.file.Path path)
 	    {
