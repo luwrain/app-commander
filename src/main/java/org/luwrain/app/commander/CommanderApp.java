@@ -99,12 +99,12 @@ class CommanderApp implements Application
 	rightPanelParams.clickHandler = (area, obj, dir)->actions.onClick(area, obj, dir);
 
  	leftPanel = new PanelArea(leftPanelParams, actionList) {
-		@Override public boolean onKeyboardEvent(KeyboardEvent event)
+		@Override public boolean onInputEvent(KeyboardEvent event)
 		{
 		    NullCheck.notNull(event, "event");
-		    if (onKeyboardEventInPanel(Side.LEFT, event))
+		    if (onInputEventInPanel(Side.LEFT, event))
 			return true;
-		    return super.onKeyboardEvent(event);
+		    return super.onInputEvent(event);
 		}
 		@Override public boolean onSystemEvent(EnvironmentEvent event)
 		{
@@ -118,12 +118,12 @@ class CommanderApp implements Application
 	    };
 
  	rightPanel = new PanelArea(rightPanelParams, actionList) {
-		@Override public boolean onKeyboardEvent(KeyboardEvent event)
+		@Override public boolean onInputEvent(KeyboardEvent event)
 		{
 		    NullCheck.notNull(event, "event");
-		    if (onKeyboardEventInPanel(Side.RIGHT, event))
+		    if (onInputEventInPanel(Side.RIGHT, event))
 			return true;
-		    return super.onKeyboardEvent(event);
+		    return super.onInputEvent(event);
 		}
 		@Override public boolean onSystemEvent(EnvironmentEvent event)
 		{
@@ -160,7 +160,7 @@ class CommanderApp implements Application
 	};
 
 	operationsArea = new ListArea(listParams) {
-		@Override public boolean onKeyboardEvent(KeyboardEvent event)
+		@Override public boolean onInputEvent(KeyboardEvent event)
 		{
 		    NullCheck.notNull(event, "event");
 		    if (event.isSpecial() && !event.isModified())
@@ -170,7 +170,7 @@ class CommanderApp implements Application
 			    luwrain.setActiveArea(leftPanel);
 			    return true;
 			}
-		    return super.onKeyboardEvent(event);
+		    return super.onInputEvent(event);
 		}
 		@Override public boolean onSystemEvent(EnvironmentEvent event)
 		{
@@ -193,7 +193,7 @@ class CommanderApp implements Application
 	    };
     }
 
-    private boolean onKeyboardEventInPanel(Side side, KeyboardEvent event)
+    private boolean onInputEventInPanel(Side side, KeyboardEvent event)
     {
 	NullCheck.notNull(side, "side");
 	NullCheck.notNull(event, "event");
@@ -321,7 +321,7 @@ class CommanderApp implements Application
     {
 	NullCheck.notNull(area, "area");
 	final SimpleArea propsArea = new SimpleArea(new DefaultControlEnvironment(luwrain), strings.infoAreaName()){
-		@Override public boolean onKeyboardEvent(KeyboardEvent event)
+		@Override public boolean onInputEvent(KeyboardEvent event)
 		{
 		    NullCheck.notNull(event, "event");
 		    if (event.isSpecial() && !event.isModified())
@@ -331,7 +331,7 @@ class CommanderApp implements Application
 			    layout.closeTempLayout();
 			    return true;
 			}
-		    return super.onKeyboardEvent(event);
+		    return super.onInputEvent(event);
 		}
 		@Override public boolean onSystemEvent(EnvironmentEvent event)
 		{
@@ -417,7 +417,7 @@ class CommanderApp implements Application
     {
 	NullCheck.notNull(area, "area");
 	final SimpleArea propertiesArea = new SimpleArea(new DefaultControlEnvironment(luwrain), strings.infoAreaName()){
-		@Override public boolean onKeyboardEvent(KeyboardEvent event)
+		@Override public boolean onInputEvent(KeyboardEvent event)
 		{
 		    NullCheck.notNull(event, "event");
 		    if (event.isSpecial() && !event.isModified())
@@ -428,7 +428,7 @@ class CommanderApp implements Application
 			    luwrain.announceActiveArea();
 			    return true;
 			}
-		    return super.onKeyboardEvent(event);
+		    return super.onInputEvent(event);
 		}
 		@Override public boolean onSystemEvent(EnvironmentEvent event)
 		{
