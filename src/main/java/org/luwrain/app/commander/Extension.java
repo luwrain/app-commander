@@ -30,20 +30,6 @@ public class Extension extends org.luwrain.core.extensions.EmptyExtension
 	    new Command(){
 		@Override public String getName()
 		{
-		    return "term";
-		}
-		@Override public void onCommand(Luwrain luwrain)
-		{
-		    final String currentDir = luwrain.getActiveAreaDir();
-		    if (currentDir != null && !currentDir.isEmpty())
-			luwrain.launchApp("term", new String[]{currentDir}); else
-			luwrain.launchApp("term", new String[]{luwrain.getFileProperty("luwrain.dir.userhome").getAbsolutePath()});
-		}
-	    },
-
-	    new Command(){
-		@Override public String getName()
-		{
 		    return "commander";
 		}
 		@Override public void onCommand(Luwrain luwrain)
