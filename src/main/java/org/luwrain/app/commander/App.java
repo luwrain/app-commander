@@ -93,12 +93,12 @@ final class App implements Application
     {
 	NullCheck.notEmpty(startFrom, "startFrom");
 
-	final PanelArea.Params leftPanelParams = PanelArea.createParams(new DefaultControlEnvironment(luwrain));
+	final PanelArea.Params leftPanelParams = PanelArea.createParams(luwrain);
 	leftPanelParams.clickHandler = (area, obj, dir)->actions.onClick(area, obj, dir);
-	final PanelArea.Params rightPanelParams = PanelArea.createParams(new DefaultControlEnvironment(luwrain));
+	final PanelArea.Params rightPanelParams = PanelArea.createParams(luwrain);
 	rightPanelParams.clickHandler = (area, obj, dir)->actions.onClick(area, obj, dir);
 
- 	leftPanel = new PanelArea(leftPanelParams, actionList) {
+ 	leftPanel = new PanelArea(leftPanelParams, luwrain, actionList) {
 		@Override public boolean onInputEvent(KeyboardEvent event)
 		{
 		    NullCheck.notNull(event, "event");
@@ -117,7 +117,7 @@ final class App implements Application
 		}
 	    };
 
- 	rightPanel = new PanelArea(rightPanelParams, actionList) {
+ 	rightPanel = new PanelArea(rightPanelParams, luwrain, actionList) {
 		@Override public boolean onInputEvent(KeyboardEvent event)
 		{
 		    NullCheck.notNull(event, "event");
@@ -219,24 +219,24 @@ final class App implements Application
 	return false;
     }
 
-    private boolean onSystemEventInPanel(EnvironmentEvent event, PanelArea area, Side side)
+    private boolean onSystemEventInPanel(EnvironmentEvent event, PanelArea panel, Side side)
     {
 	NullCheck.notNull(event, "event");
-	NullCheck.notNull(area, "area");
+	NullCheck.notNull(panel, "panel");
 	NullCheck.notNull(side, "side");
 	switch(event.getCode())
 	{
 	case OPEN:
-	    return actions.onOpenEvent(event, area);
+	    return actions.onOpenEvent(event, panel);
 	case INTRODUCE:
 	    luwrain.playSound(Sounds.INTRO_REGULAR);
 	    switch(side)
 	    {
 	    case LEFT:
-		luwrain.say(strings.leftPanelName() + " " + area.getAreaName());
+		luwrain.say(strings.leftPanelName() + " " + panel.getAreaName());
 		break;
 	    case RIGHT:
-		luwrain.say(strings.rightPanelName() + " " + area.getAreaName());
+		luwrain.say(strings.rightPanelName() + " " + panel.getAreaName());
 		break;
 	    }
 	    return true;
@@ -246,22 +246,22 @@ final class App implements Application
 	case ACTION:
 	    {
 		if (ActionEvent.isAction(event, "edit-text"))
-		    return actions.onOpenFilesWithApp("notepad", area.getFileObjectsToProcess(), false);
+		    return  panel.runHookOnSelected("luwrain.app.commander.edit");
 		if (ActionEvent.isAction(event, "size"))
-		    return infoAndProps.calcSize(area.getFileObjectsToProcess());
+		    return infoAndProps.calcSize(panel.getFileObjectsToProcess());
 		if (ActionEvent.isAction(event, "copy-url"))
-		    return actions.onCopyUrls(area);
+		    return actions.onCopyUrls(panel);
 		if (ActionEvent.isAction(event, "preview"))
-		    return actions.onOpenFilesWithApp("reader", area.getFileObjectsToProcess(), true);
+		    return panel.runHookOnSelected("luwrain.app.commander.preview");
 		if (ActionEvent.isAction(event, "hidden-show"))
 		{
-		    area.showHidden();
+		    panel.showHidden();
 		    luwrain.message("Скрытые файлы показаны");
 		    return true;
 		}
 		if (ActionEvent.isAction(event, "hidden-hide"))
 		{
-		    area.hideHidden();
+		    panel.hideHidden();
 		    luwrain.message("Скрытые файлы убраны");
 		    return true;
 		}
@@ -286,15 +286,15 @@ final class App implements Application
 		if (ActionEvent.isAction(event, "mkdir"))
 		    return actions.mkdir(this, getPanel(side));
 		if (ActionEvent.isAction(event, "delete"))
-		    return actions.onLocalDelete(area);
+		    return actions.onLocalDelete(panel);
 		if (ActionEvent.isAction(event, "open-ftp"))
-		    return actions.onOpenFtp(area);
+		    return actions.onOpenFtp(panel);
 		if (ActionEvent.isAction(event, "volume-info"))
-		    return showVolumeInfo(area);
+		    return showVolumeInfo(panel);
 		return false;
 	    }
 	case PROPERTIES:
-	    return showPropertiesArea(area);
+	    return showPropertiesArea(panel);
 	default:
 	    return false;
 	}

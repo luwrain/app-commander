@@ -190,37 +190,6 @@ boolean onLocalDelete(PanelArea area)
 	return true;
     }
 
-    boolean onOpenFilesWithApp(String appName, FileObject[] paths, boolean asUrls)
-    {
-	NullCheck.notEmpty(appName, "appName");
-	NullCheck.notNullItems(paths, "paths");
-	/*
-	  boolean atLeastOne = false;
-	  for(Path p: paths)
-	  if (!Files.isDirectory(p))
-	  {
-	  atLeastOne = true;
-	  String arg;
-	  if (asUrls)
-	  {
-	  try {
-	  arg = p.toUri().toURL().toString();
-	  }
-	  catch(java.net.MalformedURLException e)
-	  {
-	  e.printStackTrace();
-	  arg = p.toString();
-	  }
-	  } else
-	  arg = p.toString();
-	  luwrain.launchApp(appName, new String[]{arg});
-	  }
-	  return atLeastOne;
-	*/
-	return false;
-    }
-
-
     boolean onOpenFtp(PanelArea area)
     {
 	NullCheck.notNull(area, "area");
@@ -234,7 +203,7 @@ boolean onLocalDelete(PanelArea area)
     boolean onCopyUrls(PanelArea panelArea)
     {
 	NullCheck.notNull(panelArea, "panelArea");
-	final Object[] objs = panelArea.getObjectsToProcess();
+	final Object[] objs = panelArea.getNativeObjectsToProcess();
 	final List<URL> res = new LinkedList<URL>();
 	Log.debug("proba", "" + objs.length);
 	for(Object o: objs)

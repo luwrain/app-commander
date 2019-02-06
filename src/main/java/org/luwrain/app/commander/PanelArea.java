@@ -29,12 +29,15 @@ import org.luwrain.io.*;
 
 class PanelArea extends CommanderArea<FileObject>
 {
+    private final Luwrain luwrain;
     private final ActionList actionList;
 
-    PanelArea(Params<FileObject> params, ActionList actionList)
+    PanelArea(Params<FileObject> params, Luwrain luwrain, ActionList actionList)
     {
 	super(params);
+	NullCheck.notNull(luwrain, "luwrain");
 	NullCheck.notNull(actionList, "actionList");
+	this.luwrain = luwrain;
 	this.actionList = actionList;
     }
 
@@ -53,6 +56,32 @@ class PanelArea extends CommanderArea<FileObject>
 	return super.onAreaQuery(query);
     }
 
+    boolean runHookOnSelected(String hookPrefix)
+    {
+	NullCheck.notEmpty(hookPrefix, "hookPrefix");
+	final FileObject obj = getSelectedEntry();
+	if (obj == null)
+	    return false;
+	if (isLocalDir())
+	{
+	    if (!(obj instanceof org.apache.commons.vfs2.provider.local.LocalFile))
+		throw new RuntimeException("The entry is not a local file while the local dir is opened");
+	    final File f = new File(obj.getName().getPath());
+	    try {
+		if (luwrain.xRunHooks(hookPrefix + ".local.custom", new Object[]{f}, Luwrain.HookStrategy.CHAIN_OF_RESPONSIBILITY))
+		    return true;
+		return luwrain.xRunHooks(hookPrefix + ".local.default", new Object[]{f}, Luwrain.HookStrategy.CHAIN_OF_RESPONSIBILITY);
+	    }
+	    catch(RuntimeException e)
+	    {
+		luwrain.message(luwrain.i18n().getExceptionDescr(e), Luwrain.MessageType.ERROR);
+		return true;
+	    }
+	}
+	//FIXME:remote 
+	return false;
+    }
+
     boolean isLocalDir()
     {
 	final FileObject o = opened();
@@ -63,7 +92,7 @@ class PanelArea extends CommanderArea<FileObject>
 
     FileObject[] getFileObjectsToProcess()
     {
-	final List<FileObject> res = new LinkedList<FileObject>();
+	final List<FileObject> res = new LinkedList();
 	for(Object o: getMarked())
 	    res.add((FileObject)o);
 	if (!res.isEmpty())
@@ -72,7 +101,7 @@ class PanelArea extends CommanderArea<FileObject>
 	return entry != null?new FileObject[]{entry}:new FileObject[0];
     }
 
-    Object[] getObjectsToProcess()
+    Object[] getNativeObjectsToProcess()
     {
 	final FileObject[] objs = getFileObjectsToProcess();
 	final List res = new LinkedList();
@@ -164,10 +193,10 @@ res.add(new java.net.URL(root, f.getName().getPath()));
 return actionList.getPanelAreaActions(this);
 		}
 
-		static Params<FileObject> createParams(ControlEnvironment environment) throws FileSystemException
+		static Params<FileObject> createParams(Luwrain luwrain) throws FileSystemException
 		{
-		    NullCheck.notNull(environment, "environment");
-		    Params<FileObject> params = CommanderUtilsVfs.createParams(environment);
+		    NullCheck.notNull(luwrain, "luwrain");
+		    Params<FileObject> params = CommanderUtilsVfs.createParams(new DefaultControlEnvironment(luwrain));
 		    params.flags = EnumSet.of(Flags.MARKING);
 		    params.filter = new CommanderUtilsVfs.NoHiddenFilter();
 		    params.clipboardSaver = (area,model,appearance,fromIndex,toIndex,clipboard)->{
