@@ -1,5 +1,5 @@
 /*
-   Copyright 2012-2018 Michael Pozhidaev <michael.pozhidaev@gmail.com>
+   Copyright 2012-2019 Michael Pozhidaev <michael.pozhidaev@gmail.com>
 
    This file is part of LUWRAIN.
 
@@ -116,7 +116,7 @@ conversations.moveOperationName(filesToMove, dest), filesToMove, dest));
 	return true;
     }
 
-    boolean mkdir(CommanderApp app, PanelArea area)
+    boolean mkdir(App app, PanelArea area)
     {
 	NullCheck.notNull(app, "app");
 	NullCheck.notNull(area, "area");

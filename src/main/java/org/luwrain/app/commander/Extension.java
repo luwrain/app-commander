@@ -1,5 +1,5 @@
 /*
-   Copyright 2012-2018 Michael Pozhidaev <michael.pozhidaev@gmail.com>
+   Copyright 2012-2019 Michael Pozhidaev <michael.pozhidaev@gmail.com>
 
    This file is part of LUWRAIN.
 
@@ -53,13 +53,13 @@ public class Extension extends org.luwrain.core.extensions.EmptyExtension
 		@Override public Application[] prepareApp(String[] args)
 		{
 		    if (args == null || args.length < 1)
-			return new Application[]{new CommanderApp()};
+			return new Application[]{new App()};
 		    final LinkedList<Application> v = new LinkedList<Application>();
 		    for(String s: args)
 			if (s != null)
-			    v.add(new CommanderApp(s));
+			    v.add(new App(s));
 		    if (v.isEmpty())
-			return new Application[]{new CommanderApp()};
+			return new Application[]{new App()};
 		    return v.toArray(new Application[v.size()]);
 		}
 	    },

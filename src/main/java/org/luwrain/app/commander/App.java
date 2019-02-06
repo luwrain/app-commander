@@ -1,5 +1,5 @@
 /*
-   Copyright 2012-2018 Michael Pozhidaev <michael.pozhidaev@gmail.com>
+   Copyright 2012-2019 Michael Pozhidaev <michael.pozhidaev@gmail.com>
 
    This file is part of LUWRAIN.
 
@@ -31,7 +31,7 @@ import org.luwrain.popups.*;
 
 import org.luwrain.app.commander.Base.Side;
 
-class CommanderApp implements Application
+final class App implements Application
 {
     private Luwrain luwrain = null;
     private Strings strings = null;
@@ -47,12 +47,12 @@ class CommanderApp implements Application
 
     private final String startFrom;
 
-    CommanderApp()
+    App()
     {
 	startFrom = null;
     }
 
-    CommanderApp(String startFrom)
+    App(String startFrom)
     {
 	NullCheck.notNull(startFrom, "startFrom");
 	if (!startFrom.isEmpty())
