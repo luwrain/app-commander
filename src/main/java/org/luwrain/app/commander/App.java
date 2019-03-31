@@ -252,7 +252,7 @@ final class App implements Application
 		if (ActionEvent.isAction(event, "copy-url"))
 		    return actions.onCopyUrls(panel);
 		if (ActionEvent.isAction(event, "preview"))
-		    return panel.runHookOnSelected("luwrain.app.commander.preview");
+		    return panel.runHookOnSelected("luwrain.commander.preview");
 		if (ActionEvent.isAction(event, "hidden-show"))
 		{
 		    panel.showHidden();
