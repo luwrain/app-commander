@@ -196,7 +196,7 @@ return actionList.getPanelAreaActions(this);
 		static Params<FileObject> createParams(Luwrain luwrain) throws FileSystemException
 		{
 		    NullCheck.notNull(luwrain, "luwrain");
-		    Params<FileObject> params = CommanderUtilsVfs.createParams(new DefaultControlEnvironment(luwrain));
+		    Params<FileObject> params = CommanderUtilsVfs.createParams(new DefaultControlContext(luwrain));
 		    params.flags = EnumSet.of(Flags.MARKING);
 		    params.filter = new CommanderUtilsVfs.NoHiddenFilter();
 		    params.clipboardSaver = (area,model,appearance,fromIndex,toIndex,clipboard)->{

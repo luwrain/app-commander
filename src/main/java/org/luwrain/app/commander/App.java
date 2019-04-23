@@ -147,7 +147,7 @@ final class App implements Application
 	rightPanel.openInitial(startFrom);
 
 	final ListArea.Params listParams = new ListArea.Params();
-	listParams.context = new DefaultControlEnvironment(luwrain);
+	listParams.context = new DefaultControlContext(luwrain);
 	listParams.model = base.createOperationsListModel();
 	listParams.appearance = new OperationsAppearance(luwrain, strings, base);
 	listParams.name = strings.operationsAreaName();
@@ -320,7 +320,7 @@ final class App implements Application
     private boolean showVolumeInfo(PanelArea area)
     {
 	NullCheck.notNull(area, "area");
-	final SimpleArea propsArea = new SimpleArea(new DefaultControlEnvironment(luwrain), strings.infoAreaName()){
+	final SimpleArea propsArea = new SimpleArea(new DefaultControlContext(luwrain), strings.infoAreaName()){
 		@Override public boolean onInputEvent(KeyboardEvent event)
 		{
 		    NullCheck.notNull(event, "event");
@@ -416,7 +416,7 @@ final class App implements Application
     private boolean showPropertiesArea(PanelArea area)
     {
 	NullCheck.notNull(area, "area");
-	final SimpleArea propertiesArea = new SimpleArea(new DefaultControlEnvironment(luwrain), strings.infoAreaName()){
+	final SimpleArea propertiesArea = new SimpleArea(new DefaultControlContext(luwrain), strings.infoAreaName()){
 		@Override public boolean onInputEvent(KeyboardEvent event)
 		{
 		    NullCheck.notNull(event, "event");
