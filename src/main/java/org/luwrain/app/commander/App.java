@@ -71,7 +71,7 @@ final class App implements Application
 	this.base = new Base(luwrain, strings);
 	this.actionList = new ActionList(strings);
 	this.infoAndProps = new InfoAndProperties(luwrain);
-	this.actions = new Actions(luwrain, base, strings);
+	this.actions = new Actions(base);
 	try {
 	    if (startFrom != null && !startFrom.isEmpty())
 		createAreas(startFrom); else
