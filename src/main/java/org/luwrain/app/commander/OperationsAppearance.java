@@ -1,5 +1,5 @@
 /*
-   Copyright 2012-2019 Michael Pozhidaev <michael.pozhidaev@gmail.com>
+   Copyright 2012-2019 Michael Pozhidaev <msp@luwrain.org>
 
    This file is part of LUWRAIN.
 
@@ -47,13 +47,13 @@ Base base)
 	final FilesOperation op = (FilesOperation)item;
 	if (op.isFinished())
 	{
-	    luwrain.say(base.getOperationResultDescr(op) + " " + op.getOperationName());
+	    luwrain.speak(base.getOperationResultDescr(op) + " " + op.getOperationName());
 	    return;
 	}
 	final int percents = op.getPercents();
 	if (percents > 0)
-	    luwrain.say("" + luwrain.i18n().getNumberStr(percents, "percents") + " " + op.getOperationName()); else
-	    luwrain.say(op.getOperationName());
+	    luwrain.speak("" + luwrain.i18n().getNumberStr(percents, "percents") + " " + op.getOperationName()); else
+	    luwrain.speak(op.getOperationName());
 
 
     }

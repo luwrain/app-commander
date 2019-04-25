@@ -1,5 +1,5 @@
 /*
-   Copyright 2012-2019 Michael Pozhidaev <michael.pozhidaev@gmail.com>
+   Copyright 2012-2019 Michael Pozhidaev <msp@luwrain.org>
 
    This file is part of LUWRAIN.
 
@@ -233,10 +233,10 @@ final class App implements Application
 	    switch(side)
 	    {
 	    case LEFT:
-		luwrain.say(strings.leftPanelName() + " " + panel.getAreaName());
+		luwrain.speak(strings.leftPanelName() + " " + panel.getAreaName());
 		break;
 	    case RIGHT:
-		luwrain.say(strings.rightPanelName() + " " + panel.getAreaName());
+		luwrain.speak(strings.rightPanelName() + " " + panel.getAreaName());
 		break;
 	    }
 	    return true;
