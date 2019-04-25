@@ -23,7 +23,7 @@ import org.luwrain.base.FilesOperation;
 import org.luwrain.core.*;
 import org.luwrain.popups.*;
 
-class Conversations
+final class Conversations
 {
     private final Luwrain luwrain;
     private final Strings strings;
@@ -38,14 +38,11 @@ class Conversations
 
     File copyPopup(File copyFromDir, File[] filesToCopy, File copyTo)
     {
-	final File res = Popups.path(luwrain,
-				     strings.copyPopupName(), copyPopupPrefix(filesToCopy),
-				     copyTo, /*copyFromDir,*/
-				     (fileToCheck, announce)->{
-					 NullCheck.notNull(fileToCheck, "fileToCheck");
-					 return true;
-				     });
-	return res != null?res:null;
+	NullCheck.notNull(copyFromDir, "copyFromDir");
+	NullCheck.notNullItems(filesToCopy, "filesToCopy");
+	NullCheck.notNull(copyTo, "copyTo");
+	final DestPathPopup popup = new DestPathPopup(luwrain, strings, filesToCopy, copyTo);
+	return popup.result();
     }
 
     File movePopup(File moveFromDir, File[] filesToMove, File moveTo)

@@ -36,7 +36,7 @@ final class Actions
     private final Luwrain luwrain;
     private final Base base;
     private final Strings strings;
-    final Conversations conversations;
+    final Conversations conv;
 
     Actions(Base base)
     {
@@ -44,7 +44,7 @@ final class Actions
 		this.base = base;
 	this.luwrain = base.luwrain;
 	this.strings = base.strings;
-	this.conversations = new Conversations(luwrain, strings);
+	this.conv = new Conversations(luwrain, strings);
     }
 
     PanelArea.ClickHandler.Result onClick(CommanderArea area, Object obj, boolean dir)
@@ -86,10 +86,10 @@ final class Actions
 	final File copyToDir = copyToArea.getOpenedAsFile();
 	if (copyToDir == null || !copyToDir.isAbsolute())
 	    return false;
-	final File dest = conversations.copyPopup(copyFromDir, filesToCopy, copyToDir);
+	final File dest = conv.copyPopup(copyFromDir, filesToCopy, copyToDir);
 	if (dest == null)
 	    return true;
-	base.launch(luwrain.getFilesOperations().copy(listener, conversations.copyOperationName(filesToCopy, dest), filesToCopy, dest));
+	base.launch(luwrain.getFilesOperations().copy(listener, conv.copyOperationName(filesToCopy, dest), filesToCopy, dest));
 	return true;
     }
 
@@ -105,11 +105,11 @@ final class Actions
 	final File moveTo = moveToArea.getOpenedAsFile();
 	if (filesToMove.length < 1)
 	    return false;
-	final File dest = conversations.movePopup(moveFromDir, filesToMove, moveTo);
+	final File dest = conv.movePopup(moveFromDir, filesToMove, moveTo);
 	if (dest == null)
 	    return true;
 base.launch(luwrain.getFilesOperations().move(listener, 
-conversations.moveOperationName(filesToMove, dest), filesToMove, dest));
+conv.moveOperationName(filesToMove, dest), filesToMove, dest));
 	return true;
     }
 
@@ -122,7 +122,7 @@ conversations.moveOperationName(filesToMove, dest), filesToMove, dest));
 	final File createIn = area.getOpenedAsFile();
 	if (createIn == null || !createIn.isAbsolute())
 	    return false;
-	final File newDir = conversations.mkdirPopup(createIn);
+	final File newDir = conv.mkdirPopup(createIn);
 	if (newDir == null)
 	    return true;
 	try {
@@ -146,7 +146,7 @@ boolean onLocalDelete(PanelArea area)
 	final File[] files = area.getFilesToProcess();
 	if (files.length == 0)
 	    return false;
-	if (!conversations.deleteConfirmation(files))
+	if (!conv.deleteConfirmation(files))
 	    return true;
 
 	//	  operations.launch(Operations.delete(operations, strings.delOperationName(filesToDelete), 
@@ -190,7 +190,7 @@ boolean onLocalDelete(PanelArea area)
     boolean onOpenFtp(PanelArea area)
     {
 	NullCheck.notNull(area, "area");
-	final String addr = conversations.ftpAddress();
+	final String addr = conv.ftpAddress();
 	if (addr == null)
 	    return true;
 	area.openLocalPath(addr);

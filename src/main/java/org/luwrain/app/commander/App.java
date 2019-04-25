@@ -312,7 +312,7 @@ final class App implements Application
 	    @Override public FilesOperation.ConfirmationChoices confirmOverwrite(java.nio.file.Path path)
 	    {
 		NullCheck.notNull(path, "path");
-		return (FilesOperation.ConfirmationChoices)luwrain.callUiSafely(()->actions.conversations.overrideConfirmation(path.toFile()));
+		return (FilesOperation.ConfirmationChoices)luwrain.callUiSafely(()->actions.conv.overrideConfirmation(path.toFile()));
 	    }
 	};
     }
