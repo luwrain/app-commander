@@ -165,7 +165,14 @@ final class Actions
 	    if (files.length == 0)
 		return false;
 	    final InfoHook hook = new InfoHook(luwrain);
-	    return hook.localFilesInfo(files, lines);
+	    try {
+		return hook.localFilesInfo(files, lines);
+	    }
+	    catch(RuntimeException e)
+	    {
+		luwrain.crash(e);
+		return true;
+	    }
 	}
 	return false;
     }
@@ -180,13 +187,13 @@ final class Actions
 	    final File opened = area.getOpenedAsFile();
 	    if (opened == null)
 		return false;
-	    infoAndProps.fillLocalVolumeInfo(opened, propsArea);
+	    //	    infoAndProps.fillLocalVolumeInfo(opened, propsArea);
 	} else
 	{
 	    final FileObject fileObj = area.getOpenedAsFileObject();
 	    if (fileObj == null)
 		return false;
-	    infoAndProps.fillDirInfo(fileObj, propsArea);
+	    //	    infoAndProps.fillDirInfo(fileObj, propsArea);
 	}
 	return true;
     }

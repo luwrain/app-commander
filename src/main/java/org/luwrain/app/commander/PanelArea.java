@@ -17,6 +17,7 @@
 package org.luwrain.app.commander;
 
 import java.util.*;
+import java.util.concurrent.*;
 import java.io.*;
 import java.net.*;
 
@@ -25,6 +26,7 @@ import org.apache.commons.vfs2.*;
 import org.luwrain.core.*;
 import org.luwrain.core.queries.*;
 import org.luwrain.controls.*;
+import org.luwrain.script.*;
 import org.luwrain.io.*;
 
 class PanelArea extends CommanderArea<FileObject>
@@ -81,6 +83,50 @@ class PanelArea extends CommanderArea<FileObject>
 	//FIXME:remote 
 	return false;
     }
+
+    boolean runHookOnFilesToProcess(String hookPrefix, boolean background)
+    {
+	NullCheck.notEmpty(hookPrefix, "hookPrefix");
+	final Object arg;
+	final String hookName;
+	if (isLocalDir())
+	{
+	    final File[] files = getFilesToProcess();
+	    if (files.length == 0)
+		return false;
+	    final String[] names = new String[files.length];
+	    for(int i = 0;i < files.length;i++)
+		names[i] = files[i].getAbsolutePath();
+	    arg = ScriptUtils.createReadOnlyArray(names);
+	    hookName = hookPrefix + ".local";
+	} else
+	    return false;
+	if (!background)
+	    try {
+		if (luwrain.xRunHooks(hookName + ".custom", new Object[]{arg}, Luwrain.HookStrategy.CHAIN_OF_RESPONSIBILITY))
+		    return true;
+		return luwrain.xRunHooks(hookName, new Object[]{arg}, Luwrain.HookStrategy.CHAIN_OF_RESPONSIBILITY);
+	    }
+	    catch(RuntimeException e)
+	    {
+		luwrain.crash(e);
+		return true;
+	    }
+	luwrain.executeBkg(new FutureTask(()->{
+		    try {
+		if (luwrain.xRunHooks(hookName + ".custom", new Object[]{arg}, Luwrain.HookStrategy.CHAIN_OF_RESPONSIBILITY))
+		    return;
+luwrain.xRunHooks(hookName, new Object[]{arg}, Luwrain.HookStrategy.CHAIN_OF_RESPONSIBILITY);
+return;
+	    }
+	    catch(RuntimeException e)
+	    {
+		luwrain.crash(e);
+    }
+	}, null));
+	return true;
+    }
+	
 
     boolean isLocalDir()
     {
