@@ -41,7 +41,7 @@ final class Actions
     Actions(Base base)
     {
 	NullCheck.notNull(base, "base");
-		this.base = base;
+	this.base = base;
 	this.luwrain = base.luwrain;
 	this.strings = base.strings;
 	this.conv = new Conversations(luwrain, strings);
@@ -58,15 +58,15 @@ final class Actions
 	    return PanelArea.ClickHandler.Result.REJECTED;
 	try {
 	    //Maybe it's better to make a separate method translating FileObject to java.io.File
-	final FileObject fileObject = (FileObject)obj;
-	final File file = org.luwrain.util.Urls.toFile(fileObject.getURL());
-	luwrain.openFile(file.getAbsolutePath());
-	return CommanderArea.ClickHandler.Result.OK;
+	    final FileObject fileObject = (FileObject)obj;
+	    final File file = org.luwrain.util.Urls.toFile(fileObject.getURL());
+	    luwrain.openFile(file.getAbsolutePath());
+	    return CommanderArea.ClickHandler.Result.OK;
 	}
 	catch(Exception e)
 	{
 	    luwrain.crash(e);
-	    	    return PanelArea.ClickHandler.Result.REJECTED;
+	    return PanelArea.ClickHandler.Result.REJECTED;
 	}
     }
 
@@ -89,7 +89,8 @@ final class Actions
 	final File dest = conv.copyPopup(copyFromDir, filesToCopy, copyToDir);
 	if (dest == null)
 	    return true;
-	base.launch(luwrain.getFilesOperations().copy(listener, conv.copyOperationName(filesToCopy, dest), filesToCopy, dest));
+	final String opName = copyOperationName(filesToCopy, dest);
+	base.launch(luwrain.getFilesOperations().copy(listener, opName, filesToCopy, dest));
 	return true;
     }
 
@@ -108,12 +109,12 @@ final class Actions
 	final File dest = conv.movePopup(moveFromDir, filesToMove, moveTo);
 	if (dest == null)
 	    return true;
-base.launch(luwrain.getFilesOperations().move(listener, 
-conv.moveOperationName(filesToMove, dest), filesToMove, dest));
+	final String opName = moveOperationName(filesToMove, dest);
+	base.launch(luwrain.getFilesOperations().move(listener, opName, filesToMove, dest));
 	return true;
     }
 
-    boolean mkdir(App app, PanelArea area)
+    boolean onLocalMkdir(App app, PanelArea area)
     {
 	NullCheck.notNull(app, "app");
 	NullCheck.notNull(area, "area");
@@ -138,9 +139,10 @@ conv.moveOperationName(filesToMove, dest), filesToMove, dest));
 	return true;
     }
 
-boolean onLocalDelete(PanelArea area)
+    boolean onLocalDelete(PanelArea area, FilesOperation.Listener listener)
     {
 	NullCheck.notNull(area, "area");
+	NullCheck.notNull(listener, "listener");
 	if (!area.isLocalDir())
 	    return false;
 	final File[] files = area.getFilesToProcess();
@@ -148,12 +150,10 @@ boolean onLocalDelete(PanelArea area)
 	    return false;
 	if (!conv.deleteConfirmation(files))
 	    return true;
-
-	//	  operations.launch(Operations.delete(operations, strings.delOperationName(filesToDelete), 
-	//	  filesToDelete));
+	final String opName = strings.delOperationName(files);
+	base.launch(luwrain.getFilesOperations().delete(listener, opName, files));
 	return true;
     }
-
 
     boolean showFileObjectsProperties(InfoAndProperties infoAndProps, PanelArea area, SimpleArea propertiesArea)
     {
@@ -165,7 +165,7 @@ boolean onLocalDelete(PanelArea area)
 	//	infoAndProps.fillProperties(propertiesArea, paths);
 	return true;
     }
-
+    
     boolean showVolumeInfo(InfoAndProperties infoAndProps, PanelArea area, SimpleArea propsArea)
     {
 	NullCheck.notNull(infoAndProps, "infoAndProps");
@@ -237,5 +237,23 @@ boolean onLocalDelete(PanelArea area)
 	    return false;
 	area.openLocalPath(f.getAbsolutePath());
 	return true;
+    }
+
+    private String copyOperationName(File[] whatToCopy, File copyTo)
+    {
+	if (whatToCopy.length < 1)
+	    return "";
+	if (whatToCopy.length > 1)
+	    return strings.copyOperationName(whatToCopy[0].getName() + ",...", copyTo.getName());
+	return strings.copyOperationName(whatToCopy[0].getName(), copyTo.getName());
+    }
+
+private String moveOperationName(File[] whatToMove, File moveTo)
+    {
+	if (whatToMove.length < 1)
+	    return "";
+	if (whatToMove.length > 1)
+	    return strings.moveOperationName(whatToMove[0].getName() + ",...", moveTo.getName());
+	return strings.moveOperationName(whatToMove[0].getName(), moveTo.getName());
     }
 }

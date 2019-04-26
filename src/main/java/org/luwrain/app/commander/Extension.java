@@ -25,20 +25,7 @@ public class Extension extends org.luwrain.core.extensions.EmptyExtension
 {
     @Override public Command[] getCommands(Luwrain luwrain)
     {
-	return new Command[]{
-
-	    new Command(){
-		@Override public String getName()
-		{
-		    return "commander";
-		}
-		@Override public void onCommand(Luwrain luwrain)
-		{
-		    luwrain.launchApp("commander");
-		}
-	    },
-
-	};
+	return new Command[]{ new SimpleShortcutCommand("commander")};
     }
 
     @Override public ExtensionObject[] getExtObjects(Luwrain luwrain)

@@ -22,6 +22,7 @@ import java.nio.file.*;
 import org.luwrain.base.FilesOperation;
 import org.luwrain.core.*;
 import org.luwrain.popups.*;
+import org.luwrain.app.commander.popups.*;
 
 final class Conversations
 {
@@ -41,20 +42,23 @@ final class Conversations
 	NullCheck.notNull(copyFromDir, "copyFromDir");
 	NullCheck.notNullItems(filesToCopy, "filesToCopy");
 	NullCheck.notNull(copyTo, "copyTo");
-	final DestPathPopup popup = new DestPathPopup(luwrain, strings, filesToCopy, copyTo);
+	final DestPathPopup popup = new DestPathPopup(luwrain, strings, DestPathPopup.Type.COPY, copyFromDir, filesToCopy, copyTo);
+	luwrain.popup(popup);
+	if (popup.wasCancelled())
+	    return null;
 	return popup.result();
     }
 
     File movePopup(File moveFromDir, File[] filesToMove, File moveTo)
     {
-	final File res = Popups.path(luwrain,
-				     strings.movePopupName(), movePopupPrefix(filesToMove),
-				     moveTo, /*moveFromDir,*/
-				     (fileToCheck, announce)->{
-					 NullCheck.notNull(fileToCheck, "fileToCheck");
-					 return true;
-				     });
-	return res != null?res:null;
+	NullCheck.notNull(moveFromDir, "moveFromDir");
+	NullCheck.notNullItems(filesToMove, "filesToMove");
+	NullCheck.notNull(moveTo, "moveTo");
+	final DestPathPopup popup = new DestPathPopup(luwrain, strings, DestPathPopup.Type.MOVE, moveFromDir, filesToMove, moveTo);
+	luwrain.popup(popup);
+	if (popup.wasCancelled())
+	    return null;
+	return popup.result();
     }
 
     File mkdirPopup(File createIn)
@@ -79,43 +83,15 @@ final class Conversations
 	NullCheck.notNullItems(files, "files");
 	final String text = strings.delPopupText(luwrain.i18n().getNumberStr(files.length, "items"));
 	final YesNoPopup popup = new YesNoPopup(luwrain, strings.delPopupName(), text, false, Popups.DEFAULT_POPUP_FLAGS);
-	  luwrain.popup(popup);
-	  if (popup.wasCancelled())
-	  return false;
-	  return popup.result();
+	luwrain.popup(popup);
+	if (popup.wasCancelled())
+	    return false;
+	return popup.result();
     }
 
     String ftpAddress()
     {
-	return Popups.simple(luwrain, "Подключение к FTP-серверу", "Адрес FTP-сервера:", "ftp://");
-    }
-
-private String copyPopupPrefix(File[] toCopy)
-	{
-	    return strings.copyPopupPrefix(toCopy.length > 1?luwrain.i18n().getNumberStr(toCopy.length, "items"):toCopy[0].getName());
-	}
-
-private String movePopupPrefix(File[] toMove)
-	{
-	    return strings.movePopupPrefix(toMove.length > 1?luwrain.i18n().getNumberStr(toMove.length, "items"):toMove[0].getName());
-	}
-
-String copyOperationName(File[] whatToCopy, File copyTo)
-    {
-	if (whatToCopy.length < 1)
-	    return "";
-	if (whatToCopy.length > 1)
-	    return strings.copyOperationName(whatToCopy[0].getName() + ",...", copyTo.getName());
-	return strings.copyOperationName(whatToCopy[0].getName(), copyTo.getName());
-    }
-
-String moveOperationName(File[] whatToMove, File moveTo)
-    {
-	if (whatToMove.length < 1)
-	    return "";
-	if (whatToMove.length > 1)
-	    return strings.moveOperationName(whatToMove[0].getName() + ",...", moveTo.getName());
-	return strings.moveOperationName(whatToMove[0].getName(), moveTo.getName());
+	return Popups.simple(luwrain, strings.ftpConnectPopupName(), strings.ftpConnectPopupText(), "ftp://");
     }
 
     FilesOperation.ConfirmationChoices overrideConfirmation(File file)

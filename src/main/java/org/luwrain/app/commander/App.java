@@ -284,9 +284,9 @@ final class App implements Application
 		    return false;
 		}
 		if (ActionEvent.isAction(event, "mkdir"))
-		    return actions.mkdir(this, getPanel(side));
+		    return actions.onLocalMkdir(this, getPanel(side));
 		if (ActionEvent.isAction(event, "delete"))
-		    return actions.onLocalDelete(panel);
+		    return actions.onLocalDelete(panel, createFilesOperationListener());
 		if (ActionEvent.isAction(event, "open-ftp"))
 		    return actions.onOpenFtp(panel);
 		if (ActionEvent.isAction(event, "volume-info"))

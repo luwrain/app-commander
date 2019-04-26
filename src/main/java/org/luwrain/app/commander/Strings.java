@@ -66,4 +66,7 @@ public interface Strings
     String enteredPathExists(String path);
     String actionCopyToClipboard();
     String actionPlay();
+
+    String ftpConnectPopupName();
+    String ftpConnectPopupText();
 }
