@@ -155,15 +155,19 @@ final class Actions
 	return true;
     }
 
-    boolean showFileObjectsProperties(InfoAndProperties infoAndProps, PanelArea area, SimpleArea propertiesArea)
+    boolean getFilesInfo(PanelArea area, MutableLines lines)
     {
 	NullCheck.notNull(area, "area");
-	final FileObject[] paths = area.getFileObjectsToProcess();
-	if (paths.length < 1)
-	    return false;
-	propertiesArea.clear();
-	//	infoAndProps.fillProperties(propertiesArea, paths);
-	return true;
+	NullCheck.notNull(lines, "lines");
+	if (area.isLocalDir())
+	{
+	    final File[] files = area.getFilesToProcess();
+	    if (files.length == 0)
+		return false;
+	    final InfoHook hook = new InfoHook(luwrain);
+	    return hook.localFilesInfo(files, lines);
+	}
+	return false;
     }
     
     boolean showVolumeInfo(InfoAndProperties infoAndProps, PanelArea area, SimpleArea propsArea)

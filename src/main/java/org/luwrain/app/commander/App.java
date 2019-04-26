@@ -66,7 +66,7 @@ final class App implements Application
 	final Object o =  luwrain.i18n().getStrings(Strings.NAME);
 	if (o == null || !(o instanceof Strings))
 	    return new InitResult(InitResult.Type.NO_STRINGS_OBJ, Strings.NAME);
-	strings = (Strings)o;
+	this.strings = (Strings)o;
 	this.luwrain = luwrain;
 	this.base = new Base(luwrain, strings);
 	this.actionList = new ActionList(strings);
@@ -159,7 +159,7 @@ final class App implements Application
 	    return true;
 	};
 
-	operationsArea = new ListArea(listParams) {
+	this.operationsArea = new ListArea(listParams) {
 		@Override public boolean onInputEvent(KeyboardEvent event)
 		{
 		    NullCheck.notNull(event, "event");
@@ -294,7 +294,7 @@ final class App implements Application
 		return false;
 	    }
 	case PROPERTIES:
-	    return showPropertiesArea(panel);
+	    return showFilesInfo(panel);
 	default:
 	    return false;
 	}
@@ -315,6 +315,48 @@ final class App implements Application
 		return (FilesOperation.ConfirmationChoices)luwrain.callUiSafely(()->actions.conv.overrideConfirmation(path.toFile()));
 	    }
 	};
+    }
+
+    private boolean showFilesInfo(PanelArea panelArea)
+    {
+	NullCheck.notNull(panelArea, "panelArea");
+	final SimpleArea area = new SimpleArea(new DefaultControlContext(luwrain), strings.infoAreaName()){
+		@Override public boolean onInputEvent(KeyboardEvent event)
+		{
+		    NullCheck.notNull(event, "event");
+		    if (event.isSpecial() && !event.isModified())
+			switch(event.getSpecial())
+			{
+			case ESCAPE:
+			    layout.closeTempLayout();
+			    luwrain.announceActiveArea();
+			    return true;
+			}
+		    return super.onInputEvent(event);
+		}
+		@Override public boolean onSystemEvent(EnvironmentEvent event)
+		{
+		    NullCheck.notNull(event, "event");
+		    if (event.getType() != EnvironmentEvent.Type.REGULAR)
+			return super.onSystemEvent(event);
+		    switch(event.getCode())
+		    {
+		    case CLOSE:
+			closeApp();
+			return true;
+		    default:
+			return super.onSystemEvent(event);
+		    }
+		}
+	    };
+	area.beginLinesTrans();
+	area.addLine("");
+	actions.getFilesInfo(panelArea, area);
+	area.addLine("");
+	area.endLinesTrans();
+	layout.openTempArea(area);
+	luwrain.announceActiveArea();
+	return true;
     }
 
     private boolean showVolumeInfo(PanelArea area)
@@ -413,43 +455,6 @@ final class App implements Application
 	}
     }
 
-    private boolean showPropertiesArea(PanelArea area)
-    {
-	NullCheck.notNull(area, "area");
-	final SimpleArea propertiesArea = new SimpleArea(new DefaultControlContext(luwrain), strings.infoAreaName()){
-		@Override public boolean onInputEvent(KeyboardEvent event)
-		{
-		    NullCheck.notNull(event, "event");
-		    if (event.isSpecial() && !event.isModified())
-			switch(event.getSpecial())
-			{
-			case ESCAPE:
-			    layout.closeTempLayout();
-			    luwrain.announceActiveArea();
-			    return true;
-			}
-		    return super.onInputEvent(event);
-		}
-		@Override public boolean onSystemEvent(EnvironmentEvent event)
-		{
-		    NullCheck.notNull(event, "event");
-		    if (event.getType() != EnvironmentEvent.Type.REGULAR)
-			return super.onSystemEvent(event);
-		    switch(event.getCode())
-		    {
-		    case CLOSE:
-			closeApp();
-			return true;
-		    default:
-			return super.onSystemEvent(event);
-		    }
-		}
-	    };
-	//FIXME:filling
-	layout.openTempArea(propertiesArea);
-	luwrain.announceActiveArea();
-	return true;
-    }
 
     private void onOperationUpdate(FilesOperation operation)
     {
