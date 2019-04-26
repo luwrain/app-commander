@@ -177,9 +177,8 @@ final class Actions
 	return false;
     }
     
-    boolean showVolumeInfo(InfoAndProperties infoAndProps, PanelArea area, SimpleArea propsArea)
+    boolean showVolumeInfo(PanelArea area, SimpleArea propsArea)
     {
-	NullCheck.notNull(infoAndProps, "infoAndProps");
 	NullCheck.notNull(area, "area");
 	NullCheck.notNull(propsArea, "propsArea");
 	if (area.isLocalDir())

@@ -38,7 +38,6 @@ final class App implements Application
     private Base base = null;
     private Actions actions = null;
     private ActionList actionList = null;
-    private InfoAndProperties infoAndProps = null;
 
     private PanelArea leftPanel = null;
     private PanelArea rightPanel = null;
@@ -70,7 +69,6 @@ final class App implements Application
 	this.luwrain = luwrain;
 	this.base = new Base(luwrain, strings);
 	this.actionList = new ActionList(strings);
-	this.infoAndProps = new InfoAndProperties(luwrain);
 	this.actions = new Actions(base);
 	try {
 	    if (startFrom != null && !startFrom.isEmpty())
@@ -248,7 +246,7 @@ final class App implements Application
 		if (ActionEvent.isAction(event, "edit-text"))
 		    return  panel.runHookOnSelected("luwrain.app.commander.edit");
 		if (ActionEvent.isAction(event, "size"))
-		    return infoAndProps.calcSize(panel.getFileObjectsToProcess());
+		    return panel.runHookOnFilesToProcess("luwrain.commander.size", true);
 		if (ActionEvent.isAction(event, "copy-url"))
 		    return actions.onCopyUrls(panel);
 		if (ActionEvent.isAction(event, "preview"))
@@ -390,7 +388,7 @@ final class App implements Application
 		    }
 		}
 	    };
-	if (!actions.showVolumeInfo(infoAndProps, area, propsArea))
+	if (!actions.showVolumeInfo(area, propsArea))
 	    return false;
 	layout.openTempArea(propsArea);
 	return true;

@@ -114,19 +114,18 @@ class PanelArea extends CommanderArea<FileObject>
 	    }
 	luwrain.executeBkg(new FutureTask(()->{
 		    try {
-		if (luwrain.xRunHooks(hookName + ".custom", new Object[]{arg}, Luwrain.HookStrategy.CHAIN_OF_RESPONSIBILITY))
-		    return;
-luwrain.xRunHooks(hookName, new Object[]{arg}, Luwrain.HookStrategy.CHAIN_OF_RESPONSIBILITY);
-return;
-	    }
-	    catch(RuntimeException e)
-	    {
-		luwrain.crash(e);
-    }
+			if (luwrain.xRunHooks(hookName + ".custom", new Object[]{arg}, Luwrain.HookStrategy.CHAIN_OF_RESPONSIBILITY))
+			    return;
+			luwrain.xRunHooks(hookName, new Object[]{arg}, Luwrain.HookStrategy.CHAIN_OF_RESPONSIBILITY);
+			return;
+		    }
+		    catch(RuntimeException e)
+		    {
+			luwrain.crash(e);
+		    }
 	}, null));
 	return true;
     }
-	
 
     boolean isLocalDir()
     {
