@@ -22,8 +22,9 @@ import org.apache.commons.vfs2.*;
 import org.luwrain.core.*;
 import org.luwrain.core.events.*;
 
-class ActionList
-{private final Strings strings;
+final class ActionList
+{
+    private final Strings strings;
 
     ActionList(Strings strings)
     {
@@ -52,13 +53,11 @@ class ActionList
 	    new Action("delete", strings.actionDelete(), new KeyboardEvent(KeyboardEvent.Special.DELETE)),
 	    new Action("open", strings.actionOpen()),
 	    new Action("size", strings.actionSize(), new KeyboardEvent(KeyboardEvent.Special.F3, EnumSet.of(KeyboardEvent.Modifiers.ALT))),
-	    new Action("copy-url", "Скопировать URL", new KeyboardEvent(KeyboardEvent.Special.F4, EnumSet.of(KeyboardEvent.Modifiers.ALT))),
-	    new Action("preview", strings.actionPreview(), new KeyboardEvent(KeyboardEvent.Special.F3, EnumSet.of(KeyboardEvent.Modifiers.SHIFT))),
+	    new Action("copy-url", strings.actionCopyUrl(), new KeyboardEvent(KeyboardEvent.Special.F4, EnumSet.of(KeyboardEvent.Modifiers.ALT))),
 	    new Action("play", strings.actionPlay(), new KeyboardEvent(KeyboardEvent.Special.F2, EnumSet.of(KeyboardEvent.Modifiers.SHIFT))),
+	    new Action("preview", strings.actionPreview(), new KeyboardEvent(KeyboardEvent.Special.F3, EnumSet.of(KeyboardEvent.Modifiers.SHIFT))),
 	    new Action("edit-text", strings.actionEditAsText(), new KeyboardEvent(KeyboardEvent.Special.F4, EnumSet.of(KeyboardEvent.Modifiers.SHIFT))),
-	    new Action("preview-another-format", strings.actionPreviewAnotherFormat()),
-	    new Action("open-choosing-app", strings.actionOpenChoosingApp()),
-	    new Action("open-ftp", "Подключиться к FTP-серверу"), 
+	    new Action("open-ftp", strings.actionOpenFtp()), 
 	    new Action("volume-info", "Показать информацию о разделе", new KeyboardEvent(KeyboardEvent.Special.F10)), 
 	    hiddenShow,
 	    hiddenHide,

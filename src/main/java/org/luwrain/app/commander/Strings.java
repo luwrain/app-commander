@@ -69,4 +69,6 @@ public interface Strings
 
     String ftpConnectPopupName();
     String ftpConnectPopupText();
+    String actionCopyUrl();
+    String actionOpenFtp();
 }
