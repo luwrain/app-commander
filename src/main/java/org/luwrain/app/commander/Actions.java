@@ -236,19 +236,6 @@ final class Actions
 	return true;
     }
 
-    static boolean onOpenEvent(EnvironmentEvent event, PanelArea area)
-    {
-	NullCheck.notNull(event, "event");
-	NullCheck.notNull(area, "area");
-	if (!(event instanceof OpenEvent))
-	    return false;
-	final File f = new File(((OpenEvent)event).path());
-	if (!f.isDirectory())
-	    return false;
-	area.openLocalPath(f.getAbsolutePath());
-	return true;
-    }
-
     private String copyOperationName(File[] whatToCopy, File copyTo)
     {
 	if (whatToCopy.length < 1)

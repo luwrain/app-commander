@@ -224,8 +224,6 @@ final class App implements Application
 	NullCheck.notNull(side, "side");
 	switch(event.getCode())
 	{
-	case OPEN:
-	    return actions.onOpenEvent(event, panel);
 	case INTRODUCE:
 	    luwrain.playSound(Sounds.INTRO_REGULAR);
 	    switch(side)
