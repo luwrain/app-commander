@@ -46,7 +46,7 @@ public final class DestPathPopup extends FilePopup
     this.type = type;
 }
 
-    static private Acceptance createAcceptance()
+    static private FileAcceptance createAcceptance()
     {
 	return (file, announce)->{
 	    return true;
