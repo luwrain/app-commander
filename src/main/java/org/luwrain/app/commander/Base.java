@@ -1,18 +1,3 @@
-/*
-   Copyright 2012-2019 Michael Pozhidaev <msp@luwrain.org>
-
-   This file is part of LUWRAIN.
-
-   LUWRAIN is free software; you can redistribute it and/or
-   modify it under the terms of the GNU General Public
-   License as published by the Free Software Foundation; either
-   version 3 of the License, or (at your option) any later version.
-
-   LUWRAIN is distributed in the hope that it will be useful,
-   but WITHOUT ANY WARRANTY; without even the implied warranty of
-   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-   General Public License for more details.
-*/
 
 package org.luwrain.app.commander;
 
@@ -54,11 +39,14 @@ final class Base
 	luwrain.executeBkg(new FutureTask(op, null));
     }
 
+    
     boolean allOperationsFinished()
     {
+	/*
 	for(FilesOperation op:operations)
 	    if (!op.isFinished())
 		return false;
+	*/
 	return true;
     }
 
@@ -94,25 +82,5 @@ final class Base
 	}
     }
 
-    ListArea.Model createOperationsListModel()
-    {
-	return new OperationsListModel();
-    }
 
-    private class OperationsListModel implements ListArea.Model
-    {
-	@Override public Object getItem(int index)
-	{
-	    if (index < 0)
-		throw new IllegalArgumentException("index (" + index + ") may not be negative");
-	    return operations.get(index);
-	}
-	@Override public int getItemCount()
-	{
-	    return operations.size();
-	}
-	@Override public void refresh()
-	{
-	}
-    }
     }
