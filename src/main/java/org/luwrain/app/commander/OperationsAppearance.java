@@ -9,19 +9,17 @@ import org.luwrain.controls.*;
 
 class OperationsAppearance implements ListArea.Appearance
 {
-    private Luwrain luwrain;
-    private Strings strings;
-    private Base base;
+        private final App app;
+    private final Luwrain luwrain;
+    private final Strings strings;
 
-    OperationsAppearance(Luwrain luwrain, Strings strings,
-Base base)
+
+    OperationsAppearance(App app)
     {
-	NullCheck.notNull(luwrain, "luwrain");
-	NullCheck.notNull(strings, "strings");
-	NullCheck.notNull(base, "base");
-	this.luwrain = luwrain;
-	this.strings = strings;
-	this.base = base;
+	NullCheck.notNull(app, "app");
+	this.luwrain = app.getLuwrain();
+	this.strings = app.getStrings();
+	this.app = app;
     }
 
     @Override public void announceItem(Object item, Set<Flags> flags)
@@ -32,7 +30,7 @@ Base base)
 	final FilesOperation op = (FilesOperation)item;
 	if (op.isFinished())
 	{
-	    luwrain.speak(base.getOperationResultDescr(op) + " " + op.getOperationName());
+	    app.getLuwrain().speak(app.getOperationResultDescr(op) + " " + op.getOperationName());
 	    return;
 	}
 	final int percents = op.getPercents();
@@ -49,7 +47,7 @@ Base base)
 	NullCheck.notNull(flags, "flags");
 	final FilesOperation op = (FilesOperation)item;
 	if (op.isFinished())
-	    return base.getOperationResultDescr(op);
+	    return app.getOperationResultDescr(op);
 	final int percents = op.getPercents();
 	if (percents == 0)
 	    return op.getOperationName() + "...";

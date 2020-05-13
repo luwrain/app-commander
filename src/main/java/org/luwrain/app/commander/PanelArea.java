@@ -17,15 +17,14 @@ import org.luwrain.io.*;
 class PanelArea extends CommanderArea<FileObject>
 {
     private final Luwrain luwrain;
-    private final ActionList actionList;
+    //    private final ActionList actionList;
 
-    PanelArea(Params<FileObject> params, Luwrain luwrain, ActionList actionList)
+    PanelArea(Params<FileObject> params, Luwrain luwrain)
     {
 	super(params);
 	NullCheck.notNull(luwrain, "luwrain");
-	NullCheck.notNull(actionList, "actionList");
 	this.luwrain = luwrain;
-	this.actionList = actionList;
+	//	this.actionList = actionList;
     }
 
     @Override public boolean onAreaQuery(AreaQuery query)
@@ -218,10 +217,6 @@ res.add(new java.net.URL(root, f.getName().getPath()));
 	reread(false);
     }
 
-		@Override public Action[] getAreaActions()
-		{
-return actionList.getPanelAreaActions(this);
-		}
 
 		static Params<FileObject> createParams(Luwrain luwrain) throws FileSystemException
 		{

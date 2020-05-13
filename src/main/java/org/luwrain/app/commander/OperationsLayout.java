@@ -14,7 +14,7 @@ import org.luwrain.controls.*;
 import org.luwrain.io.*;
 import org.luwrain.popups.*;
 
-import org.luwrain.app.commander.Base.Side;
+import org.luwrain.app.commander.App.Side;
 import org.luwrain.template.*;
 
 final class OperationsLayout extends LayoutBase
