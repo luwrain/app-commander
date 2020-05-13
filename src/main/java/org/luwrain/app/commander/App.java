@@ -33,16 +33,14 @@ import org.luwrain.template.*;
 
 final class App extends AppBase<Strings>
 {
-    enum Side {LEFT, RIGHT};
-    
-    final String startFrom;
-        final Vector<FilesOperation> operations = new Vector<FilesOperation>();
+    static private final String REGISTRY_PATH = "/org/luwrain/app/commander";
 
-        static private final String REGISTRY_PATH = "/org/luwrain/app/commander";
+    enum Side {LEFT, RIGHT};
+
+    final String startFrom;
+    final Vector<FilesOperation> operations = new Vector<FilesOperation>();
 
     private Settings sett = null;
-
-
     private Conversations conv = null;
     private MainLayout mainLayout = null;
 
@@ -68,31 +66,18 @@ final class App extends AppBase<Strings>
 	return true;
     }
 
-        boolean allAllOperationsFinished()
-    {
-	/*
-	for(FilesOperation op:operations)
-	    if (!op.isFinished())
-		return false;
-	*/
-	return true;
-    }
-
-        void launch(FilesOperation op)
+    void launch(FilesOperation op)
     {
 	NullCheck.notNull(op, "op");
 	operations.add(op);
 	getLuwrain().executeBkg(new FutureTask(op, null));
     }
 
-    
     boolean allOperationsFinished()
     {
-	/*
 	for(FilesOperation op:operations)
 	    if (!op.isFinished())
 		return false;
-	*/
 	return true;
     }
 
@@ -128,10 +113,6 @@ final class App extends AppBase<Strings>
 	}
     }
 
-
-
-
-
     private FilesOperation.Listener createFilesOperationListener()
     {
 	return new FilesOperation.Listener(){
@@ -149,8 +130,6 @@ final class App extends AppBase<Strings>
 	};
     }
 
-
-
     private void onOperationUpdate(FilesOperation operation)
     {
 	NullCheck.notNull(operation, "operation");
@@ -162,6 +141,28 @@ final class App extends AppBase<Strings>
 		getLuwrain().playSound(Sounds.DONE);
 	    //refreshPanels();
 	}
+    }
+
+    boolean onInputEvent(Area area, KeyboardEvent event, Runnable closing)
+    {
+	NullCheck.notNull(area, "area");
+	if (event.isSpecial())
+	    switch(event.getSpecial())
+	    {
+	    case ESCAPE:
+		if (closing != null)
+		    closing.run(); else
+		    closeApp();
+		return true;
+	    }
+	return super.onInputEvent(area, event);
+    }
+
+    @Override public boolean onInputEvent(Area area, KeyboardEvent event)
+    {
+	NullCheck.notNull(area, "area");
+	NullCheck.notNull(event, "event");
+	return onInputEvent(area, event, null);
     }
 
     Conversations getConv()

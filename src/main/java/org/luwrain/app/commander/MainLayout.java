@@ -42,7 +42,7 @@ final class MainLayout extends LayoutBase
     {
 	NullCheck.notNull(app, "app");
 	this.app = app;
- 	this.leftPanel = new PanelArea(createLeftPanelParams(), app.getLuwrain()) {
+ 	this.leftPanel = new PanelArea(createPanelParams(), app.getLuwrain()) {
 		@Override public boolean onInputEvent(KeyboardEvent event)
 		{
 		    NullCheck.notNull(event, "event");
@@ -71,7 +71,7 @@ final class MainLayout extends LayoutBase
 		    return super.onAreaQuery(query);
 		}
 	    };
- 	this.rightPanel = new PanelArea(createRightPanelParams(), app.getLuwrain()) {
+ 	this.rightPanel = new PanelArea(createPanelParams(), app.getLuwrain()) {
 		@Override public boolean onInputEvent(KeyboardEvent event)
 		{
 		    NullCheck.notNull(event, "event");
@@ -125,16 +125,16 @@ final class MainLayout extends LayoutBase
 	    switch(side)
 	    {
 	    case LEFT:
-		app.getLuwrain().speak(app.getStrings().leftPanelName() + " " + leftPanel.getAreaName());
+		app.getLuwrain().speak(app.getStrings().leftPanelName() + " " + app.getLuwrain().getSpeakableText(leftPanel.getAreaName(), Luwrain.SpeakableTextType.PROGRAMMING));
 		return true;
 	    case RIGHT:
-		app.getLuwrain().speak(app.getStrings().rightPanelName() + " " + rightPanel.getAreaName());
+		app.getLuwrain().speak(app.getStrings().rightPanelName() + " " + app.getLuwrain().getSpeakableText(rightPanel.getAreaName(), Luwrain.SpeakableTextType.PROGRAMMING));
 		return true;
 	    }
 	    return false;
     }
 
-        PanelArea.ClickHandler.Result onClick(CommanderArea area, Object obj, boolean dir)
+        private PanelArea.ClickHandler.Result onClick(CommanderArea area, Object obj, boolean dir)
     {
 	NullCheck.notNull(area, "area");
 	NullCheck.notNull(obj, "obj");
@@ -344,22 +344,11 @@ private String moveOperationName(File[] whatToMove, File moveTo)
     }
 
 
-    private CommanderArea.Params createLeftPanelParams()
-    {
-		try {
-	final CommanderArea.Params params = PanelArea.createParams(app.getLuwrain());
-		return params;
-	}
-	catch(Exception e)
-	{
-	    throw new RuntimeException(e);
-	}
-    }
-
-        private CommanderArea.Params createRightPanelParams()
+        private CommanderArea.Params createPanelParams()
     {
 	try {
 	final CommanderArea.Params params = PanelArea.createParams(app.getLuwrain());
+	params.clickHandler = this::onClick;
 		return params;
 	}
 	catch(Exception e)
