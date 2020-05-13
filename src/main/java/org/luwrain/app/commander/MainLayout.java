@@ -35,7 +35,6 @@ import org.luwrain.template.*;
 final class MainLayout extends LayoutBase
 {
     private final App app;
-    private Luwrain luwrain = null;
     private final PanelArea leftPanel;
     private final PanelArea rightPanel;
 
@@ -102,10 +101,10 @@ final class MainLayout extends LayoutBase
 		}
 	    };
 	leftPanel.setLoadingResultHandler((location, data, selectedIndex, announce)->{
-		luwrain.runUiSafely(()->leftPanel.acceptNewLocation(location, data, selectedIndex, announce));
+		app.getLuwrain().runUiSafely(()->leftPanel.acceptNewLocation(location, data, selectedIndex, announce));
 	    });
 	rightPanel.setLoadingResultHandler((location, data, selectedIndex, announce)->{
-		luwrain.runUiSafely(()->rightPanel.acceptNewLocation(location, data, selectedIndex, announce));
+		app.getLuwrain().runUiSafely(()->rightPanel.acceptNewLocation(location, data, selectedIndex, announce));
 	    });
 	if (app.startFrom != null)
 	{
@@ -122,7 +121,7 @@ final class MainLayout extends LayoutBase
     private boolean announcePanel(Side side)
     {
 	NullCheck.notNull(side, "side");
-	    luwrain.playSound(Sounds.INTRO_REGULAR);
+	app.getLuwrain().playSound(Sounds.INTRO_REGULAR);
 	    switch(side)
 	    {
 	    case LEFT:
@@ -148,12 +147,12 @@ final class MainLayout extends LayoutBase
 	    //Maybe it's better to make a separate method translating FileObject to java.io.File
 	    final FileObject fileObject = (FileObject)obj;
 	    final File file = org.luwrain.util.Urls.toFile(fileObject.getURL());
-	    luwrain.openFile(file.getAbsolutePath());
+	    app.getLuwrain().openFile(file.getAbsolutePath());
 	    return CommanderArea.ClickHandler.Result.OK;
 	}
 	catch(Exception e)
 	{
-	    luwrain.crash(e);
+	    app.getLuwrain().crash(e);
 	    return PanelArea.ClickHandler.Result.REJECTED;
 	}
     }
@@ -178,7 +177,7 @@ final class MainLayout extends LayoutBase
 	if (dest == null)
 	    return true;
 	final String opName = copyOperationName(filesToCopy, dest);
-	app.launch(luwrain.getFilesOperations().copy(listener, opName, filesToCopy, dest));
+	app.launch(app.getLuwrain().getFilesOperations().copy(listener, opName, filesToCopy, dest));
 	return true;
     }
 
@@ -198,7 +197,7 @@ final class MainLayout extends LayoutBase
 	if (dest == null)
 	    return true;
 	final String opName = moveOperationName(filesToMove, dest);
-	app.launch(luwrain.getFilesOperations().move(listener, opName, filesToMove, dest));
+	app.launch(app.getLuwrain().getFilesOperations().move(listener, opName, filesToMove, dest));
 	return true;
     }
 
@@ -219,7 +218,7 @@ final class MainLayout extends LayoutBase
 	}
 	catch (IOException e)
 	{
-	    app.getLuwrain().message(app.getStrings().mkdirErrorMessage(luwrain.i18n().getExceptionDescr(e)), Luwrain.MessageType.ERROR);
+	    app.getLuwrain().message(app.getStrings().mkdirErrorMessage(app.getI18n().getExceptionDescr(e)), Luwrain.MessageType.ERROR);
 	    return true;
 	}
 	app.getLuwrain().message(app.getStrings().mkdirOkMessage(newDir.getName()), Luwrain.MessageType.OK);
@@ -239,7 +238,7 @@ final class MainLayout extends LayoutBase
 	if (!app.getConv().deleteConfirmation(files))
 	    return true;
 	final String opName = app.getStrings().delOperationName(files);
-	app.launch(luwrain.getFilesOperations().delete(listener, opName, files));
+	app.launch(app.getLuwrain().getFilesOperations().delete(listener, opName, files));
 	return true;
     }
 
@@ -252,13 +251,13 @@ final class MainLayout extends LayoutBase
 	    final File[] files = area.getFilesToProcess();
 	    if (files.length == 0)
 		return false;
-	    final InfoHook hook = new InfoHook(luwrain);
+	    final InfoHook hook = new InfoHook(app.getLuwrain());
 	    try {
 		return hook.localFilesInfo(files, lines);
 	    }
 	    catch(RuntimeException e)
 	    {
-		luwrain.crash(e);
+		app.getLuwrain().crash(e);
 		return true;
 	    }
 	}
