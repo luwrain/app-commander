@@ -1,3 +1,18 @@
+/*
+   Copyright 2012-2020 Michael Pozhidaev <msp@luwrain.org>
+
+   This file is part of LUWRAIN.
+
+   LUWRAIN is free software; you can redistribute it and/or
+   modify it under the terms of the GNU General Public
+   License as published by the Free Software Foundation; either
+   version 3 of the License, or (at your option) any later version.
+
+   LUWRAIN is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+   General Public License for more details.
+*/
 
 package org.luwrain.app.commander;
 
@@ -32,53 +47,93 @@ final class MainLayout extends LayoutBase
 		@Override public boolean onInputEvent(KeyboardEvent event)
 		{
 		    NullCheck.notNull(event, "event");
+		    if (app.onInputEvent(this, event))
+			return true;
 		    return super.onInputEvent(event);
 		}
 		@Override public boolean onSystemEvent(EnvironmentEvent event)
 		{
 		    NullCheck.notNull(event, "event");
+		    if (event.getType() == EnvironmentEvent.Type.REGULAR)
+			switch(event.getCode())
+			{
+			case INTRODUCE:
+			    return announcePanel(Side.LEFT);
+			}
+		    if (app.onSystemEvent(this, event))
+			return true;
 		    return super.onSystemEvent(event);
 		}
+		@Override public boolean onAreaQuery(AreaQuery query)
+		{
+		    NullCheck.notNull(query, "query");
+		    if (app.onAreaQuery(this, query))
+			return true;
+		    return super.onAreaQuery(query);
+		}
 	    };
-
  	this.rightPanel = new PanelArea(createRightPanelParams(), app.getLuwrain()) {
 		@Override public boolean onInputEvent(KeyboardEvent event)
 		{
 		    NullCheck.notNull(event, "event");
+		    if (app.onInputEvent(this, event))
+			return true;
 		    return super.onInputEvent(event);
 		}
 		@Override public boolean onSystemEvent(EnvironmentEvent event)
 		{
 		    NullCheck.notNull(event, "event");
+		    if (event.getType() == EnvironmentEvent.Type.REGULAR)
+			switch(event.getCode())
+			{
+			case INTRODUCE:
+			    return announcePanel(Side.RIGHT);
+			}
+		    if (app.onSystemEvent(this, event))
+			return true;
 		    return super.onSystemEvent(event);
 		}
+		@Override public boolean onAreaQuery(AreaQuery query)
+		{
+		    NullCheck.notNull(query, "query");
+		    if (app.onAreaQuery(this, query))
+			return true;
+		    return super.onAreaQuery(query);
+		}
 	    };
-
 	leftPanel.setLoadingResultHandler((location, data, selectedIndex, announce)->{
 		luwrain.runUiSafely(()->leftPanel.acceptNewLocation(location, data, selectedIndex, announce));
 	    });
 	rightPanel.setLoadingResultHandler((location, data, selectedIndex, announce)->{
 		luwrain.runUiSafely(()->rightPanel.acceptNewLocation(location, data, selectedIndex, announce));
 	    });
-	leftPanel.openInitial(app.startFrom);
-	rightPanel.openInitial(app.startFrom);
-
+	if (app.startFrom != null)
+	{
+	    leftPanel.openInitial(app.startFrom);
+	    rightPanel.openInitial(app.startFrom);
+	} else
+	{
+	    final String location = app.getLuwrain().getProperty("luwrain.dir.userhome");
+	    	    leftPanel.openInitial(location);
+	    rightPanel.openInitial(location);
+	}
     }
 
-	/*
-	case INTRODUCE:
+    private boolean announcePanel(Side side)
+    {
+	NullCheck.notNull(side, "side");
 	    luwrain.playSound(Sounds.INTRO_REGULAR);
 	    switch(side)
 	    {
 	    case LEFT:
-		luwrain.speak(strings.leftPanelName() + " " + panel.getAreaName());
-		break;
+		app.getLuwrain().speak(app.getStrings().leftPanelName() + " " + leftPanel.getAreaName());
+		return true;
 	    case RIGHT:
-		luwrain.speak(strings.rightPanelName() + " " + panel.getAreaName());
-		break;
+		app.getLuwrain().speak(app.getStrings().rightPanelName() + " " + rightPanel.getAreaName());
+		return true;
 	    }
-	    return true;
-	*/
+	    return false;
+    }
 
         PanelArea.ClickHandler.Result onClick(CommanderArea area, Object obj, boolean dir)
     {
@@ -292,13 +347,27 @@ private String moveOperationName(File[] whatToMove, File moveTo)
 
     private CommanderArea.Params createLeftPanelParams()
     {
-	return null;
+		try {
+	final CommanderArea.Params params = PanelArea.createParams(app.getLuwrain());
+		return params;
+	}
+	catch(Exception e)
+	{
+	    throw new RuntimeException(e);
+	}
     }
 
         private CommanderArea.Params createRightPanelParams()
     {
-	return null;
-    }
+	try {
+	final CommanderArea.Params params = PanelArea.createParams(app.getLuwrain());
+		return params;
+	}
+	catch(Exception e)
+	{
+	    throw new RuntimeException(e);
+	}
+	    }
 
 
 	
