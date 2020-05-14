@@ -43,6 +43,7 @@ final class MainLayout extends LayoutBase
 	NullCheck.notNull(app, "app");
 	this.app = app;
  	this.leftPanel = new PanelArea(createPanelParams(), app.getLuwrain()) {
+		private final Actions actions = getPanelActions(this);
 		@Override public boolean onInputEvent(KeyboardEvent event)
 		{
 		    NullCheck.notNull(event, "event");
@@ -59,7 +60,7 @@ final class MainLayout extends LayoutBase
 			case INTRODUCE:
 			    return announcePanel(Side.LEFT);
 			}
-		    if (app.onSystemEvent(this, event))
+		    if (app.onSystemEvent(this, event, actions))
 			return true;
 		    return super.onSystemEvent(event);
 		}
@@ -70,8 +71,13 @@ final class MainLayout extends LayoutBase
 			return true;
 		    return super.onAreaQuery(query);
 		}
+		@Override public Action[] getAreaActions()
+		{
+		    return actions.getAreaActions();
+		}
 	    };
  	this.rightPanel = new PanelArea(createPanelParams(), app.getLuwrain()) {
+		private final Actions actions = getPanelActions(this);
 		@Override public boolean onInputEvent(KeyboardEvent event)
 		{
 		    NullCheck.notNull(event, "event");
@@ -88,7 +94,7 @@ final class MainLayout extends LayoutBase
 			case INTRODUCE:
 			    return announcePanel(Side.RIGHT);
 			}
-		    if (app.onSystemEvent(this, event))
+		    if (app.onSystemEvent(this, event, actions))
 			return true;
 		    return super.onSystemEvent(event);
 		}
@@ -98,6 +104,10 @@ final class MainLayout extends LayoutBase
 		    if (app.onAreaQuery(this, query))
 			return true;
 		    return super.onAreaQuery(query);
+		}
+		@Override public Action[] getAreaActions()
+		{
+		    return actions.getAreaActions();
 		}
 	    };
 	leftPanel.setLoadingResultHandler((location, data, selectedIndex, announce)->{
@@ -116,6 +126,14 @@ final class MainLayout extends LayoutBase
 	    	    leftPanel.openInitial(location);
 	    rightPanel.openInitial(location);
 	}
+    }
+
+    private Actions getPanelActions(PanelArea panelArea)
+    {
+	NullCheck.notNull(panelArea, "panelArea");
+	return actions(
+	action("mkdir", app.getStrings().actionMkdir(), new KeyboardEvent(KeyboardEvent.Special.F7), ()->actLocalMkdir(panelArea))
+		       );
     }
 
     private boolean announcePanel(Side side)
@@ -144,7 +162,6 @@ final class MainLayout extends LayoutBase
 	if (!panelArea.isLocalDir())//FIXME:
 	    return PanelArea.ClickHandler.Result.REJECTED;
 	try {
-	    //Maybe it's better to make a separate method translating FileObject to java.io.File
 	    final FileObject fileObject = (FileObject)obj;
 	    final File file = org.luwrain.util.Urls.toFile(fileObject.getURL());
 	    app.getLuwrain().openFile(file.getAbsolutePath());
@@ -157,7 +174,7 @@ final class MainLayout extends LayoutBase
 	}
     }
 
-    boolean onLocalCopy(PanelArea copyFromArea, PanelArea copyToArea, FilesOperation.Listener listener)
+    private boolean todoLocalCopy(PanelArea copyFromArea, PanelArea copyToArea, FilesOperation.Listener listener)
     {
 	NullCheck.notNull(copyFromArea, "copyFromArea");
 	NullCheck.notNull(copyToArea, "copyToArea");
@@ -181,7 +198,7 @@ final class MainLayout extends LayoutBase
 	return true;
     }
 
-    boolean onLocalMove(PanelArea moveFromArea, PanelArea moveToArea, FilesOperation.Listener listener)
+    private boolean todoLocalMove(PanelArea moveFromArea, PanelArea moveToArea, FilesOperation.Listener listener)
     {
 	NullCheck.notNull(moveFromArea, "moveFromArea");
 	NullCheck.notNull(moveToArea, "moveToArea");
@@ -201,28 +218,27 @@ final class MainLayout extends LayoutBase
 	return true;
     }
 
-    boolean onLocalMkdir(App app, PanelArea area)
+    private boolean actLocalMkdir(PanelArea panelArea)
     {
-	NullCheck.notNull(app, "app");
-	NullCheck.notNull(area, "area");
-	if (!area.isLocalDir())
+	NullCheck.notNull(panelArea, "panelArea");
+	if (!panelArea.isLocalDir())
 	    return false;
-	final File createIn = area.getOpenedAsFile();
+	final File createIn = panelArea.getOpenedAsFile();
 	if (createIn == null || !createIn.isAbsolute())
 	    return false;
 	final File newDir = app.getConv().mkdirPopup(createIn);
 	if (newDir == null)
 	    return true;
 	try {
-	    java.nio.file.Files.createDirectories(newDir.toPath());//FIXME:
+	    java.nio.file.Files.createDirectories(newDir.toPath());
 	}
 	catch (IOException e)
 	{
-	    app.getLuwrain().message(app.getStrings().mkdirErrorMessage(app.getI18n().getExceptionDescr(e)), Luwrain.MessageType.ERROR);
+	    app.getLuwrain().crash(e);
 	    return true;
 	}
 	app.getLuwrain().message(app.getStrings().mkdirOkMessage(newDir.getName()), Luwrain.MessageType.OK);
-	area.reread(newDir.getName(), false);
+	panelArea.reread(newDir.getName(), false);
 	return true;
     }
 
@@ -242,7 +258,7 @@ final class MainLayout extends LayoutBase
 	return true;
     }
 
-    boolean getFilesInfo(PanelArea area, MutableLines lines)
+     boolean getFilesInfo(PanelArea area, MutableLines lines)
     {
 	NullCheck.notNull(area, "area");
 	NullCheck.notNull(lines, "lines");
@@ -263,7 +279,7 @@ final class MainLayout extends LayoutBase
 	}
 	return false;
     }
-    
+
     boolean showVolumeInfo(PanelArea area, SimpleArea propsArea)
     {
 	NullCheck.notNull(area, "area");
