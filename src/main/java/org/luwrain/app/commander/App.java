@@ -42,6 +42,7 @@ final class App extends AppBase<Strings>
 
     private Settings sett = null;
     private Conversations conv = null;
+    private Hooks hooks = null;
     private MainLayout mainLayout = null;
 
     App()
@@ -61,6 +62,7 @@ final class App extends AppBase<Strings>
     {
 	this.sett = RegistryProxy.create(getLuwrain().getRegistry(), REGISTRY_PATH, Settings.class);
 	this.conv = new Conversations(this);
+	this.hooks = new Hooks(this);
 	this.mainLayout = new MainLayout(this);
 	setAppName(getStrings().appName());
 	return true;
@@ -168,6 +170,11 @@ final class App extends AppBase<Strings>
     Conversations getConv()
     {
 	return this.conv;
+    }
+
+    Hooks getHooks()
+    {
+return this.hooks;
     }
 
     Settings getSett()

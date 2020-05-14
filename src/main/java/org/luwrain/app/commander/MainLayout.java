@@ -267,9 +267,8 @@ final class MainLayout extends LayoutBase
 	    final File[] files = area.getFilesToProcess();
 	    if (files.length == 0)
 		return false;
-	    final InfoHook hook = new InfoHook(app.getLuwrain());
 	    try {
-		return hook.localFilesInfo(files, lines);
+		return app.getHooks().localFilesInfo(files, lines);
 	    }
 	    catch(RuntimeException e)
 	    {

@@ -23,14 +23,14 @@ import java.util.concurrent.atomic.*;
 import org.luwrain.core.*;
 import org.luwrain.script.*;
 
-final class InfoHook
+final class Hooks
 {
-    private final Luwrain luwrain;
+    private final App app;
 
-    InfoHook(Luwrain luwrain)
+    Hooks(App app)
     {
-	NullCheck.notNull(luwrain, "luwrain");
-	this.luwrain = luwrain;
+	NullCheck.notNull(app, "app");
+	this.app = app;
     }
 
     boolean localFilesInfo(File[] files, MutableLines lines)
@@ -39,7 +39,7 @@ final class InfoHook
 	NullCheck.notNull(lines, "lines");
 	final AtomicReference res = new AtomicReference();
 	final Object arg = ScriptUtils.createReadOnlyArray(files);
-	luwrain.xRunHooks("luwrain.commander.info.local", (hook)->{
+	app.getLuwrain().xRunHooks("luwrain.commander.info.local", (hook)->{
 		try {
 		    final Object obj = hook.run(new Object[]{arg});
 		    if (obj == null)
