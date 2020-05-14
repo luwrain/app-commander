@@ -59,6 +59,8 @@ final class MainLayout extends LayoutBase
 			{
 			case INTRODUCE:
 			    return announcePanel(Side.LEFT);
+			case PROPERTIES:
+			    return showFilesInfo(this);
 			}
 		    if (app.onSystemEvent(this, event, actions))
 			return true;
@@ -93,6 +95,8 @@ final class MainLayout extends LayoutBase
 			{
 			case INTRODUCE:
 			    return announcePanel(Side.RIGHT);
+			    			case PROPERTIES:
+			    return showFilesInfo(this);
 			}
 		    if (app.onSystemEvent(this, event, actions))
 			return true;
@@ -258,23 +262,27 @@ final class MainLayout extends LayoutBase
 	return true;
     }
 
-     boolean getFilesInfo(PanelArea area, MutableLines lines)
+     private boolean showFilesInfo(PanelArea area)
     {
 	NullCheck.notNull(area, "area");
-	NullCheck.notNull(lines, "lines");
 	if (area.isLocalDir())
 	{
 	    final File[] files = area.getFilesToProcess();
 	    if (files.length == 0)
 		return false;
+	    final MutableLinesImpl lines = new MutableLinesImpl();
 	    try {
-		return app.getHooks().localFilesInfo(files, lines);
+		if (!app.getHooks().localFilesInfo(files, lines))
+		    return false;
 	    }
 	    catch(RuntimeException e)
 	    {
 		app.getLuwrain().crash(e);
 		return true;
 	    }
+	    final FilesInfoLayout info = new FilesInfoLayout(app, lines, ()->app.layout(getLayout()));
+	    app.layout(info.getLayout());
+	    return true;
 	}
 	return false;
     }
