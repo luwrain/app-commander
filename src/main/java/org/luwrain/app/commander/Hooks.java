@@ -22,9 +22,12 @@ import java.util.concurrent.atomic.*;
 
 import org.luwrain.core.*;
 import org.luwrain.script.*;
+import org.luwrain.script.hooks.*;
 
 final class Hooks
 {
+    static private final String LOCAL_FILES_INFO_HOOK = "luwrain.commander.info.files.local";
+
     private final App app;
 
     Hooks(App app)
@@ -37,30 +40,18 @@ final class Hooks
     {
 	NullCheck.notNullItems(files, "files");
 	NullCheck.notNull(lines, "lines");
-	final AtomicReference res = new AtomicReference();
 	final Object arg = ScriptUtils.createReadOnlyArray(files);
-	app.getLuwrain().xRunHooks("luwrain.commander.info.local", (hook)->{
-		try {
-		    final Object obj = hook.run(new Object[]{arg});
-		    if (obj == null)
-			return Luwrain.HookResult.CONTINUE;
-		    res.set(obj);
-		    return Luwrain.HookResult.BREAK;
-		}
-		catch(RuntimeException e)
-		{
-		    res.set(e);
-		    return Luwrain.HookResult.BREAK;
-		}
-	    });
-	if (res.get() == null)
+	final Object res = new ProviderHook(app.getLuwrain()).run(LOCAL_FILES_INFO_HOOK, new Object[]{arg});
+	if (res == null)
 	    return false;
-	if (res.get() instanceof RuntimeException)
-	    throw (RuntimeException)res.get();
-	final List<String> items = ScriptUtils.getStringArray(res.get());
+	final List<String> items = ScriptUtils.getStringArray(res);
+	if (items == null)
+	    return false;
+	lines.addLine("");
 	for(String s: items)
 	    if (s != null)
 		lines.addLine(s);
+	lines.addLine("");
 	return true;
     }
 }

@@ -36,7 +36,7 @@ final class FilesInfoLayout extends LayoutBase
 		@Override public boolean onInputEvent(KeyboardEvent event)
 		{
 		    NullCheck.notNull(event, "event");
-		    if (app.onInputEvent(this, event))
+		    if (app.onInputEvent(this, event, closing))
 			return true;
 		    return super.onInputEvent(event);
 		}
@@ -64,7 +64,7 @@ final class FilesInfoLayout extends LayoutBase
 		}
 		@Override public String getLine(int index)
 		{
-		    if (index < lines.getLineCount())
+		    if (index >= lines.getLineCount())
 			return "";
 		    return lines.getLine(index);
 		}
