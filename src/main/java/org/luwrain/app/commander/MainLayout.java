@@ -262,12 +262,12 @@ final class MainLayout extends LayoutBase
 	return true;
     }
 
-     private boolean showFilesInfo(PanelArea area)
+     private boolean showFilesInfo(PanelArea panelArea)
     {
-	NullCheck.notNull(area, "area");
-	if (area.isLocalDir())
+	NullCheck.notNull(panelArea, "panelArea");
+	if (panelArea.isLocalDir())
 	{
-	    final File[] files = area.getFilesToProcess();
+	    final File[] files = panelArea.getFilesToProcess();
 	    if (files.length == 0)
 		return false;
 	    final MutableLinesImpl lines = new MutableLinesImpl();
@@ -280,7 +280,7 @@ final class MainLayout extends LayoutBase
 		app.getLuwrain().crash(e);
 		return true;
 	    }
-	    final FilesInfoLayout info = new FilesInfoLayout(app, lines, ()->app.layout(getLayout()));
+	    final FilesInfoLayout info = new FilesInfoLayout(app, lines, ()->app.layout(getLayout(), panelArea));
 	    app.layout(info.getLayout());
 	    return true;
 	}

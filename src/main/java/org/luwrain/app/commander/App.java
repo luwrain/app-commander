@@ -20,15 +20,9 @@ import java.util.*;
 import java.util.concurrent.*;
 import java.io.*;
 
-import org.apache.commons.vfs2.*;
-
 import org.luwrain.base.*;
 import org.luwrain.core.*;
 import org.luwrain.core.events.*;
-import org.luwrain.controls.*;
-import org.luwrain.io.*;
-import org.luwrain.popups.*;
-
 import org.luwrain.template.*;
 
 final class App extends AppBase<Strings>
@@ -150,6 +144,15 @@ final class App extends AppBase<Strings>
 	NullCheck.notNull(layout, "layout");
 	getLayout().setBasicLayout(layout);
 	getLuwrain().announceActiveArea();
+    }
+
+    void layout(AreaLayout layout, Area activeArea)
+    {
+	NullCheck.notNull(layout, "layout");
+	NullCheck.notNull(activeArea, "activeArea");
+	getLayout().setBasicLayout(layout);
+	getLuwrain().announceActiveArea();
+	getLuwrain().setActiveArea(activeArea);
     }
 
     boolean onInputEvent(Area area, KeyboardEvent event, Runnable closing)
