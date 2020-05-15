@@ -71,4 +71,8 @@ public interface Strings
     String ftpConnectPopupText();
     String actionCopyUrl();
     String actionOpenFtp();
+    String leftPanelVolumePopupName();
+        String rightPanelVolumePopupName();
+    String leftPanelVolume();
+    String rightPanelVolume();
 }

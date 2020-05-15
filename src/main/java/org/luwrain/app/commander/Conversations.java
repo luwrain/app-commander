@@ -108,4 +108,14 @@ final class Conversations
 	    return FilesOperation.ConfirmationChoices.SKIP;
 	return FilesOperation.ConfirmationChoices.CANCEL;
     }
+
+    File leftPanelVolume()
+    {
+	return Popups.disksVolumes(luwrain, strings.leftPanelVolumePopupName());
+    }
+
+        File rightPanelVolume()
+    {
+	return Popups.disksVolumes(luwrain, strings.rightPanelVolumePopupName());
+    }
 }

@@ -136,7 +136,9 @@ final class MainLayout extends LayoutBase
     {
 	NullCheck.notNull(panelArea, "panelArea");
 	return actions(
-	action("mkdir", app.getStrings().actionMkdir(), new KeyboardEvent(KeyboardEvent.Special.F7), ()->actLocalMkdir(panelArea))
+		       action("mkdir", app.getStrings().actionMkdir(), new KeyboardEvent(KeyboardEvent.Special.F7), ()->actLocalMkdir(panelArea)),
+		       action("left-panel-volume", app.getStrings().leftPanelVolume(), new KeyboardEvent(KeyboardEvent.Special.F1, EnumSet.of(KeyboardEvent.Modifiers.ALT)), ()->actPanelVolume(leftPanel)),
+		       action("right-panel-volume", app.getStrings().rightPanelVolume(), new KeyboardEvent(KeyboardEvent.Special.F2, EnumSet.of(KeyboardEvent.Modifiers.ALT)), ()->actPanelVolume(rightPanel))
 		       );
     }
 
@@ -262,6 +264,13 @@ final class MainLayout extends LayoutBase
 	return true;
     }
 
+    private boolean actPanelVolume(PanelArea panelArea)
+    {
+	NullCheck.notNull(panelArea, "panelArea");
+	final File res = panelArea == leftPanel?app.getConv().leftPanelVolume():app.getConv().rightPanelVolume();
+	return true;
+    }
+
      private boolean showFilesInfo(PanelArea panelArea)
     {
 	NullCheck.notNull(panelArea, "panelArea");
@@ -366,7 +375,6 @@ private String moveOperationName(File[] whatToMove, File moveTo)
 	return app.getStrings().moveOperationName(whatToMove[0].getName(), moveTo.getName());
     }
 
-
         private CommanderArea.Params createPanelParams()
     {
 	try {
@@ -379,9 +387,6 @@ private String moveOperationName(File[] whatToMove, File moveTo)
 	    throw new RuntimeException(e);
 	}
 	    }
-
-
-	
 
 	AreaLayout getLayout()
 	{
