@@ -44,7 +44,7 @@ final class MainLayout extends LayoutBase
 	this.app = app;
  	this.leftPanel = new PanelArea(createPanelParams(), app.getLuwrain()) {
 		private final Actions actions = getPanelActions(this);
-		@Override public boolean onInputEvent(KeyboardEvent event)
+		@Override public boolean onInputEvent(InputEvent event)
 		{
 		    NullCheck.notNull(event, "event");
 		    if (app.onInputEvent(this, event))
@@ -80,7 +80,7 @@ final class MainLayout extends LayoutBase
 	    };
  	this.rightPanel = new PanelArea(createPanelParams(), app.getLuwrain()) {
 		private final Actions actions = getPanelActions(this);
-		@Override public boolean onInputEvent(KeyboardEvent event)
+		@Override public boolean onInputEvent(InputEvent event)
 		{
 		    NullCheck.notNull(event, "event");
 		    if (app.onInputEvent(this, event))
@@ -136,9 +136,9 @@ final class MainLayout extends LayoutBase
     {
 	NullCheck.notNull(panelArea, "panelArea");
 	return actions(
-		       action("mkdir", app.getStrings().actionMkdir(), new KeyboardEvent(KeyboardEvent.Special.F7), ()->actLocalMkdir(panelArea)),
-		       action("left-panel-volume", app.getStrings().leftPanelVolume(), new KeyboardEvent(KeyboardEvent.Special.F1, EnumSet.of(KeyboardEvent.Modifiers.ALT)), ()->actPanelVolume(leftPanel)),
-		       action("right-panel-volume", app.getStrings().rightPanelVolume(), new KeyboardEvent(KeyboardEvent.Special.F2, EnumSet.of(KeyboardEvent.Modifiers.ALT)), ()->actPanelVolume(rightPanel))
+		       action("mkdir", app.getStrings().actionMkdir(), new InputEvent(InputEvent.Special.F7), ()->actLocalMkdir(panelArea)),
+		       action("left-panel-volume", app.getStrings().leftPanelVolume(), new InputEvent(InputEvent.Special.F1, EnumSet.of(InputEvent.Modifiers.ALT)), ()->actPanelVolume(leftPanel)),
+		       action("right-panel-volume", app.getStrings().rightPanelVolume(), new InputEvent(InputEvent.Special.F2, EnumSet.of(InputEvent.Modifiers.ALT)), ()->actPanelVolume(rightPanel))
 		       );
     }
 

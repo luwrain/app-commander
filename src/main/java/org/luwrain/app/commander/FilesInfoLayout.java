@@ -33,7 +33,7 @@ final class FilesInfoLayout extends LayoutBase
 	NullCheck.notNull(closing, "closing");
 	this.app = app;
 	this.area = new NavigationArea(new DefaultControlContext(app.getLuwrain())) {
-		@Override public boolean onInputEvent(KeyboardEvent event)
+		@Override public boolean onInputEvent(InputEvent event)
 		{
 		    NullCheck.notNull(event, "event");
 		    if (app.onInputEvent(this, event, closing))

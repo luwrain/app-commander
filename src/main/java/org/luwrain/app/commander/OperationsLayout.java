@@ -43,7 +43,7 @@ final class OperationsLayout extends LayoutBase
 	NullCheck.notNull(app, "app");
 	this.app = app;
 	this.operationsArea = new ListArea(createOperationsParams()) {
-		@Override public boolean onInputEvent(KeyboardEvent event)
+		@Override public boolean onInputEvent(InputEvent event)
 		{
 		    NullCheck.notNull(event, "event");
 		    return super.onInputEvent(event);

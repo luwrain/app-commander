@@ -155,7 +155,7 @@ final class App extends AppBase<Strings>
 	getLuwrain().setActiveArea(activeArea);
     }
 
-    boolean onInputEvent(Area area, KeyboardEvent event, Runnable closing)
+    boolean onInputEvent(Area area, InputEvent event, Runnable closing)
     {
 	NullCheck.notNull(area, "area");
 	if (event.isSpecial())
@@ -170,7 +170,7 @@ final class App extends AppBase<Strings>
 	return super.onInputEvent(area, event);
     }
 
-    @Override public boolean onInputEvent(Area area, KeyboardEvent event)
+    @Override public boolean onInputEvent(Area area, InputEvent event)
     {
 	NullCheck.notNull(area, "area");
 	NullCheck.notNull(event, "event");
