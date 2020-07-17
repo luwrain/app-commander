@@ -51,10 +51,10 @@ final class MainLayout extends LayoutBase
 			return true;
 		    return super.onInputEvent(event);
 		}
-		@Override public boolean onSystemEvent(EnvironmentEvent event)
+		@Override public boolean onSystemEvent(SystemEvent event)
 		{
 		    NullCheck.notNull(event, "event");
-		    if (event.getType() == EnvironmentEvent.Type.REGULAR)
+		    if (event.getType() == SystemEvent.Type.REGULAR)
 			switch(event.getCode())
 			{
 			case INTRODUCE:
@@ -87,10 +87,10 @@ final class MainLayout extends LayoutBase
 			return true;
 		    return super.onInputEvent(event);
 		}
-		@Override public boolean onSystemEvent(EnvironmentEvent event)
+		@Override public boolean onSystemEvent(SystemEvent event)
 		{
 		    NullCheck.notNull(event, "event");
-		    if (event.getType() == EnvironmentEvent.Type.REGULAR)
+		    if (event.getType() == SystemEvent.Type.REGULAR)
 			switch(event.getCode())
 			{
 			case INTRODUCE:

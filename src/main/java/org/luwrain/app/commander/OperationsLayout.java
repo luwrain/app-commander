@@ -48,7 +48,7 @@ final class OperationsLayout extends LayoutBase
 		    NullCheck.notNull(event, "event");
 		    return super.onInputEvent(event);
 		}
-		@Override public boolean onSystemEvent(EnvironmentEvent event)
+		@Override public boolean onSystemEvent(SystemEvent event)
 		{
 		    NullCheck.notNull(event, "event");
 			return super.onSystemEvent(event);
