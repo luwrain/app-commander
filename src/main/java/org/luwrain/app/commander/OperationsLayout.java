@@ -30,7 +30,7 @@ import org.luwrain.io.*;
 import org.luwrain.popups.*;
 
 import org.luwrain.app.commander.App.Side;
-import org.luwrain.template.*;
+import org.luwrain.app.base.*;
 
 final class OperationsLayout extends LayoutBase
 {

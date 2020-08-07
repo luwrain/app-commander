@@ -23,7 +23,7 @@ import java.io.*;
 import org.luwrain.base.*;
 import org.luwrain.core.*;
 import org.luwrain.core.events.*;
-import org.luwrain.template.*;
+import org.luwrain.app.base.*;
 
 final class App extends AppBase<Strings>
 {
@@ -46,7 +46,7 @@ final class App extends AppBase<Strings>
 
     App(String startFrom)
     {
-	super(Strings.NAME, Strings.class);
+	super(Strings.NAME, Strings.class, "luwrain.commander");
 	if (startFrom != null && !startFrom.isEmpty())
 	    this.startFrom = startFrom; else
 	    this.startFrom = null;

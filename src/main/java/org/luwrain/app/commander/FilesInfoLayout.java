@@ -19,7 +19,7 @@ package org.luwrain.app.commander;
 import org.luwrain.core.*;
 import org.luwrain.core.events.*;
 import org.luwrain.controls.*;
-import org.luwrain.template.*;
+import org.luwrain.app.base.*;
 
 final class FilesInfoLayout extends LayoutBase
 {
