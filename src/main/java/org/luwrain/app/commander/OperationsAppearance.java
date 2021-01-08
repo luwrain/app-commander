@@ -1,5 +1,5 @@
 /*
-   Copyright 2012-2020 Michael Pozhidaev <msp@luwrain.org>
+   Copyright 2012-2021 Michael Pozhidaev <msp@luwrain.org>
 
    This file is part of LUWRAIN.
 
@@ -42,13 +42,13 @@ class OperationsAppearance implements ListArea.Appearance
 	NullCheck.notNull(item, "item");
 	NullCheck.notNull(flags, "flags");
 
-	final FilesOperation op = (FilesOperation)item;
+	final Operation op = (Operation)item;
 	if (op.isFinished())
 	{
 	    app.getLuwrain().speak(app.getOperationResultDescr(op) + " " + op.getOperationName());
 	    return;
 	}
-	final int percents = op.getPercents();
+	final int percents = op.getPercent();
 	if (percents > 0)
 	    luwrain.speak("" + luwrain.i18n().getNumberStr(percents, "percents") + " " + op.getOperationName()); else
 	    luwrain.speak(op.getOperationName());
@@ -60,13 +60,13 @@ class OperationsAppearance implements ListArea.Appearance
     {
 	NullCheck.notNull(item, "item");
 	NullCheck.notNull(flags, "flags");
-	final FilesOperation op = (FilesOperation)item;
+	final Operation op = (Operation)item;
 	if (op.isFinished())
 	    return app.getOperationResultDescr(op);
-	final int percents = op.getPercents();
-	if (percents == 0)
+	final int percent = op.getPercent();
+	if (percent == 0)
 	    return op.getOperationName() + "...";
-	return  percents + "%: "+ op.getOperationName();
+	return  percent + "%: "+ op.getOperationName();
     }
 
     @Override public int getObservableLeftBound(Object item)

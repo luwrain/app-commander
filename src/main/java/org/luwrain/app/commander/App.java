@@ -1,5 +1,5 @@
 /*
-   Copyright 2012-2020 Michael Pozhidaev <msp@luwrain.org>
+   Copyright 2012-2021 Michael Pozhidaev <msp@luwrain.org>
 
    This file is part of LUWRAIN.
 
@@ -20,10 +20,10 @@ import java.util.*;
 import java.util.concurrent.*;
 import java.io.*;
 
-import org.luwrain.base.*;
 import org.luwrain.core.*;
 import org.luwrain.core.events.*;
 import org.luwrain.app.base.*;
+import org.luwrain.app.commander.fileops.*;
 
 final class App extends AppBase<Strings>
 {
@@ -32,11 +32,12 @@ final class App extends AppBase<Strings>
     enum Side {LEFT, RIGHT};
 
     final String startFrom;
-    final Vector<FilesOperation> operations = new Vector<FilesOperation>();
 
+    final List<Operation> operations = new ArrayList();
     private Settings sett = null;
     private Conversations conv = null;
     private Hooks hooks = null;
+    
     private MainLayout mainLayout = null;
 
     App()
@@ -62,7 +63,7 @@ final class App extends AppBase<Strings>
 	return true;
     }
 
-    void launch(FilesOperation op)
+    void launch(Operation op)
     {
 	NullCheck.notNull(op, "op");
 	operations.add(op);
@@ -71,7 +72,7 @@ final class App extends AppBase<Strings>
 
     boolean allOperationsFinished()
     {
-	for(FilesOperation op:operations)
+	for(Operation op:operations)
 	    if (!op.isFinished())
 		return false;
 	return true;
@@ -87,9 +88,10 @@ final class App extends AppBase<Strings>
 	return true;
     }
 
-    String getOperationResultDescr(FilesOperation op)
+    String getOperationResultDescr(Operation op)
     {
 	NullCheck.notNull(op, "op");
+	/*
 	switch(op.getResult().getType())
 	{
 	case OK:
@@ -107,33 +109,43 @@ final class App extends AppBase<Strings>
 	default:
 	    return "";
 	}
+	*/
+	return "";
     }
 
-    private FilesOperation.Listener createFilesOperationListener()
+    private OperationListener createFilesOperationListener()
     {
-	return new FilesOperation.Listener(){
-	    @Override public void onOperationProgress(FilesOperation operation)
+	return new OperationListener(){
+	    @Override public void onOperationProgress(Operation operation)
 	    {
 		NullCheck.notNull(operation, "operation");
 		NullCheck.notNull(operation, "operation");
 		getLuwrain().runUiSafely(()->onOperationUpdate(operation));
 	    }
+
+	    	    @Override public void onOperationProgress(org.luwrain.app.commander.fileops.Base base)
+	    {
+	    }
+
+	    
+	    /*
 	    @Override public FilesOperation.ConfirmationChoices confirmOverwrite(java.nio.file.Path path)
 	    {
 		NullCheck.notNull(path, "path");
 		return (FilesOperation.ConfirmationChoices)getLuwrain().callUiSafely(()->conv.overrideConfirmation(path.toFile()));
 	    }
+	    */
 	};
     }
 
-    private void onOperationUpdate(FilesOperation operation)
+    private void onOperationUpdate(Operation operation)
     {
 	NullCheck.notNull(operation, "operation");
 	//	operationsArea.redraw();
 	//	luwrain.onAreaNewBackgroundSound();
 	if (operation.isFinished())
 	{
-	    if (operation.getResult().getType() == FilesOperation.Result.Type.OK)
+	    if (operation.getResult().getType() == Result.Type.OK)
 		getLuwrain().playSound(Sounds.DONE);
 	    //refreshPanels();
 	}

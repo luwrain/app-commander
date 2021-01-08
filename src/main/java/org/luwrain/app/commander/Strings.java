@@ -1,5 +1,5 @@
 /*
-   Copyright 2012-2020 Michael Pozhidaev <msp@luwrain.org>
+   Copyright 2012-2021 Michael Pozhidaev <msp@luwrain.org>
 
    This file is part of LUWRAIN.
 
@@ -43,10 +43,10 @@ public interface Strings
     String delPopupName();
     String delPopupText(String whatToDelete);
     String delOperationName(File[] filesToDelete);
-    String operationCompletedMessage(org.luwrain.base.FilesOperation op);
+    String operationCompletedMessage(Operation op);
     String notAllOperationsFinished();
     String cancelOperationPopupName();
-    String cancelOperationPopupText(org.luwrain.base.FilesOperation op);
+    String cancelOperationPopupText(Operation op);
     String bytesNum(long num);
     String opResultOk();
     String opResultInterrupted();

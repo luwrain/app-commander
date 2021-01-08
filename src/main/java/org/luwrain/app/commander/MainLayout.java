@@ -1,5 +1,5 @@
 /*
-   Copyright 2012-2020 Michael Pozhidaev <msp@luwrain.org>
+   Copyright 2012-2021 Michael Pozhidaev <msp@luwrain.org>
 
    This file is part of LUWRAIN.
 
@@ -180,7 +180,7 @@ final class MainLayout extends LayoutBase
 	}
     }
 
-    private boolean todoLocalCopy(PanelArea copyFromArea, PanelArea copyToArea, FilesOperation.Listener listener)
+    private boolean todoLocalCopy(PanelArea copyFromArea, PanelArea copyToArea, OperationListener listener)
     {
 	NullCheck.notNull(copyFromArea, "copyFromArea");
 	NullCheck.notNull(copyToArea, "copyToArea");
@@ -200,11 +200,11 @@ final class MainLayout extends LayoutBase
 	if (dest == null)
 	    return true;
 	final String opName = copyOperationName(filesToCopy, dest);
-	app.launch(app.getLuwrain().getFilesOperations().copy(listener, opName, filesToCopy, dest));
+	//app.launch(app.getLuwrain().getFilesOperations().copy(listener, opName, filesToCopy, dest));
 	return true;
     }
 
-    private boolean todoLocalMove(PanelArea moveFromArea, PanelArea moveToArea, FilesOperation.Listener listener)
+    private boolean todoLocalMove(PanelArea moveFromArea, PanelArea moveToArea, OperationListener listener)
     {
 	NullCheck.notNull(moveFromArea, "moveFromArea");
 	NullCheck.notNull(moveToArea, "moveToArea");
@@ -220,7 +220,7 @@ final class MainLayout extends LayoutBase
 	if (dest == null)
 	    return true;
 	final String opName = moveOperationName(filesToMove, dest);
-	app.launch(app.getLuwrain().getFilesOperations().move(listener, opName, filesToMove, dest));
+	//app.launch(app.getLuwrain().getFilesOperations().move(listener, opName, filesToMove, dest));
 	return true;
     }
 
@@ -248,7 +248,7 @@ final class MainLayout extends LayoutBase
 	return true;
     }
 
-    boolean onLocalDelete(PanelArea area, FilesOperation.Listener listener)
+    boolean onLocalDelete(PanelArea area, OperationListener listener)
     {
 	NullCheck.notNull(area, "area");
 	NullCheck.notNull(listener, "listener");
@@ -260,7 +260,7 @@ final class MainLayout extends LayoutBase
 	if (!app.getConv().deleteConfirmation(files))
 	    return true;
 	final String opName = app.getStrings().delOperationName(files);
-	app.launch(app.getLuwrain().getFilesOperations().delete(listener, opName, files));
+	//app.launch(app.getLuwrain().getFilesOperations().delete(listener, opName, files));
 	return true;
     }
 

@@ -1,5 +1,5 @@
 /*
-   Copyright 2012-2020 Michael Pozhidaev <msp@luwrain.org>
+   Copyright 2012-2021 Michael Pozhidaev <msp@luwrain.org>
 
    This file is part of LUWRAIN.
 
@@ -19,7 +19,6 @@ package org.luwrain.app.commander;
 import java.io.*;
 import java.nio.file.*;
 
-import org.luwrain.base.FilesOperation;
 import org.luwrain.core.*;
 import org.luwrain.popups.*;
 import org.luwrain.app.commander.popups.*;
@@ -93,6 +92,7 @@ final class Conversations
 	return Popups.simple(luwrain, strings.ftpConnectPopupName(), strings.ftpConnectPopupText(), "ftp://");
     }
 
+    /*
     FilesOperation.ConfirmationChoices overrideConfirmation(File file)
     {
 	NullCheck.notNull(file, "file");
@@ -108,6 +108,7 @@ final class Conversations
 	    return FilesOperation.ConfirmationChoices.SKIP;
 	return FilesOperation.ConfirmationChoices.CANCEL;
     }
+    */
 
     File leftPanelVolume()
     {

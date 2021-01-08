@@ -16,7 +16,13 @@
 
 package org.luwrain.app.commander;
 
-interface Settings
+import org.luwrain.app.commander.fileops.*;
+
+
+interface Operation extends Runnable
 {
-    String getZipFilesEncoding(String defValue);
+    boolean isFinished();
+    Result getResult();
+    String getOperationName();
+    int getPercent();
 }
