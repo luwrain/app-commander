@@ -16,6 +16,8 @@
 
 package org.luwrain.app.commander;
 
+import java.io.*;
+
 import org.luwrain.core.*;
 import org.luwrain.core.events.*;
 import org.luwrain.controls.*;
@@ -26,10 +28,10 @@ final class FilesInfoLayout extends LayoutBase
     private final App app;
     private final NavigationArea area;
 
-    FilesInfoLayout(App app, Lines lines, Runnable closing)
+    FilesInfoLayout(App app, File[] files, Runnable closing)
     {
 	NullCheck.notNull(app, "app");
-	NullCheck.notNull(lines, "lines");
+	NullCheck.notNullItems(files, "files");
 	NullCheck.notNull(closing, "closing");
 	this.app = app;
 	this.area = new NavigationArea(new DefaultControlContext(app.getLuwrain())) {
@@ -60,13 +62,17 @@ final class FilesInfoLayout extends LayoutBase
 		}
 		@Override public int getLineCount()
 		{
-		    return lines.getLineCount() > 0?lines.getLineCount():1;
+		    //		    return lines.getLineCount() > 0?lines.getLineCount():1;
+		    return 1;
 		}
 		@Override public String getLine(int index)
 		{
+		    /*
 		    if (index >= lines.getLineCount())
 			return "";
 		    return lines.getLine(index);
+		    */
+		    return "";
 		}
 	    };
     }

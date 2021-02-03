@@ -44,7 +44,6 @@ final class MainLayout extends LayoutBase
 	NullCheck.notNull(app, "app");
 	this.app = app;
  	this.leftPanel = new PanelArea(createPanelParams(), app.getLuwrain()) {
-		private final Actions actions = getPanelActions(this);
 		@Override public boolean onInputEvent(InputEvent event)
 		{
 		    NullCheck.notNull(event, "event");
@@ -63,7 +62,7 @@ final class MainLayout extends LayoutBase
 			case PROPERTIES:
 			    return showFilesInfo(this);
 			}
-		    if (app.onSystemEvent(this, event, actions))
+		    if (app.onSystemEvent(this, event, getPanelActions(Side.LEFT)))
 			return true;
 		    return super.onSystemEvent(event);
 		}
@@ -76,11 +75,10 @@ final class MainLayout extends LayoutBase
 		}
 		@Override public Action[] getAreaActions()
 		{
-		    return actions.getAreaActions();
+		    return getPanelActions(Side.LEFT).getAreaActions();
 		}
 	    };
  	this.rightPanel = new PanelArea(createPanelParams(), app.getLuwrain()) {
-		private final Actions actions = getPanelActions(this);
 		@Override public boolean onInputEvent(InputEvent event)
 		{
 		    NullCheck.notNull(event, "event");
@@ -99,7 +97,7 @@ final class MainLayout extends LayoutBase
 			    			case PROPERTIES:
 			    return showFilesInfo(this);
 			}
-		    if (app.onSystemEvent(this, event, actions))
+		    if (app.onSystemEvent(this, event, getPanelActions(Side.RIGHT)))
 			return true;
 		    return super.onSystemEvent(event);
 		}
@@ -112,7 +110,7 @@ final class MainLayout extends LayoutBase
 		}
 		@Override public Action[] getAreaActions()
 		{
-		    return actions.getAreaActions();
+		    return getPanelActions(Side.RIGHT).getAreaActions();
 		}
 	    };
 	leftPanel.setLoadingResultHandler((location, data, selectedIndex, announce)->{
@@ -133,13 +131,25 @@ final class MainLayout extends LayoutBase
 	}
     }
 
-    private Actions getPanelActions(PanelArea panelArea)
+    private Actions getPanelActions(Side side)
     {
-	NullCheck.notNull(panelArea, "panelArea");
+	NullCheck.notNull(side, "side");
+	final PanelArea panelArea;
+	final PanelArea oppositePanelArea;
+	if (side == Side.LEFT)
+	{
+	    panelArea = leftPanel;
+	    oppositePanelArea = rightPanel;
+	} else
+	{
+	    panelArea = rightPanel;
+	    oppositePanelArea = leftPanel;
+	}
 	return actions(
 		       action("mkdir", app.getStrings().actionMkdir(), new InputEvent(InputEvent.Special.F7), ()->actLocalMkdir(panelArea)),
 		       action("left-panel-volume", app.getStrings().leftPanelVolume(), new InputEvent(InputEvent.Special.F1, EnumSet.of(InputEvent.Modifiers.ALT)), ()->actPanelVolume(leftPanel)),
-		       action("right-panel-volume", app.getStrings().rightPanelVolume(), new InputEvent(InputEvent.Special.F2, EnumSet.of(InputEvent.Modifiers.ALT)), ()->actPanelVolume(rightPanel))
+		       action("right-panel-volume", app.getStrings().rightPanelVolume(), new InputEvent(InputEvent.Special.F2, EnumSet.of(InputEvent.Modifiers.ALT)), ()->actPanelVolume(rightPanel)),
+		       action("info", "info", ()->showFilesInfo(panelArea))
 		       );
     }
 
@@ -275,6 +285,13 @@ final class MainLayout extends LayoutBase
      private boolean showFilesInfo(PanelArea panelArea)
     {
 	NullCheck.notNull(panelArea, "panelArea");
+
+		    final FilesInfoLayout info = new FilesInfoLayout(app, new File[0], ()->app.layout(getLayout(), panelArea));
+	    app.layout(info.getLayout());
+	    return true;
+
+	    
+	/*
 	if (panelArea.isLocalDir())
 	{
 	    final File[] files = panelArea.getFilesToProcess();
@@ -290,11 +307,8 @@ final class MainLayout extends LayoutBase
 		app.getLuwrain().crash(e);
 		return true;
 	    }
-	    final FilesInfoLayout info = new FilesInfoLayout(app, lines, ()->app.layout(getLayout(), panelArea));
-	    app.layout(info.getLayout());
-	    return true;
 	}
-	return false;
+	*/
     }
 
     boolean showVolumeInfo(PanelArea area, SimpleArea propsArea)

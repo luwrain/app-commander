@@ -27,8 +27,6 @@ import org.luwrain.app.commander.fileops.*;
 
 final class App extends AppBase<Strings>
 {
-    static private final String REGISTRY_PATH = "/org/luwrain/app/commander";
-
     enum Side {LEFT, RIGHT};
 
     final String startFrom;
@@ -37,7 +35,6 @@ final class App extends AppBase<Strings>
     private Settings sett = null;
     private Conversations conv = null;
     private Hooks hooks = null;
-    
     private MainLayout mainLayout = null;
 
     App()
@@ -55,7 +52,7 @@ final class App extends AppBase<Strings>
 
     @Override public boolean onAppInit()
     {
-	this.sett = RegistryProxy.create(getLuwrain().getRegistry(), REGISTRY_PATH, Settings.class);
+	this.sett = Settings.create(getLuwrain());
 	this.conv = new Conversations(this);
 	this.hooks = new Hooks(this);
 	this.mainLayout = new MainLayout(this);
@@ -162,15 +159,6 @@ final class App extends AppBase<Strings>
 	getLuwrain().setActiveArea(activeArea);
     }
 
-    Conversations getConv()
-    {
-	return this.conv;
-    }
-
-    Hooks getHooks()
-    {
-return this.hooks;
-    }
 
     @Override public boolean onEscape(InputEvent event)
     {
@@ -199,4 +187,13 @@ return this.hooks;
 	return this.sett;
     }
 
+        Conversations getConv()
+    {
+	return this.conv;
+    }
+
+    Hooks getHooks()
+    {
+return this.hooks;
+    }
 }
