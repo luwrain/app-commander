@@ -123,11 +123,6 @@ final class App extends AppBase<Strings>
 		getLuwrain().runUiSafely(()->onOperationUpdate(operation));
 	    }
 
-	    	    @Override public void onOperationProgress(org.luwrain.app.commander.fileops.Base base)
-	    {
-	    }
-
-	    
 	    /*
 	    @Override public FilesOperation.ConfirmationChoices confirmOverwrite(java.nio.file.Path path)
 	    {
@@ -177,9 +172,11 @@ final class App extends AppBase<Strings>
 return this.hooks;
     }
 
-    Settings getSett()
+    @Override public boolean onEscape(InputEvent event)
     {
-	return this.sett;
+	NullCheck.notNull(event, "event");
+	closeApp();
+	return true;
     }
 
     @Override public AreaLayout getDefaultAreaLayout()
@@ -196,4 +193,10 @@ return this.hooks;
 	}
 	super.closeApp();
     }
+    
+        Settings getSett()
+    {
+	return this.sett;
+    }
+
 }

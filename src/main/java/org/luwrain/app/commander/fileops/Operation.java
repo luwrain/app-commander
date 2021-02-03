@@ -24,7 +24,7 @@ import java.nio.file.attribute.*;
 import org.luwrain.core.*;
 import org.luwrain.app.commander.*;
 
-public abstract class Base
+public abstract class Operation implements Runnable
 {
     public enum ConfirmationChoices
     {
@@ -42,7 +42,7 @@ public abstract class Base
     private Result result = new Result();
     protected boolean interrupted = false;
 
-    Base(OperationListener listener, String name)
+    Operation(OperationListener listener, String name)
     {
 	NullCheck.notNull(listener, "listener");
 	NullCheck.notEmpty(name, "name");
@@ -50,7 +50,8 @@ public abstract class Base
 	this.name = name;
     }
 
-    abstract protected Result work() throws IOException;
+    protected abstract Result work() throws IOException;
+    public abstract int getPercent();
 
     public void run()
     {
@@ -166,7 +167,7 @@ FIXME:
 	return null;
     }
 
-    protected void onProgress(Base op)
+    protected void onProgress(Operation op)
     {
 	NullCheck.notNull(op, "op");
 	listener.onOperationProgress(op);

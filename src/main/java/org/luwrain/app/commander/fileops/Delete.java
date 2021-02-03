@@ -22,7 +22,7 @@ import java.nio.file.Path;
 import org.luwrain.core.*;
 import org.luwrain.app.commander.*;
 
-class Delete extends Base
+class Delete extends Operation
 {
     private final Path[] toDelete;
 
@@ -49,7 +49,7 @@ class Delete extends Base
 	return new Result();
     }
 
-    public int getPercents()
+    public int getPercent()
     {
 	return 0;
     }

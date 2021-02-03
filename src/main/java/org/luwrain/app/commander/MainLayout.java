@@ -31,6 +31,7 @@ import org.luwrain.popups.*;
 
 import org.luwrain.app.commander.App.Side;
 import org.luwrain.app.base.*;
+import org.luwrain.app.commander.fileops.*;
 
 final class MainLayout extends LayoutBase
 {

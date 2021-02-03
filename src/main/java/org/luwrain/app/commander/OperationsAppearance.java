@@ -21,6 +21,7 @@ import java.util.*;
 import org.luwrain.base.*;
 import org.luwrain.core.*;
 import org.luwrain.controls.*;
+import org.luwrain.app.commander.fileops.*;
 
 class OperationsAppearance implements ListArea.Appearance
 {

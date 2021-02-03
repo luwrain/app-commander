@@ -22,7 +22,7 @@ import java.nio.file.*;
 import org.luwrain.core.*;
 import org.luwrain.app.commander.*;
 
-abstract class CopyingBase extends Base
+abstract class CopyingBase extends Operation
 {
     private long totalBytes = 0;
     private long processedBytes = 0;
@@ -246,7 +246,7 @@ abstract class CopyingBase extends Base
 	}
     }
 
-    public synchronized  int getPercents()
+    public synchronized  int getPercent()
     {
 	return percents;
     }
