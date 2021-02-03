@@ -201,8 +201,8 @@ final class MainLayout extends LayoutBase
 	final File copyFromDir = copyFromArea.getOpenedAsFile();
 	if (copyFromDir == null || !copyFromDir.isAbsolute())
 	    return false;
-	final File[] filesToCopy = copyFromArea.getFilesToProcess();
-	if (filesToCopy.length < 1)
+	final File[] filesToCopy = PanelArea.asFile(copyFromArea.getToProcess());
+	if (filesToCopy.length == 0)
 	    return false;
 	final File copyToDir = copyToArea.getOpenedAsFile();
 	if (copyToDir == null || !copyToDir.isAbsolute())
@@ -223,7 +223,7 @@ final class MainLayout extends LayoutBase
 	if (!moveFromArea.isLocalDir() || !moveToArea.isLocalDir())
 	    return false;
 	final File moveFromDir = moveFromArea.getOpenedAsFile();
-	final File[] filesToMove = moveFromArea.getFilesToProcess();
+	final File[] filesToMove = PanelArea.asFile(moveFromArea.getToProcess());
 	final File moveTo = moveToArea.getOpenedAsFile();
 	if (filesToMove.length < 1)
 	    return false;
@@ -265,7 +265,7 @@ final class MainLayout extends LayoutBase
 	NullCheck.notNull(listener, "listener");
 	if (!area.isLocalDir())
 	    return false;
-	final File[] files = area.getFilesToProcess();
+	final File[] files = PanelArea.asFile(area.getToProcess());
 	if (files.length == 0)
 	    return false;
 	if (!app.getConv().deleteConfirmation(files))

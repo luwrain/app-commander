@@ -32,14 +32,12 @@ import org.luwrain.io.*;
 class PanelArea extends CommanderArea<FileObject>
 {
     private final Luwrain luwrain;
-    //    private final ActionList actionList;
 
     PanelArea(Params<FileObject> params, Luwrain luwrain)
     {
 	super(params);
 	NullCheck.notNull(luwrain, "luwrain");
 	this.luwrain = luwrain;
-	//	this.actionList = actionList;
     }
 
     @Override public boolean onAreaQuery(AreaQuery query)
@@ -90,7 +88,7 @@ class PanelArea extends CommanderArea<FileObject>
 	final String hookName;
 	if (isLocalDir())
 	{
-	    final File[] files = getFilesToProcess();
+	    final File[] files = asFile(getToProcess());
 	    if (files.length == 0)
 		return false;
 	    final String[] names = new String[files.length];
@@ -134,9 +132,9 @@ class PanelArea extends CommanderArea<FileObject>
 	return o instanceof org.apache.commons.vfs2.provider.local.LocalFile;
     }
 
-    FileObject[] getFileObjectsToProcess()
+    FileObject[] getToProcess()
     {
-	final List<FileObject> res = new LinkedList();
+	final List<FileObject> res = new ArrayList();
 	for(Object o: getMarked())
 	    res.add((FileObject)o);
 	if (!res.isEmpty())
@@ -147,8 +145,8 @@ class PanelArea extends CommanderArea<FileObject>
 
     Object[] getNativeObjectsToProcess()
     {
-	final FileObject[] objs = getFileObjectsToProcess();
-	final List res = new LinkedList();
+	final FileObject[] objs = getToProcess();
+	final List res = new ArrayList();
 	for(FileObject f: objs)
 	{
 	    if (f instanceof org.apache.commons.vfs2.provider.local.LocalFile)
@@ -167,17 +165,6 @@ res.add(new java.net.URL(root, f.getName().getPath()));
 	    }
 	}
 	return res.toArray(new Object[res.size()]);
-    }
-
-    File[] getFilesToProcess()
-    {
-	if (!isLocalDir())
-	    return new File[0];
-	final FileObject[] objects = getFileObjectsToProcess();
-	final File[] res = new File[objects.length];
-	for(int i = 0;i < objects.length;++i)
-	    res[i] = new File(objects[i].getName().getPath());
-	return res;
     }
 
     File getOpenedAsFile()
@@ -232,6 +219,46 @@ res.add(new java.net.URL(root, f.getName().getPath()));
 	reread(false);
     }
 
+    static File asFile(FileObject fileObject)
+    {
+	NullCheck.notNull(fileObject, "fileObject");
+		    if (fileObject instanceof org.apache.commons.vfs2.provider.local.LocalFile)
+			return new File(fileObject.getName().getPath());
+		    return null;
+    }
+
+    URL asUrl(FileObject fileObject)
+    {
+	NullCheck.notNull(fileObject, "fileObject");
+	
+    
+	    if (fileObject instanceof org.apache.commons.vfs2.provider.ftp.FtpFileObject)
+	    {
+		final org.apache.commons.vfs2.provider.ftp.FtpFileObject ftpFile = (org.apache.commons.vfs2.provider.ftp.FtpFileObject)fileObject;
+		try {
+final java.net.URL root = new java.net.URL(ftpFile.getFileSystem().getRootURI());
+return new java.net.URL(root, fileObject.getName().getPath());
+		}
+		catch(MalformedURLException e)
+		{
+		    throw new IllegalArgumentException(e);
+		}
+	    }
+	    return null;
+    }
+
+        static File[]asFile(FileObject[] fileObjects)
+    {
+	NullCheck.notNullItems(fileObjects, "fileObjects");
+	final List<File> res = new ArrayList();
+	for(FileObject f: fileObjects)
+	{
+	    final File ff = asFile(f);
+	    if (ff != null)
+		res.add(ff);
+	}
+	return res.toArray(new File[res.size()]);
+    }
 
 		static Params<FileObject> createParams(Luwrain luwrain) throws FileSystemException
 		{
