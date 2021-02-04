@@ -46,7 +46,7 @@ class PanelArea extends CommanderArea<FileObject>
 	if (query.getQueryCode() == AreaQuery.CURRENT_DIR && query instanceof CurrentDirQuery)
 	{
 	    final CurrentDirQuery currentDirQuery = (CurrentDirQuery)query;
-	    final File f = getOpenedAsFile();
+	    final File f = asFile(opened());
 	    if (f == null)
 		return false;
 	    currentDirQuery.answer(f.getAbsolutePath());
@@ -143,43 +143,6 @@ class PanelArea extends CommanderArea<FileObject>
 	return entry != null?new FileObject[]{entry}:new FileObject[0];
     }
 
-    Object[] getNativeObjectsToProcess()
-    {
-	final FileObject[] objs = getToProcess();
-	final List res = new ArrayList();
-	for(FileObject f: objs)
-	{
-	    if (f instanceof org.apache.commons.vfs2.provider.local.LocalFile)
-		res.add(new File(f.getName().getPath()));
-	    if (f instanceof org.apache.commons.vfs2.provider.ftp.FtpFileObject)
-	    {
-		try {
-final org.apache.commons.vfs2.provider.ftp.FtpFileObject ftpFile = (org.apache.commons.vfs2.provider.ftp.FtpFileObject)f;
-final java.net.URL root = new java.net.URL(ftpFile.getFileSystem().getRootURI());
-res.add(new java.net.URL(root, f.getName().getPath()));
-		}
-		catch(MalformedURLException e)
-		{
-		    //FIXME:
-		}
-	    }
-	}
-	return res.toArray(new Object[res.size()]);
-    }
-
-    File getOpenedAsFile()
-    {
-	if (!isLocalDir())
-	    return null;
-	final FileObject obj = opened();
-	return obj != null?new File(obj.getName().getPath()):null;
-    }
-
-    FileObject getOpenedAsFileObject()
-    {
-	return opened();
-    }
-
     boolean openLocalPath(String path)
     {
 	NullCheck.notNull(path, "path");
@@ -221,7 +184,8 @@ res.add(new java.net.URL(root, f.getName().getPath()));
 
     static File asFile(FileObject fileObject)
     {
-	NullCheck.notNull(fileObject, "fileObject");
+	if (fileObject == null)
+	    return null;
 		    if (fileObject instanceof org.apache.commons.vfs2.provider.local.LocalFile)
 			return new File(fileObject.getName().getPath());
 		    return null;
@@ -229,21 +193,20 @@ res.add(new java.net.URL(root, f.getName().getPath()));
 
     URL asUrl(FileObject fileObject)
     {
-	NullCheck.notNull(fileObject, "fileObject");
-	
-    
-	    if (fileObject instanceof org.apache.commons.vfs2.provider.ftp.FtpFileObject)
-	    {
-		final org.apache.commons.vfs2.provider.ftp.FtpFileObject ftpFile = (org.apache.commons.vfs2.provider.ftp.FtpFileObject)fileObject;
-		try {
-final java.net.URL root = new java.net.URL(ftpFile.getFileSystem().getRootURI());
-return new java.net.URL(root, fileObject.getName().getPath());
-		}
-		catch(MalformedURLException e)
-		{
-		    throw new IllegalArgumentException(e);
-		}
+	if (fileObject == null)
+	    return null;
+	if (fileObject instanceof org.apache.commons.vfs2.provider.ftp.FtpFileObject)
+	{
+	    final org.apache.commons.vfs2.provider.ftp.FtpFileObject ftpFile = (org.apache.commons.vfs2.provider.ftp.FtpFileObject)fileObject;
+	    try {
+		final java.net.URL root = new java.net.URL(ftpFile.getFileSystem().getRootURI());
+		return new java.net.URL(root, fileObject.getName().getPath());
 	    }
+	    catch(MalformedURLException e)
+	    {
+		throw new IllegalArgumentException(e);
+	    }
+	}
 	    return null;
     }
 
@@ -260,58 +223,34 @@ return new java.net.URL(root, fileObject.getName().getPath());
 	return res.toArray(new File[res.size()]);
     }
 
-		static Params<FileObject> createParams(Luwrain luwrain) throws FileSystemException
-		{
-		    NullCheck.notNull(luwrain, "luwrain");
-		    Params<FileObject> params = CommanderUtilsVfs.createParams(new DefaultControlContext(luwrain));
-		    params.flags = EnumSet.of(Flags.MARKING);
-		    params.filter = new CommanderUtilsVfs.NoHiddenFilter();
-		    params.clipboardSaver = (area,model,appearance,fromIndex,toIndex,clipboard)->{
-			NullCheck.notNull(model, "model");
-			NullCheck.notNull(clipboard, "clipboard");
-			if (fromIndex < 0 || toIndex < 0)
-			    throw new IllegalArgumentException("fromIndex and toIndex may not be negative");
-			final int count = model.getItemCount();
-			if (fromIndex >= toIndex || fromIndex >= count || toIndex > count)
-			    return false;
-			final List<String> names = new LinkedList<String>();
-			final List<Serializable> res = new LinkedList<Serializable>();
-			for(int i = fromIndex;i < toIndex;++i)
-			{
-			    /*
-			    final CommanderArea.Wrapper<FileObject> wrapper = (CommanderArea.Wrapper<FileObject>)model.getItem(i);
-			    if (wrapper == null || wrapper.obj == null)
-				return false;
-			    final FileObject fileObj = wrapper.obj;
-			    final Serializable obj = fileObjectToJavaObject(fileObj);
-			    if (obj == null)
-				continue;
-			    names.add(fileObj.getName().getBaseName());
-			    res.add(obj);
-			    */
-			}
-			return clipboard.set(res.toArray(new Serializable[res.size()]), names.toArray(new String[names.size()]));
-		    };
-		    return params;
-		}
-
-		static private Serializable fileObjectToJavaObject(FileObject obj)
-		{
-		    NullCheck.notNull(obj, "obj");
-		    if (obj instanceof org.apache.commons.vfs2.provider.local.LocalFile)
-			return new File(obj.getName().getPath());
-		    if (obj instanceof org.apache.commons.vfs2.provider.ftp.FtpFileObject)
-		    {
-			try {
-			    final org.apache.commons.vfs2.provider.ftp.FtpFileObject ftpFile = (org.apache.commons.vfs2.provider.ftp.FtpFileObject)obj;
-			    final java.net.URL root = new java.net.URL(ftpFile.getFileSystem().getRootURI());
-			    return new java.net.URL(root, obj.getName().getPath());
-			}
-			catch(MalformedURLException e)
-			{
-			    //FIXME:
-			}
-		    }
-		    return null;
-		}
+    static Params<FileObject> createParams(Luwrain luwrain) throws FileSystemException
+    {
+	NullCheck.notNull(luwrain, "luwrain");
+	Params<FileObject> params = CommanderUtilsVfs.createParams(new DefaultControlContext(luwrain));
+	params.flags = EnumSet.of(Flags.MARKING);
+	params.filter = new CommanderUtilsVfs.NoHiddenFilter();
+	params.clipboardSaver = (area,model,appearance,fromIndex,toIndex,clipboard)->{
+	    NullCheck.notNull(model, "model");
+	    NullCheck.notNull(clipboard, "clipboard");
+	    if (fromIndex < 0 || toIndex < 0)
+		throw new IllegalArgumentException("fromIndex and toIndex may not be negative");
+	    final int count = model.getItemCount();
+	    if (fromIndex >= toIndex || fromIndex >= count || toIndex > count)
+		return false;
+	    final List<String> names = new ArrayList();
+	    final List<Serializable> res = new ArrayList();
+	    for(int i = fromIndex;i < toIndex;++i)
+	    {
+		final CommanderArea.NativeItem<FileObject> nativeObj = (CommanderArea.NativeItem<FileObject>)model.getItem(i);
+		final FileObject fileObj = nativeObj.getNativeObj();
+		names.add(nativeObj.getBaseName());
+		final File file = asFile(fileObj);
+		if (file != null)
+		    res.add(file); else
+		    res.add(fileObj.getName().getBaseName());
+	    }
+	    return clipboard.set(res.toArray(new Object[res.size()]), names.toArray(new String[names.size()]));
+	};
+	return params;
+    }
 }

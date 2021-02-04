@@ -38,11 +38,13 @@ final class MainLayout extends LayoutBase
     private final App app;
     private final PanelArea leftPanel;
     private final PanelArea rightPanel;
+    private final FileActions fileActions;
 
     MainLayout(App app)
     {
 	NullCheck.notNull(app, "app");
 	this.app = app;
+	this.fileActions = new FileActions(app);
  	this.leftPanel = new PanelArea(createPanelParams(), app.getLuwrain()) {
 		@Override public boolean onInputEvent(InputEvent event)
 		{
@@ -149,6 +151,7 @@ final class MainLayout extends LayoutBase
 		       action("mkdir", app.getStrings().actionMkdir(), new InputEvent(InputEvent.Special.F7), ()->actLocalMkdir(panelArea)),
 		       action("left-panel-volume", app.getStrings().leftPanelVolume(), new InputEvent(InputEvent.Special.F1, EnumSet.of(InputEvent.Modifiers.ALT)), ()->actPanelVolume(leftPanel)),
 		       action("right-panel-volume", app.getStrings().rightPanelVolume(), new InputEvent(InputEvent.Special.F2, EnumSet.of(InputEvent.Modifiers.ALT)), ()->actPanelVolume(rightPanel)),
+		       action("size", "size", new InputEvent(InputEvent.Special.F3, EnumSet.of(InputEvent.Modifiers.ALT)), ()->fileActions.size(panelArea)),
 		       action("info", "info", ()->showFilesInfo(panelArea))
 		       );
     }
@@ -198,13 +201,13 @@ final class MainLayout extends LayoutBase
 	NullCheck.notNull(listener, "listener");
 	if (!copyFromArea.isLocalDir() || !copyToArea.isLocalDir())
 	    return false;
-	final File copyFromDir = copyFromArea.getOpenedAsFile();
+	final File copyFromDir = PanelArea.asFile(copyFromArea.opened());
 	if (copyFromDir == null || !copyFromDir.isAbsolute())
 	    return false;
 	final File[] filesToCopy = PanelArea.asFile(copyFromArea.getToProcess());
 	if (filesToCopy.length == 0)
 	    return false;
-	final File copyToDir = copyToArea.getOpenedAsFile();
+	final File copyToDir = PanelArea.asFile(copyToArea.opened());
 	if (copyToDir == null || !copyToDir.isAbsolute())
 	    return false;
 	final File dest = app.getConv().copyPopup(copyFromDir, filesToCopy, copyToDir);
@@ -222,9 +225,9 @@ final class MainLayout extends LayoutBase
 	NullCheck.notNull(listener, "listener");
 	if (!moveFromArea.isLocalDir() || !moveToArea.isLocalDir())
 	    return false;
-	final File moveFromDir = moveFromArea.getOpenedAsFile();
+	final File moveFromDir = PanelArea.asFile(moveFromArea.opened());
 	final File[] filesToMove = PanelArea.asFile(moveFromArea.getToProcess());
-	final File moveTo = moveToArea.getOpenedAsFile();
+	final File moveTo = PanelArea.asFile(moveToArea.opened());
 	if (filesToMove.length < 1)
 	    return false;
 	final File dest = app.getConv().movePopup(moveFromDir, filesToMove, moveTo);
@@ -240,7 +243,7 @@ final class MainLayout extends LayoutBase
 	NullCheck.notNull(panelArea, "panelArea");
 	if (!panelArea.isLocalDir())
 	    return false;
-	final File createIn = panelArea.getOpenedAsFile();
+	final File createIn = PanelArea.asFile(panelArea.opened());
 	if (createIn == null || !createIn.isAbsolute())
 	    return false;
 	final File newDir = app.getConv().mkdirPopup(createIn);
@@ -317,13 +320,13 @@ final class MainLayout extends LayoutBase
 	NullCheck.notNull(propsArea, "propsArea");
 	if (area.isLocalDir())
 	{
-	    final File opened = area.getOpenedAsFile();
+	    final File opened = PanelArea.asFile(area.opened());
 	    if (opened == null)
 		return false;
 	    //	    infoAndProps.fillLocalVolumeInfo(opened, propsArea);
 	} else
 	{
-	    final FileObject fileObj = area.getOpenedAsFileObject();
+	    final FileObject fileObj = area.opened();
 	    if (fileObj == null)
 		return false;
 	    //	    infoAndProps.fillDirInfo(fileObj, propsArea);
