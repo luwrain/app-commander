@@ -110,7 +110,7 @@ final class App extends AppBase<Strings>
 	return "";
     }
 
-    private OperationListener createFilesOperationListener()
+    OperationListener createOperationListener()
     {
 	return new OperationListener(){
 	    @Override public void onOperationProgress(Operation operation)

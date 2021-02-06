@@ -18,6 +18,7 @@ package org.luwrain.app.commander;
 
 import java.util.*;
 import java.io.*;
+import java.nio.file.*;
 import org.apache.commons.vfs2.*;
 
 import org.luwrain.base.*;
@@ -46,7 +47,7 @@ final class FileActions
 		try {
 		    res = getSize(files);
 		}
-		catch(FileSystemException e)
+		catch(org.apache.commons.vfs2.FileSystemException e)
 		{
 		    app.getLuwrain().crash(e);
 		    return;
@@ -55,7 +56,7 @@ final class FileActions
 	    });
     }
 
-    private long getSize(FileObject fileObj) throws FileSystemException
+    private long getSize(FileObject fileObj) throws org.apache.commons.vfs2.FileSystemException
     {
 	NullCheck.notNull(fileObj, "fileObj");
 	if (fileObj.getType().hasChildren())
@@ -65,12 +66,25 @@ final class FileActions
 	return 0;
     }
 
-    private long getSize(FileObject[] files) throws FileSystemException
+    private long getSize(FileObject[] files) throws org.apache.commons.vfs2.FileSystemException
     {
 	NullCheck.notNullItems(files, "files");
 	long sum = 0;
 	for(FileObject f: files)
 	    sum += getSize(f);
 	return sum;
+    }
+
+    boolean zipCompress(PanelArea panelArea)
+    {
+	NullCheck.notNull(panelArea, "panelArea");
+	final Path[] toProcess = PanelArea.asPath(panelArea.getToProcess());
+	if (toProcess.length == 0)
+	    return false;
+	final ZipCompress zipCompress = new ZipCompress(app.createOperationListener(), "zip", toProcess, Paths.get("/tmp/proba.zip"));
+	final App.TaskId taskId = app.newTaskId();
+	return app.runTask(taskId, ()->{
+		zipCompress.run();
+	    });
     }
 }

@@ -24,14 +24,13 @@ import java.nio.file.attribute.*;
 import org.luwrain.core.*;
 import org.luwrain.app.commander.*;
 
-
 public final class Result 
-    {
-	public enum Type { OK, INTERRUPTED, EXCEPTION, MOVE_DEST_NOT_DIR, SOURCE_PARENT_OF_DEST};
+{
+    public enum Type { OK, INTERRUPTED, EXCEPTION, MOVE_DEST_NOT_DIR, SOURCE_PARENT_OF_DEST};
 
-	private final Type type;
-	private final String extInfo;
-	private final Exception exception;
+    private final Type type;
+    private final String extInfo;
+    private final Exception exception;
 
 	public Result()
 	{

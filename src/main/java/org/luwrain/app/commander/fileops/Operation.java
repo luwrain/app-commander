@@ -26,14 +26,12 @@ import org.luwrain.app.commander.*;
 
 public abstract class Operation implements Runnable
 {
-    public enum ConfirmationChoices
-    {
+    public enum ConfirmationChoices {
 	OVERWRITE,
 	SKIP,
 	CANCEL
     };
 
-    
     private final OperationListener listener;
     private final String name;
 
@@ -76,17 +74,17 @@ public abstract class Operation implements Runnable
 	interrupted = true;
     }
 
-    public synchronized  String getOperationName()
+    public String getOperationName()
     {
 	return name;
     }
 
-    public synchronized  boolean isFinished()
+    public boolean isFinished()
     {
 	return finished;
     }
 
-    public synchronized Result getResult()
+    public Result getResult()
     {
 	return result;
     }
@@ -99,33 +97,33 @@ public abstract class Operation implements Runnable
 	return false;
     }
 
-    protected boolean isDirectory(Path path, boolean followSymlinks) throws IOException
+    static protected boolean isDirectory(Path path, boolean followSymlinks) throws IOException
     {
 	NullCheck.notNull(path, "path");
-	    if (followSymlinks)
-		return Files.isDirectory(path); else
-		return Files.isDirectory(path, LinkOption.NOFOLLOW_LINKS);
+	if (followSymlinks)
+	    return Files.isDirectory(path); else
+	    return Files.isDirectory(path, LinkOption.NOFOLLOW_LINKS);
     }
 
-    protected Path[] getDirContent(final Path path) throws IOException
+    static protected Path[] getDirContent(final Path path) throws IOException
     {
-	final LinkedList<Path> res = new LinkedList<Path>();
+	final List<Path> res = new ArrayList();
         try (DirectoryStream<Path> directoryStream = Files.newDirectoryStream(path)) {
-		for (Path p : directoryStream) 
-		    res.add(p);
-	    } 
+	    for (Path p : directoryStream) 
+		res.add(p);
+	} 
 	return res.toArray(new Path[res.size()]);
     }
 
-    protected boolean isRegularFile(Path path, boolean followSymlinks) throws IOException
+    static protected boolean isRegularFile(Path path, boolean followSymlinks) throws IOException
     {
 	NullCheck.notNull(path, "path");
-	    if (followSymlinks)
-		return Files.isRegularFile(path); else
-		return Files.isRegularFile(path, LinkOption.NOFOLLOW_LINKS);
+	if (followSymlinks)
+	    return Files.isRegularFile(path); else
+	    return Files.isRegularFile(path, LinkOption.NOFOLLOW_LINKS);
     }
 
-    protected boolean exists(Path path, boolean followSymlinks) throws IOException
+    static protected boolean exists(Path path, boolean followSymlinks) throws IOException
     {
 	NullCheck.notNull(path, "path");
 	    if (followSymlinks)
@@ -187,4 +185,21 @@ FIXME:
 	    } 
 	return res;
     }
+
+    static protected void ensureValidLocalPath(Path[] path)
+    {
+	NullCheck.notNullItems(path, "path");
+	NullCheck.notEmptyArray(path, "path");
+	for(Path p: path)
+	    if (!p.isAbsolute())
+		throw new IllegalArgumentException(p.toString() + " can't be relative");
+    }
+
+        static protected void ensureValidLocalPath(Path path)
+    {
+	NullCheck.notNull(path, "path");
+	    if (!path.isAbsolute())
+		throw new IllegalArgumentException(path.toString() + " can't be relative");
+    }
+
 }

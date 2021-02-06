@@ -151,6 +151,7 @@ final class MainLayout extends LayoutBase
 		       action("mkdir", app.getStrings().actionMkdir(), new InputEvent(InputEvent.Special.F7), ()->actLocalMkdir(panelArea)),
 		       action("left-panel-volume", app.getStrings().leftPanelVolume(), new InputEvent(InputEvent.Special.F1, EnumSet.of(InputEvent.Modifiers.ALT)), ()->actPanelVolume(leftPanel)),
 		       action("right-panel-volume", app.getStrings().rightPanelVolume(), new InputEvent(InputEvent.Special.F2, EnumSet.of(InputEvent.Modifiers.ALT)), ()->actPanelVolume(rightPanel)),
+		       		       action("zip", "zip", ()->fileActions.zipCompress(panelArea)),
 		       action("size", "size", new InputEvent(InputEvent.Special.F3, EnumSet.of(InputEvent.Modifiers.ALT)), ()->fileActions.size(panelArea)),
 		       action("info", "info", ()->showFilesInfo(panelArea))
 		       );

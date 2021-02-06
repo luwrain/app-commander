@@ -19,6 +19,7 @@ package org.luwrain.app.commander;
 import java.util.*;
 import java.util.concurrent.*;
 import java.io.*;
+import java.nio.file.*;
 import java.net.*;
 
 import org.apache.commons.vfs2.*;
@@ -182,6 +183,15 @@ class PanelArea extends CommanderArea<FileObject>
 	reread(false);
     }
 
+        static Path asPath(FileObject fileObject)
+    {
+	if (fileObject == null)
+	    return null;
+		    if (fileObject instanceof org.apache.commons.vfs2.provider.local.LocalFile)
+			return Paths.get(fileObject.getName().getPath());
+		    return null;
+    }
+
     static File asFile(FileObject fileObject)
     {
 	if (fileObject == null)
@@ -210,7 +220,20 @@ class PanelArea extends CommanderArea<FileObject>
 	    return null;
     }
 
-        static File[]asFile(FileObject[] fileObjects)
+            static Path[] asPath(FileObject[] fileObjects)
+    {
+	NullCheck.notNullItems(fileObjects, "fileObjects");
+	final List<Path> res = new ArrayList();
+	for(FileObject f: fileObjects)
+	{
+	    final Path ff = asPath(f);
+	    if (ff != null)
+		res.add(ff);
+	}
+	return res.toArray(new Path[res.size()]);
+    }
+
+        static File[] asFile(FileObject[] fileObjects)
     {
 	NullCheck.notNullItems(fileObjects, "fileObjects");
 	final List<File> res = new ArrayList();
@@ -223,7 +246,7 @@ class PanelArea extends CommanderArea<FileObject>
 	return res.toArray(new File[res.size()]);
     }
 
-    static Params<FileObject> createParams(Luwrain luwrain) throws FileSystemException
+    static Params<FileObject> createParams(Luwrain luwrain) throws org.apache.commons.vfs2.FileSystemException
     {
 	NullCheck.notNull(luwrain, "luwrain");
 	Params<FileObject> params = CommanderUtilsVfs.createParams(new DefaultControlContext(luwrain));
