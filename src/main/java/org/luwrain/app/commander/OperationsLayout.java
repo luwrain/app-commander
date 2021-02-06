@@ -17,26 +17,18 @@
 package org.luwrain.app.commander;
 
 import java.util.*;
-import java.io.*;
-import java.io.*;
 
-import org.apache.commons.vfs2.*;
-
-import org.luwrain.base.*;
 import org.luwrain.core.*;
 import org.luwrain.core.events.*;
 import org.luwrain.controls.*;
-import org.luwrain.io.*;
-import org.luwrain.popups.*;
-
-import org.luwrain.app.commander.App.Side;
 import org.luwrain.app.base.*;
+import org.luwrain.app.commander.App.Side;
+import org.luwrain.app.commander.fileops.*;
 
 final class OperationsLayout extends LayoutBase
 {
     private final App app;
-        private final ListArea operationsArea;
-    private AreaLayoutHelper layout = null;
+    final ListArea operationsArea;
 
     OperationsLayout(App app)
     {
@@ -46,12 +38,23 @@ final class OperationsLayout extends LayoutBase
 		@Override public boolean onInputEvent(InputEvent event)
 		{
 		    NullCheck.notNull(event, "event");
+		    if (app.onInputEvent(this, event, ()->app.layouts().main()))
+			return true;
 		    return super.onInputEvent(event);
 		}
 		@Override public boolean onSystemEvent(SystemEvent event)
 		{
 		    NullCheck.notNull(event, "event");
-			return super.onSystemEvent(event);
+		    if (app.onSystemEvent(this, event))
+			return true;
+		    return super.onSystemEvent(event);
+		}
+		@Override public boolean onAreaQuery(AreaQuery query)
+		{
+		    NullCheck.notNull(query, "query");
+		    if (app.onAreaQuery(this, query))
+			return true;
+		    return super.onAreaQuery(query);
 		}
 		@Override protected String noContentStr()
 		{
@@ -62,30 +65,16 @@ final class OperationsLayout extends LayoutBase
 
     private ListArea.Params createOperationsParams()
     {
-	return null;
+	final ListArea.Params params = new ListArea.Params();
+	params.context = new DefaultControlContext(app.getLuwrain());
+	params.name = app.getStrings().operationsAreaName();
+	params.model = new ListUtils.ArrayModel(()->app.operations.toArray(new Operation[app.operations.size()]));
+	params.appearance = new ListUtils.DefaultAppearance(params.context);
+	return params;
     }
 
     AreaLayout getLayout()
     {
 	return new AreaLayout(operationsArea);
     }
-
-        private class OperationsListModel implements ListArea.Model
-    {
-	@Override public Object getItem(int index)
-	{
-	    if (index < 0)
-		throw new IllegalArgumentException("index (" + index + ") may not be negative");
-	    return app.operations.get(index);
-	}
-	@Override public int getItemCount()
-	{
-	    return app.operations.size();
-	}
-	@Override public void refresh()
-	{
-	}
-    }
-
-
-    }
+}

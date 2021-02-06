@@ -59,6 +59,9 @@ final class MainLayout extends LayoutBase
 		    if (event.getType() == SystemEvent.Type.REGULAR)
 			switch(event.getCode())
 			{
+			case SAVE:
+			    app.layouts().operations();
+			    return true;
 			case INTRODUCE:
 			    return announcePanel(Side.LEFT);
 			case PROPERTIES:
@@ -94,6 +97,9 @@ final class MainLayout extends LayoutBase
 		    if (event.getType() == SystemEvent.Type.REGULAR)
 			switch(event.getCode())
 			{
+			case SAVE:
+			    app.layouts().operations();
+			    return true;
 			case INTRODUCE:
 			    return announcePanel(Side.RIGHT);
 			    			case PROPERTIES:

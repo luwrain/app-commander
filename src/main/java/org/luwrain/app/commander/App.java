@@ -36,6 +36,7 @@ final class App extends AppBase<Strings>
     private Conversations conv = null;
     private Hooks hooks = null;
     private MainLayout mainLayout = null;
+    private OperationsLayout operationsLayout = null;
 
     App()
     {
@@ -56,15 +57,9 @@ final class App extends AppBase<Strings>
 	this.conv = new Conversations(this);
 	this.hooks = new Hooks(this);
 	this.mainLayout = new MainLayout(this);
+	this.operationsLayout = new OperationsLayout(this);
 	setAppName(getStrings().appName());
 	return true;
-    }
-
-    void launch(Operation op)
-    {
-	NullCheck.notNull(op, "op");
-	operations.add(op);
-	getLuwrain().executeBkg(new FutureTask(op, null));
     }
 
     boolean allOperationsFinished()
@@ -78,10 +73,11 @@ final class App extends AppBase<Strings>
     boolean closeOperation(int index)
     {
 	if (index < 0 || index >= operations.size())
-	    throw new IllegalArgumentException("index (" + index + ") must be positive and less than the number of operations (" + operations.size() + ")");
+	    throw new IllegalArgumentException("index (" + String.valueOf(index) + ") must be positive and less than the number of operations (" + String.valueOf(operations.size()) + ")");
 	if (!operations.get(index).isFinished())
 	    return false;
 	operations.remove(index);
+	operationsLayout.operationsArea.refresh();
 	return true;
     }
 
@@ -143,22 +139,6 @@ final class App extends AppBase<Strings>
 	}
     }
 
-    void layout(AreaLayout layout)
-    {
-	NullCheck.notNull(layout, "layout");
-	getLayout().setBasicLayout(layout);
-	getLuwrain().announceActiveArea();
-    }
-
-    void layout(AreaLayout layout, Area activeArea)
-    {
-	NullCheck.notNull(layout, "layout");
-	NullCheck.notNull(activeArea, "activeArea");
-	getLayout().setBasicLayout(layout);
-	getLuwrain().announceActiveArea();
-	getLuwrain().setActiveArea(activeArea);
-    }
-
 
     @Override public boolean onEscape(InputEvent event)
     {
@@ -181,19 +161,57 @@ final class App extends AppBase<Strings>
 	}
 	super.closeApp();
     }
-    
-        Settings getSett()
+
+    void layout(AreaLayout layout)
+    {
+	NullCheck.notNull(layout, "layout");
+	getLayout().setBasicLayout(layout);
+	getLuwrain().announceActiveArea();
+    }
+
+    void layout(AreaLayout layout, Area activeArea)
+    {
+	NullCheck.notNull(layout, "layout");
+	NullCheck.notNull(activeArea, "activeArea");
+	getLayout().setBasicLayout(layout);
+	getLuwrain().announceActiveArea();
+	getLuwrain().setActiveArea(activeArea);
+    }
+
+    Layouts layouts()
+    {
+	return new Layouts(){
+	    @Override public void main()
+	    {
+		getLayout().setBasicLayout(mainLayout.getLayout());
+		getLuwrain().announceActiveArea();
+	    }
+	    @Override public void operations()
+	    {
+		getLayout().setBasicLayout(operationsLayout.getLayout());
+		getLuwrain().announceActiveArea();
+	    }
+	};
+    }
+
+    Settings getSett()
     {
 	return this.sett;
     }
 
-        Conversations getConv()
+    Conversations getConv()
     {
 	return this.conv;
     }
 
     Hooks getHooks()
     {
-return this.hooks;
+	return this.hooks;
+    }
+
+    interface Layouts
+    {
+	void main();
+	void operations();
     }
 }
