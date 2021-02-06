@@ -20,6 +20,7 @@ import java.io.*;
 import java.nio.file.*;
 
 import org.luwrain.core.*;
+import org.luwrain.util.*;
 import org.luwrain.app.commander.*;
 
 abstract class CopyingBase extends Operation
@@ -33,6 +34,12 @@ abstract class CopyingBase extends Operation
     {
 	super(listener, name);
     }
+
+        @Override public int getPercent()
+    {
+	return percents;
+    }
+
 
     protected Result copy(Path[] toCopy, Path dest) throws IOException
     {
@@ -205,33 +212,23 @@ abstract class CopyingBase extends Operation
 		return new Result(Result.Type.INTERRUPTED);
 	    }
 	    Files.delete(toFile);
-	} //toFile exists
+	} // toFile exists
 	if (Files.isSymbolicLink(fromFile))
 	{
 	    Files.createSymbolicLink(toFile, Files.readSymbolicLink(fromFile));
 	    return new Result();
 	}
-	final InputStream in = Files.newInputStream(fromFile);
-	final OutputStream out = Files.newOutputStream(toFile);
-	try {
-	    final byte[] buf = new byte[2048];
-	    int length;
-	    while (true)
-	    { 
-		length = in.read(buf);
-		if (length <= 0)
-		    break;
+	try (final InputStream in = Files.newInputStream(fromFile)) {
+	    try (final OutputStream out = Files.newOutputStream(toFile)) {
+		StreamUtils.copyAllBytes(in, out,
+					 (chunkNumBytes, totalNumBytes)->onNewPortion(chunkNumBytes),
+					 ()->{ return interrupted; });
+		out.flush();
 		if (interrupted)
 		    return new Result(Result.Type.INTERRUPTED);
-		onNewPortion(length);
-		out.write(buf, 0, length);
 	    }
 	}
-	finally {
-	    in.close();
-	    out.close();
-	}
-	return new Result();
+    	return new Result();
     }
 
     private void onNewPortion(int bytes)
@@ -246,8 +243,4 @@ abstract class CopyingBase extends Operation
 	}
     }
 
-    public synchronized  int getPercent()
-    {
-	return percents;
-    }
 }
