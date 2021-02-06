@@ -27,8 +27,8 @@ abstract class CopyingBase extends Operation
 {
     private long totalBytes = 0;
     private long processedBytes = 0;
-    private int percents = 0;
-    private int lastPercents = 0;//Useful for filtering out notifications with the same number of percents
+    private int percent = 0;
+    private int lastPercent = 0;
 
     CopyingBase(OperationListener listener, String name)
     {
@@ -37,7 +37,7 @@ abstract class CopyingBase extends Operation
 
         @Override public int getPercent()
     {
-	return percents;
+	return percent;
     }
 
 
@@ -221,7 +221,7 @@ abstract class CopyingBase extends Operation
 	try (final InputStream in = Files.newInputStream(fromFile)) {
 	    try (final OutputStream out = Files.newOutputStream(toFile)) {
 		StreamUtils.copyAllBytes(in, out,
-					 (chunkNumBytes, totalNumBytes)->onNewPortion(chunkNumBytes),
+					 (chunkNumBytes, totalNumBytes)->onNewChunk(chunkNumBytes),
 					 ()->{ return interrupted; });
 		out.flush();
 		if (interrupted)
@@ -231,16 +231,15 @@ abstract class CopyingBase extends Operation
     	return new Result();
     }
 
-    private void onNewPortion(int bytes)
+    private void onNewChunk(int bytes)
     {
 	processedBytes += bytes;
-	long lPercents = (processedBytes * 100) / totalBytes;
-	percents = (int)lPercents;
-	if (percents > lastPercents)
+	long lPercent = (processedBytes * 100) / totalBytes;
+	percent = (int)lPercent;
+	if (percent > lastPercent)
 	{
 	    onProgress(this);
-	    lastPercents = percents;
+	    lastPercent = percent;
 	}
     }
-
 }
