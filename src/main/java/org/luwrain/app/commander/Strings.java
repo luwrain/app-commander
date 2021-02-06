@@ -60,10 +60,12 @@ public interface Strings
     String actionPreviewAnotherFormat();
     String actionOpenChoosingApp();
     String actionCopy();
-    String actionMove();
-    String actionMkdir();
     String actionDelete();
+    String actionInfo();
+    String actionMkdir();
+            String actionMove();
     String actionSize();
+    String actionZip();
     String dirMayNotBePreviewed();
     String enteredPathExists(String path);
     String actionCopyToClipboard();

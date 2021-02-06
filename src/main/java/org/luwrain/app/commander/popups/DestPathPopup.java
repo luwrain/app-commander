@@ -16,7 +16,9 @@
 
 package org.luwrain.app.commander.popups;
 
+import java.util.*;
 import java.io.*;
+import java.nio.file.*;
 
 import org.luwrain.core.*;
 import org.luwrain.popups.*;
@@ -30,36 +32,32 @@ public final class DestPathPopup extends FilePopup
     private final Strings strings;
 
     public DestPathPopup(Luwrain luwrain, Strings strings, Type type,
-		  File srcDir, File[] files, File destDir)
+		  Path srcDir, Path[] files, Path destDir)
 {
     super(luwrain,
-	  makeName(strings),
-	  makePrefix(),
-	  createAcceptance(),
-	  null, //startFrom
-	  srcDir,
-	  null,
-	  Popups.DEFAULT_POPUP_FLAGS); //flags
+	  name(strings), prefix(), acceptance(),
+	  destDir.toFile(), srcDir.toFile(),
+	  EnumSet.noneOf(FilePopup.Flags.class), Popups.DEFAULT_POPUP_FLAGS);
     NullCheck.notNull(strings, "strings");
     NullCheck.notNull(type, "type");
     this.strings = strings;
     this.type = type;
 }
 
-    static private FileAcceptance createAcceptance()
+    static private FileAcceptance acceptance()
     {
 	return (file, announce)->{
 	    return true;
 	};
     }
 
-static private String makeName(Strings strings)
+static private String name(Strings strings)
 {
     NullCheck.notNull(strings, "strings");
     return strings.copyPopupName();
 }
 
-static private String makePrefix()
+static private String prefix()
 {
     return "";
 }
@@ -73,5 +71,4 @@ private String movePopupPrefix(File[] toMove)
 	{
 	    return strings.movePopupPrefix(toMove.length > 1?luwrain.i18n().getNumberStr(toMove.length, "items"):toMove[0].getName());
 	}
-
 }

@@ -22,12 +22,12 @@ import java.nio.file.*;
 import org.luwrain.core.*;
 import org.luwrain.app.commander.*;
 
-class Copy extends CopyingBase
+public final class Copy extends CopyingBase
 {
     private final Path[] copyFrom;
     private final Path copyTo;
 
-    Copy(OperationListener listener, String opName,
+    public Copy(OperationListener listener, String opName,
 	 Path[] copyFrom, Path copyTo)
     {
 	super(listener, opName);

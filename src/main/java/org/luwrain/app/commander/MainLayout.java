@@ -36,8 +36,8 @@ import org.luwrain.app.commander.fileops.*;
 final class MainLayout extends LayoutBase
 {
     private final App app;
-    private final PanelArea leftPanel;
-    private final PanelArea rightPanel;
+    final PanelArea leftPanel;
+    final PanelArea rightPanel;
     private final FileActions fileActions;
 
     MainLayout(App app)
@@ -154,12 +154,13 @@ final class MainLayout extends LayoutBase
 	    oppositePanelArea = leftPanel;
 	}
 	return actions(
+		       action("copy", app.getStrings().actionCopy(), new InputEvent(InputEvent.Special.F5), ()->fileActions.localCopy(panelArea, oppositePanelArea)),
 		       action("mkdir", app.getStrings().actionMkdir(), new InputEvent(InputEvent.Special.F7), ()->actLocalMkdir(panelArea)),
 		       action("left-panel-volume", app.getStrings().leftPanelVolume(), new InputEvent(InputEvent.Special.F1, EnumSet.of(InputEvent.Modifiers.ALT)), ()->actPanelVolume(leftPanel)),
 		       action("right-panel-volume", app.getStrings().rightPanelVolume(), new InputEvent(InputEvent.Special.F2, EnumSet.of(InputEvent.Modifiers.ALT)), ()->actPanelVolume(rightPanel)),
-		       		       action("zip", "zip", ()->fileActions.zipCompress(panelArea)),
-		       action("size", "size", new InputEvent(InputEvent.Special.F3, EnumSet.of(InputEvent.Modifiers.ALT)), ()->fileActions.size(panelArea)),
-		       action("info", "info", ()->showFilesInfo(panelArea))
+		       action("zip", app.getStrings().actionZip(), ()->fileActions.zipCompress(panelArea)),
+		       action("size", app.getStrings().actionSize(), new InputEvent(InputEvent.Special.F3, EnumSet.of(InputEvent.Modifiers.ALT)), ()->fileActions.size(panelArea)),
+		       action("info", app.getStrings().actionInfo(), ()->showFilesInfo(panelArea))
 		       );
     }
 
@@ -201,49 +202,6 @@ final class MainLayout extends LayoutBase
 	}
     }
 
-    private boolean todoLocalCopy(PanelArea copyFromArea, PanelArea copyToArea, OperationListener listener)
-    {
-	NullCheck.notNull(copyFromArea, "copyFromArea");
-	NullCheck.notNull(copyToArea, "copyToArea");
-	NullCheck.notNull(listener, "listener");
-	if (!copyFromArea.isLocalDir() || !copyToArea.isLocalDir())
-	    return false;
-	final File copyFromDir = PanelArea.asFile(copyFromArea.opened());
-	if (copyFromDir == null || !copyFromDir.isAbsolute())
-	    return false;
-	final File[] filesToCopy = PanelArea.asFile(copyFromArea.getToProcess());
-	if (filesToCopy.length == 0)
-	    return false;
-	final File copyToDir = PanelArea.asFile(copyToArea.opened());
-	if (copyToDir == null || !copyToDir.isAbsolute())
-	    return false;
-	final File dest = app.getConv().copyPopup(copyFromDir, filesToCopy, copyToDir);
-	if (dest == null)
-	    return true;
-	final String opName = copyOperationName(filesToCopy, dest);
-	//app.launch(app.getLuwrain().getFilesOperations().copy(listener, opName, filesToCopy, dest));
-	return true;
-    }
-
-    private boolean todoLocalMove(PanelArea moveFromArea, PanelArea moveToArea, OperationListener listener)
-    {
-	NullCheck.notNull(moveFromArea, "moveFromArea");
-	NullCheck.notNull(moveToArea, "moveToArea");
-	NullCheck.notNull(listener, "listener");
-	if (!moveFromArea.isLocalDir() || !moveToArea.isLocalDir())
-	    return false;
-	final File moveFromDir = PanelArea.asFile(moveFromArea.opened());
-	final File[] filesToMove = PanelArea.asFile(moveFromArea.getToProcess());
-	final File moveTo = PanelArea.asFile(moveToArea.opened());
-	if (filesToMove.length < 1)
-	    return false;
-	final File dest = app.getConv().movePopup(moveFromDir, filesToMove, moveTo);
-	if (dest == null)
-	    return true;
-	final String opName = moveOperationName(filesToMove, dest);
-	//app.launch(app.getLuwrain().getFilesOperations().move(listener, opName, filesToMove, dest));
-	return true;
-    }
 
     private boolean actLocalMkdir(PanelArea panelArea)
     {
@@ -380,24 +338,6 @@ final class MainLayout extends LayoutBase
 	    luwrain.playSound(Sounds.OK);
 	*/
 	return true;
-    }
-
-    private String copyOperationName(File[] whatToCopy, File copyTo)
-    {
-	if (whatToCopy.length < 1)
-	    return "";
-	if (whatToCopy.length > 1)
-	    return app.getStrings().copyOperationName(whatToCopy[0].getName() + ",...", copyTo.getName());
-	return app.getStrings().copyOperationName(whatToCopy[0].getName(), copyTo.getName());
-    }
-
-private String moveOperationName(File[] whatToMove, File moveTo)
-    {
-	if (whatToMove.length < 1)
-	    return "";
-	if (whatToMove.length > 1)
-	    return app.getStrings().moveOperationName(whatToMove[0].getName() + ",...", moveTo.getName());
-	return app.getStrings().moveOperationName(whatToMove[0].getName(), moveTo.getName());
     }
 
         private CommanderArea.Params createPanelParams()

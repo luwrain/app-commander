@@ -26,14 +26,12 @@ import org.luwrain.core.*;
 import org.luwrain.controls.*;
 import org.luwrain.app.commander.fileops.*;
 
-final class FileActions
+final class FileActions extends OperationsNames
 {
-    private final App app;
     FileActions(App app)
     {
-	NullCheck.notNull(app, "app");
-	this.app = app;
-    }
+	super(app);
+	    }
 
     boolean size(PanelArea panelArea)
     {
@@ -74,6 +72,53 @@ final class FileActions
 	    sum += getSize(f);
 	return sum;
     }
+
+        boolean localCopy(PanelArea copyFromArea, PanelArea copyToArea)
+    {
+	NullCheck.notNull(copyFromArea, "copyFromArea");
+	NullCheck.notNull(copyToArea, "copyToArea");
+	if (!copyFromArea.isLocalDir() || !copyToArea.isLocalDir())
+	    return false;
+	final Path copyFromDir = PanelArea.asPath(copyFromArea.opened());
+	if (copyFromDir == null || !copyFromDir.isAbsolute())
+	    return false;
+	final Path[] filesToCopy = PanelArea.asPath(copyFromArea.getToProcess());
+	if (filesToCopy.length == 0)
+	    return false;
+	final Path copyToDir = PanelArea.asPath(copyToArea.opened());
+	if (copyToDir == null || !copyToDir.isAbsolute())
+	    return false;
+	final Path dest = app.getConv().copyPopup(copyFromDir, filesToCopy, copyToDir);
+	if (dest == null)
+	    return true;
+	final String name = copyOperationName(filesToCopy, dest);
+	final Copy copy = new Copy(app.createOperationListener(), name, null, null);
+	app.operations.add(0, copy);
+	return true;
+    }
+
+    
+
+    private boolean todoLocalMove(PanelArea moveFromArea, PanelArea moveToArea, OperationListener listener)
+    {
+	NullCheck.notNull(moveFromArea, "moveFromArea");
+	NullCheck.notNull(moveToArea, "moveToArea");
+	NullCheck.notNull(listener, "listener");
+	if (!moveFromArea.isLocalDir() || !moveToArea.isLocalDir())
+	    return false;
+	final File moveFromDir = PanelArea.asFile(moveFromArea.opened());
+	final File[] filesToMove = PanelArea.asFile(moveFromArea.getToProcess());
+	final File moveTo = PanelArea.asFile(moveToArea.opened());
+	if (filesToMove.length < 1)
+	    return false;
+	final File dest = null;//app.getConv().movePopup(moveFromDir, filesToMove, moveTo);
+	if (dest == null)
+	    return true;
+	final String opName = moveOperationName(filesToMove, dest);
+	//app.launch(app.getLuwrain().getFilesOperations().move(listener, opName, filesToMove, dest));
+	return true;
+    }
+
 
     boolean zipCompress(PanelArea panelArea)
     {

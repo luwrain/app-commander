@@ -85,23 +85,23 @@ final class App extends AppBase<Strings>
     {
 	NullCheck.notNull(op, "op");
 	/*
-	switch(op.getResult().getType())
-	{
-	case OK:
-	    return getStrings().opResultOk();
-	case SOURCE_PARENT_OF_DEST:
-	    return "Целевой каталог является подкаталогом родительского";
-	case MOVE_DEST_NOT_DIR:
-	    return "Целевой путь не указывает на каталог";
-	case INTERRUPTED:
-	    return getStrings().opResultInterrupted();
-	case EXCEPTION:
-	    if (op.getResult().getException() != null)
-		return getLuwrain().i18n().getExceptionDescr(op.getResult().getException());
-	    return "Нет информации об ошибке";
-	default:
-	    return "";
-	}
+	  switch(op.getResult().getType())
+	  {
+	  case OK:
+	  return getStrings().opResultOk();
+	  case SOURCE_PARENT_OF_DEST:
+	  return "Целевой каталог является подкаталогом родительского";
+	  case MOVE_DEST_NOT_DIR:
+	  return "Целевой путь не указывает на каталог";
+	  case INTERRUPTED:
+	  return getStrings().opResultInterrupted();
+	  case EXCEPTION:
+	  if (op.getResult().getException() != null)
+	  return getLuwrain().i18n().getExceptionDescr(op.getResult().getException());
+	  return "Нет информации об ошибке";
+	  default:
+	  return "";
+	  }
 	*/
 	return "";
     }
@@ -112,33 +112,19 @@ final class App extends AppBase<Strings>
 	    @Override public void onOperationProgress(Operation operation)
 	    {
 		NullCheck.notNull(operation, "operation");
-		NullCheck.notNull(operation, "operation");
-		getLuwrain().runUiSafely(()->onOperationUpdate(operation));
+		getLuwrain().runUiSafely(()->{
+			operationsLayout.operationsArea.redraw();
+			if (operation.isFinished())
+			{
+			    if (operation.getResult().getType() == Result.Type.OK)
+				getLuwrain().playSound(Sounds.DONE);
+			    mainLayout.leftPanel.refresh();
+			    mainLayout.rightPanel.refresh();
+			}
+		    });
 	    }
-
-	    /*
-	    @Override public FilesOperation.ConfirmationChoices confirmOverwrite(java.nio.file.Path path)
-	    {
-		NullCheck.notNull(path, "path");
-		return (FilesOperation.ConfirmationChoices)getLuwrain().callUiSafely(()->conv.overrideConfirmation(path.toFile()));
-	    }
-	    */
 	};
     }
-
-    private void onOperationUpdate(Operation operation)
-    {
-	NullCheck.notNull(operation, "operation");
-	//	operationsArea.redraw();
-	//	luwrain.onAreaNewBackgroundSound();
-	if (operation.isFinished())
-	{
-	    if (operation.getResult().getType() == Result.Type.OK)
-		getLuwrain().playSound(Sounds.DONE);
-	    //refreshPanels();
-	}
-    }
-
 
     @Override public boolean onEscape(InputEvent event)
     {
