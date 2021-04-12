@@ -246,34 +246,40 @@ class PanelArea extends CommanderArea<FileObject>
 	return res.toArray(new File[res.size()]);
     }
 
-    static Params<FileObject> createParams(Luwrain luwrain) throws org.apache.commons.vfs2.FileSystemException
+    static Params<FileObject> createParams(ControlContext controlContext)
     {
-	NullCheck.notNull(luwrain, "luwrain");
-	Params<FileObject> params = CommanderUtilsVfs.createParams(new DefaultControlContext(luwrain));
-	params.flags = EnumSet.of(Flags.MARKING);
-	params.filter = new CommanderUtilsVfs.NoHiddenFilter();
-	params.clipboardSaver = (area,model,appearance,fromIndex,toIndex,clipboard)->{
-	    NullCheck.notNull(model, "model");
-	    NullCheck.notNull(clipboard, "clipboard");
-	    if (fromIndex < 0 || toIndex < 0)
-		throw new IllegalArgumentException("fromIndex and toIndex may not be negative");
-	    final int count = model.getItemCount();
-	    if (fromIndex >= toIndex || fromIndex >= count || toIndex > count)
-		return false;
-	    final List<String> names = new ArrayList();
-	    final List<Serializable> res = new ArrayList();
-	    for(int i = fromIndex;i < toIndex;++i)
-	    {
-		final CommanderArea.NativeItem<FileObject> nativeObj = (CommanderArea.NativeItem<FileObject>)model.getItem(i);
-		final FileObject fileObj = nativeObj.getNativeObj();
-		names.add(nativeObj.getBaseName());
-		final File file = asFile(fileObj);
-		if (file != null)
-		    res.add(file); else
-		    res.add(fileObj.getName().getBaseName());
-	    }
-	    return clipboard.set(res.toArray(new Object[res.size()]), names.toArray(new String[names.size()]));
-	};
-	return params;
+	NullCheck.notNull(controlContext, "controlContext");
+	try {
+	    Params<FileObject> params = CommanderUtilsVfs.createParams(controlContext);
+	    params.flags = EnumSet.of(Flags.MARKING);
+	    params.filter = new CommanderUtilsVfs.NoHiddenFilter();
+	    params.clipboardSaver = (area,model,appearance,fromIndex,toIndex,clipboard)->{
+		NullCheck.notNull(model, "model");
+		NullCheck.notNull(clipboard, "clipboard");
+		if (fromIndex < 0 || toIndex < 0)
+		    throw new IllegalArgumentException("fromIndex and toIndex may not be negative");
+		final int count = model.getItemCount();
+		if (fromIndex >= toIndex || fromIndex >= count || toIndex > count)
+		    return false;
+		final List<String> names = new ArrayList();
+		final List<Serializable> res = new ArrayList();
+		for(int i = fromIndex;i < toIndex;++i)
+		{
+		    final CommanderArea.NativeItem<FileObject> nativeObj = (CommanderArea.NativeItem<FileObject>)model.getItem(i);
+		    final FileObject fileObj = nativeObj.getNativeObj();
+		    names.add(nativeObj.getBaseName());
+		    final File file = asFile(fileObj);
+		    if (file != null)
+			res.add(file); else
+			res.add(fileObj.getName().getBaseName());
+		}
+		return clipboard.set(res.toArray(new Object[res.size()]), names.toArray(new String[names.size()]));
+	    };
+	    return params;
+	}
+	catch(org.apache.commons.vfs2.FileSystemException e)
+	{
+	    throw new RuntimeException(e);
+	}
     }
 }

@@ -135,7 +135,7 @@ final class App extends AppBase<Strings>
 
     @Override public AreaLayout getDefaultAreaLayout()
     {
-	return mainLayout.getLayout();
+	return mainLayout.getAreaLayout();
     }
 
     @Override public void closeApp()
@@ -169,7 +169,7 @@ final class App extends AppBase<Strings>
 	return new Layouts(){
 	    @Override public void main()
 	    {
-		getLayout().setBasicLayout(mainLayout.getLayout());
+		setAreaLayout(mainLayout);
 		getLuwrain().announceActiveArea();
 	    }
 	    @Override public void operations()

@@ -42,17 +42,15 @@ final class MainLayout extends LayoutBase
 
     MainLayout(App app)
     {
+	super(app);
 	NullCheck.notNull(app, "app");
 	this.app = app;
 	this.fileActions = new FileActions(app);
- 	this.leftPanel = new PanelArea(createPanelParams(), app.getLuwrain()) {
-		@Override public boolean onInputEvent(InputEvent event)
-		{
-		    NullCheck.notNull(event, "event");
-		    if (app.onInputEvent(this, event))
-			return true;
-		    return super.onInputEvent(event);
-		}
+
+	final CommanderArea.Params params = PanelArea.createParams(getControlContext());
+	params.clickHandler = this::onClick;
+
+ 	this.leftPanel = new PanelArea(params, getLuwrain()) {
 		@Override public boolean onSystemEvent(SystemEvent event)
 		{
 		    NullCheck.notNull(event, "event");
@@ -67,30 +65,11 @@ final class MainLayout extends LayoutBase
 			case PROPERTIES:
 			    return showFilesInfo(this);
 			}
-		    if (app.onSystemEvent(this, event, getPanelActions(Side.LEFT)))
-			return true;
 		    return super.onSystemEvent(event);
 		}
-		@Override public boolean onAreaQuery(AreaQuery query)
-		{
-		    NullCheck.notNull(query, "query");
-		    if (app.onAreaQuery(this, query))
-			return true;
-		    return super.onAreaQuery(query);
-		}
-		@Override public Action[] getAreaActions()
-		{
-		    return getPanelActions(Side.LEFT).getAreaActions();
-		}
 	    };
- 	this.rightPanel = new PanelArea(createPanelParams(), app.getLuwrain()) {
-		@Override public boolean onInputEvent(InputEvent event)
-		{
-		    NullCheck.notNull(event, "event");
-		    if (app.onInputEvent(this, event))
-			return true;
-		    return super.onInputEvent(event);
-		}
+
+ 	this.rightPanel = new PanelArea(params, getLuwrain()) {
 		@Override public boolean onSystemEvent(SystemEvent event)
 		{
 		    NullCheck.notNull(event, "event");
@@ -102,31 +81,22 @@ final class MainLayout extends LayoutBase
 			    return true;
 			case INTRODUCE:
 			    return announcePanel(Side.RIGHT);
-			    			case PROPERTIES:
+			case PROPERTIES:
 			    return showFilesInfo(this);
 			}
-		    if (app.onSystemEvent(this, event, getPanelActions(Side.RIGHT)))
-			return true;
 		    return super.onSystemEvent(event);
 		}
-		@Override public boolean onAreaQuery(AreaQuery query)
-		{
-		    NullCheck.notNull(query, "query");
-		    if (app.onAreaQuery(this, query))
-			return true;
-		    return super.onAreaQuery(query);
-		}
-		@Override public Action[] getAreaActions()
-		{
-		    return getPanelActions(Side.RIGHT).getAreaActions();
-		}
 	    };
+
 	leftPanel.setLoadingResultHandler((location, data, selectedIndex, announce)->{
 		app.getLuwrain().runUiSafely(()->leftPanel.acceptNewLocation(location, data, selectedIndex, announce));
 	    });
 	rightPanel.setLoadingResultHandler((location, data, selectedIndex, announce)->{
 		app.getLuwrain().runUiSafely(()->rightPanel.acceptNewLocation(location, data, selectedIndex, announce));
 	    });
+
+	setAreaLayout(AreaLayout.LEFT_RIGHT, leftPanel, getPanelActions(Side.LEFT), rightPanel, getPanelActions(Side.RIGHT));
+
 	if (app.startFrom != null)
 	{
 	    leftPanel.openInitial(app.startFrom);
@@ -202,7 +172,6 @@ final class MainLayout extends LayoutBase
 	}
     }
 
-
     private boolean actLocalMkdir(PanelArea panelArea)
     {
 	NullCheck.notNull(panelArea, "panelArea");
@@ -254,7 +223,7 @@ final class MainLayout extends LayoutBase
     {
 	NullCheck.notNull(panelArea, "panelArea");
 
-		    final FilesInfoLayout info = new FilesInfoLayout(app, new File[0], ()->app.layout(getLayout(), panelArea));
+		    final FilesInfoLayout info = new FilesInfoLayout(app, new File[0], ()->app.layout(getAreaLayout(), panelArea));
 	    app.layout(info.getLayout());
 	    return true;
 
@@ -339,23 +308,4 @@ final class MainLayout extends LayoutBase
 	*/
 	return true;
     }
-
-        private CommanderArea.Params createPanelParams()
-    {
-	try {
-	final CommanderArea.Params params = PanelArea.createParams(app.getLuwrain());
-	params.clickHandler = this::onClick;
-		return params;
-	}
-	catch(Exception e)
-	{
-	    throw new RuntimeException(e);
-	}
-	    }
-
-	AreaLayout getLayout()
-	{
-	    return new AreaLayout(AreaLayout.LEFT_RIGHT, leftPanel, rightPanel);
-	}
-
 	}
