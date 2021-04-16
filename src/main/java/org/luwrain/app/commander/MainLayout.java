@@ -125,7 +125,8 @@ final class MainLayout extends LayoutBase
 	}
 	return actions(
 		       action("copy", app.getStrings().actionCopy(), new InputEvent(InputEvent.Special.F5), ()->fileActions.localCopy(panelArea, oppositePanelArea)),
-		       action("mkdir", app.getStrings().actionMkdir(), new InputEvent(InputEvent.Special.F7), ()->actLocalMkdir(panelArea)),
+		       		       action("move", app.getStrings().actionMove(), new InputEvent(InputEvent.Special.F6), ()->fileActions.localMove(panelArea, oppositePanelArea)),
+		       action("mkdir", app.getStrings().actionMkdir(), new InputEvent(InputEvent.Special.F7), ()->fileActions.localMkdir(panelArea)),
 		       action("left-panel-volume", app.getStrings().leftPanelVolume(), new InputEvent(InputEvent.Special.F1, EnumSet.of(InputEvent.Modifiers.ALT)), ()->actPanelVolume(leftPanel)),
 		       action("right-panel-volume", app.getStrings().rightPanelVolume(), new InputEvent(InputEvent.Special.F2, EnumSet.of(InputEvent.Modifiers.ALT)), ()->actPanelVolume(rightPanel)),
 		       action("zip", app.getStrings().actionZip(), ()->fileActions.zipCompress(panelArea)),
@@ -170,46 +171,6 @@ final class MainLayout extends LayoutBase
 	    app.getLuwrain().crash(e);
 	    return PanelArea.ClickHandler.Result.REJECTED;
 	}
-    }
-
-    private boolean actLocalMkdir(PanelArea panelArea)
-    {
-	NullCheck.notNull(panelArea, "panelArea");
-	if (!panelArea.isLocalDir())
-	    return false;
-	final File createIn = PanelArea.asFile(panelArea.opened());
-	if (createIn == null || !createIn.isAbsolute())
-	    return false;
-	final File newDir = app.getConv().mkdirPopup(createIn);
-	if (newDir == null)
-	    return true;
-	try {
-	    java.nio.file.Files.createDirectories(newDir.toPath());
-	}
-	catch (IOException e)
-	{
-	    app.getLuwrain().crash(e);
-	    return true;
-	}
-	app.getLuwrain().message(app.getStrings().mkdirOkMessage(newDir.getName()), Luwrain.MessageType.OK);
-	panelArea.reread(newDir.getName(), false);
-	return true;
-    }
-
-    boolean onLocalDelete(PanelArea area, OperationListener listener)
-    {
-	NullCheck.notNull(area, "area");
-	NullCheck.notNull(listener, "listener");
-	if (!area.isLocalDir())
-	    return false;
-	final File[] files = PanelArea.asFile(area.getToProcess());
-	if (files.length == 0)
-	    return false;
-	if (!app.getConv().deleteConfirmation(files))
-	    return true;
-	final String opName = app.getStrings().delOperationName(files);
-	//app.launch(app.getLuwrain().getFilesOperations().delete(listener, opName, files));
-	return true;
     }
 
     private boolean actPanelVolume(PanelArea panelArea)

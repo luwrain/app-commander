@@ -35,7 +35,7 @@ final class Conversations
 	this.strings = app.getStrings();
     }
 
-    Path copyPopup(Path copyFromDir, Path[] filesToCopy, Path copyTo)
+    Path copy(Path copyFromDir, Path[] filesToCopy, Path copyTo)
     {
 	NullCheck.notNull(copyFromDir, "copyFromDir");
 	NullCheck.notNullItems(filesToCopy, "filesToCopy");
@@ -47,8 +47,7 @@ final class Conversations
 	return popup.result().toPath();
     }
 
-    /*
-    File movePopup(File moveFromDir, File[] filesToMove, File moveTo)
+    Path move(Path  moveFromDir, Path[] filesToMove, Path moveTo)
     {
 	NullCheck.notNull(moveFromDir, "moveFromDir");
 	NullCheck.notNullItems(filesToMove, "filesToMove");
@@ -57,9 +56,8 @@ final class Conversations
 	luwrain.popup(popup);
 	if (popup.wasCancelled())
 	    return null;
-	return popup.result();
+	return popup.result().toPath();
     }
-    */
 
     File mkdirPopup(File createIn)
     {
