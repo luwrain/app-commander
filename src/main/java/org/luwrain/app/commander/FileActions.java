@@ -31,7 +31,7 @@ final class FileActions extends OperationsNames
     FileActions(App app)
     {
 	super(app);
-	    }
+    }
 
     boolean size(PanelArea panelArea)
     {
@@ -58,7 +58,7 @@ final class FileActions extends OperationsNames
     {
 	NullCheck.notNull(fileObj, "fileObj");
 	if (fileObj.getType().hasChildren())
-	return getSize(fileObj.getChildren());
+	    return getSize(fileObj.getChildren());
 	if (fileObj.isFile() && !fileObj.isSymbolicLink())
     	    return fileObj.getContent().getSize();
 	return 0;
@@ -91,11 +91,9 @@ final class FileActions extends OperationsNames
 	final Path dest = app.getConv().copy(copyFromDir, filesToCopy, copyToDir);
 	if (dest == null)
 	    return true;
-	/*
 	final String name = copyOperationName(filesToCopy, dest);
-	final Copy copy = new Copy(app.createOperationListener(), name, null, null);
-	app.operations.add(0, copy);
-	*/
+	final Copy copy = new Copy(app.createOperationListener(), name, filesToCopy, dest);
+	app.runOperation(copy);
 	return true;
     }
 
@@ -144,7 +142,7 @@ final class FileActions extends OperationsNames
 	return true;
     }
 
-        boolean localDelete(PanelArea area, OperationListener listener)
+    boolean localDelete(PanelArea area, OperationListener listener)
     {
 	NullCheck.notNull(area, "area");
 	NullCheck.notNull(listener, "listener");
@@ -159,11 +157,6 @@ final class FileActions extends OperationsNames
 	//app.launch(app.getLuwrain().getFilesOperations().delete(listener, opName, files));
 	return true;
     }
-
-
-
-
-
 
     boolean zipCompress(PanelArea panelArea)
     {

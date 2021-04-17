@@ -46,13 +46,13 @@ class OperationsAppearance implements ListArea.Appearance
 	final Operation op = (Operation)item;
 	if (op.isFinished())
 	{
-	    app.getLuwrain().speak(app.getOperationResultDescr(op) + " " + op.getOperationName());
+	    app.getLuwrain().speak(app.getOperationResultDescr(op) + " " + op.name);
 	    return;
 	}
 	final int percents = op.getPercent();
 	if (percents > 0)
-	    luwrain.speak("" + luwrain.i18n().getNumberStr(percents, "percents") + " " + op.getOperationName()); else
-	    luwrain.speak(op.getOperationName());
+	    luwrain.speak("" + luwrain.i18n().getNumberStr(percents, "percents") + " " + op.name); else
+	    luwrain.speak(op.name);
 
 
     }
@@ -66,8 +66,8 @@ class OperationsAppearance implements ListArea.Appearance
 	    return app.getOperationResultDescr(op);
 	final int percent = op.getPercent();
 	if (percent == 0)
-	    return op.getOperationName() + "...";
-	return  percent + "%: "+ op.getOperationName();
+	    return op.name + "...";
+	return  percent + "%: "+ op.name;
     }
 
     @Override public int getObservableLeftBound(Object item)

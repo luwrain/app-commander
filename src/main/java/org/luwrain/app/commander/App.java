@@ -62,6 +62,13 @@ final class App extends AppBase<Strings>
 	return true;
     }
 
+    void runOperation(Operation op)
+    {
+	NullCheck.notNull(op, "op");
+	this.operations.add(0, op);
+	getLuwrain().executeBkg(new FutureTask(op, null));
+    }
+
     boolean allOperationsFinished()
     {
 	for(Operation op:operations)

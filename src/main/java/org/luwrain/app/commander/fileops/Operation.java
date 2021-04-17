@@ -81,11 +81,6 @@ public abstract class Operation implements Runnable
 	interrupted = true;
     }
 
-    public String getOperationName()
-    {
-	return name;
-    }
-
     public boolean isFinished()
     {
 	return finished;
