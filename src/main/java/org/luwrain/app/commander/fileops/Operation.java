@@ -26,6 +26,11 @@ import org.luwrain.app.commander.*;
 
 public abstract class Operation implements Runnable
 {
+    static public final String
+	INTERRUPTED = "LWR_INTERRUPTED",
+	MOVE_DEST_NOT_DIR = "LWR_MOVE_DEST_NOT_DIR";
+
+    
     public enum ConfirmationChoices {
 	OVERWRITE,
 	SKIP,
@@ -36,8 +41,8 @@ public abstract class Operation implements Runnable
     private final String name;
 
     private boolean finished = false;
+    private Exception ex = null;
     private boolean finishingAccepted = false ;
-    private Result result = new Result();
     protected boolean interrupted = false;
 
     Operation(OperationListener listener, String name)
@@ -48,19 +53,20 @@ public abstract class Operation implements Runnable
 	this.name = name;
     }
 
-    protected abstract Result work() throws IOException;
+    protected abstract void work() throws IOException;
     public abstract int getPercent();
 
     public void run()
     {
+	this.ex = null;
 	try {
 	    try {
-		result = work();
+		work();
 	    }
 	    catch (Exception e)
 	    {
-		Log.error("fileops", name + ":" + e.getClass().getName() + ":" + e.getMessage());
-		result = new Result(Result.Type.EXCEPTION, e);
+		Log.error("fileops", name + ":" + e.getClass().getName() + ": " + e.getMessage());
+		this.ex = e;
 	    }
 	}
 	finally {
@@ -84,17 +90,17 @@ public abstract class Operation implements Runnable
 	return finished;
     }
 
-    public Result getResult()
-    {
-	return result;
-    }
-
     public boolean finishingAccepted()
     {
 	if (finishingAccepted)
 	    return true;
 	finishingAccepted = true;
 	return false;
+    }
+
+    public Exception getException()
+    {
+	return this.ex;
     }
 
     static protected boolean isDirectory(Path path, boolean followSymlinks) throws IOException
@@ -131,23 +137,20 @@ public abstract class Operation implements Runnable
 		return Files.exists(path, LinkOption.NOFOLLOW_LINKS);
     }
 
-    protected Result deleteFileOrDir(Path p) throws IOException
+    protected void deleteFileOrDir(Path p) throws IOException
     {
 	NullCheck.notNull(p, "p");
 	if (interrupted)
-	    return new Result(Result.Type.INTERRUPTED);
+	    throw new IOException("INTERRUPTED");
 	if (isDirectory(p, false))
 	{
 	    final Path[] content = getDirContent(p);
 	    for(Path pp: content)
 	    {
-		final Result res = deleteFileOrDir(pp);
-		if (res.getType() != Result.Type.OK)
-		    return res;
+		deleteFileOrDir(pp);
 	    }
 	}
 	Files.delete(p);
-	return new Result();
     }
 
     protected void status(String message)

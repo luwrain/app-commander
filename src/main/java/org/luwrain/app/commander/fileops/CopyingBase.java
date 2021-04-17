@@ -40,7 +40,7 @@ abstract class CopyingBase extends Operation
 	return percent;
     }
 
-    protected Result copy(Path[] toCopy, Path dest) throws IOException
+    protected void copy(Path[] toCopy, Path dest) throws IOException
     {
 	NullCheck.notNullItems(toCopy, "toCopy");
 	NullCheck.notEmptyArray(toCopy, "toCopy");
@@ -68,18 +68,18 @@ abstract class CopyingBase extends Operation
 	    if (d.startsWith(path))
 		throw new IOException("SOURCE_IS_A_PARENT_OF_THE_DEST");
 	if (toCopy.length == 1)
-	    return singleSource(toCopy[0], d); else
-	    return multipleSource(toCopy, d);
+	    singleSource(toCopy[0], d); else
+	    multipleSource(toCopy, d);
     }
 
-    private Result singleSource(Path fileFrom, Path dest) throws IOException
+    private void singleSource(Path fileFrom, Path dest) throws IOException
     {
 	status("single source mode:copying " + fileFrom + " to " + dest);
 	// The destination directory already exists, just copying whatever fileFrom is
 	if (isDirectory(dest, true))
 	{
 	    status("" + dest + " exists and is a directory (or a symlink to a directory)");
-	    return copyRecurse(new Path[]{fileFrom}, dest);
+	    copyRecurse(new Path[]{fileFrom}, dest);
 	}
 	// The destination isn't a directory, maybe even doesn't exist
 	if (isDirectory(fileFrom, false))
@@ -91,22 +91,21 @@ abstract class CopyingBase extends Operation
 		switch(confirmOverwrite(dest))
 		{
 		case SKIP:
-		    return new Result();
+		    return;
 		case CANCEL:
-		    return new Result(Result.Type.INTERRUPTED);
+		    throw new IOException("INTERRUPTED");
 		}
 		status("deleting previously existing " + dest.toString());
 		Files.delete(dest);
 	    }
 	    Files.createDirectories(dest);
 	    //Copying the content of fileFrom to the newly created directory dest
-	    return copyRecurse(getDirContent(fileFrom), dest);
+	    copyRecurse(getDirContent(fileFrom), dest);
 	}
 	// We sure that fileFrom and dest aren't directories, but dest may exist
 	if (!Files.isSymbolicLink(fileFrom) && !isRegularFile(fileFrom, false))
 	{
 	    status("" + fileFrom + "is not a symlink and is not a regular file, nothing to do");
-	    return new Result();//Silently do nothing
 	}
 	status("" + fileFrom + " is a symlink or a regular file");
 	if (exists(dest, false))
@@ -115,18 +114,18 @@ abstract class CopyingBase extends Operation
 	    switch(confirmOverwrite(dest))
 	    {
 	    case SKIP:
-		return new Result();
+		return;
 	    case CANCEL:
-		return new Result(Result.Type.INTERRUPTED);
+		throw new IOException("INTERRUPTED");
 	    }
 	    Files.delete(dest);
 	}
 	if (dest.getParent() != null)
 	    Files.createDirectories(dest.getParent());
-	return copySingleFile(fileFrom, dest);//This takes care if fromFile is a symlink
+	copySingleFile(fileFrom, dest);//This takes care if fromFile is a symlink
     }
 
-    private Result multipleSource(Path[] toCopy, Path dest) throws IOException
+    private void multipleSource(Path[] toCopy, Path dest) throws IOException
     {
 	status("multiple source mode");
 	if (exists(dest, false) && !isDirectory(dest, true))
@@ -135,19 +134,19 @@ abstract class CopyingBase extends Operation
 	    switch(confirmOverwrite(dest))
 	    {
 	    case SKIP:
-		return new Result();
+		return;
 	    case CANCEL:
-		return new Result(Result.Type.INTERRUPTED);
+		throw new IOException(INTERRUPTED);
 	    }
 	    status("deleting previously existing " + dest.toString());
 	    Files.delete(dest);
 	}
 	if (!exists(dest, false))//just for the case dest is a symlink to a directory
 	    Files.createDirectories(dest);
-	return copyRecurse(toCopy, dest);
+	copyRecurse(toCopy, dest);
     }
 
-    private Result copyRecurse(Path[] filesFrom, Path fileTo) throws IOException
+    private void copyRecurse(Path[] filesFrom, Path fileTo) throws IOException
     {
 	NullCheck.notNullItems(filesFrom, "filesFrom");
 	NullCheck.notNull(fileTo, "fileTo");
@@ -158,9 +157,7 @@ abstract class CopyingBase extends Operation
 	    if (!isDirectory(f, false))
 	    {
 		status("" + f.toString() + " is not a directory, copying it");
-		final Result res = copyFileToDir(f, fileTo);
-		if (res.getType() != Result.Type.OK)
-		    return res;
+		copyFileToDir(f, fileTo);
 		continue;
 	    }
 	    status("" + f.toString() + " is a directory");
@@ -174,7 +171,7 @@ abstract class CopyingBase extends Operation
 		case SKIP:
 		    continue;
 		case CANCEL:
-		    return new Result(Result.Type.INTERRUPTED);
+		    throw new IOException("INTERRUPTED");
 		}
 		status("deleting previously existing " + newDest.toString());
 		Files.delete(newDest);
@@ -182,21 +179,18 @@ abstract class CopyingBase extends Operation
 	    if (!exists(newDest, false))//just for the case newDest  is a symlink to a directory
 		Files.createDirectories(newDest);
 	    status("" + newDest + " prepared");
-	    final Result res = copyRecurse(getDirContent(f), newDest);
-	    if (res.getType() != Result.Type.OK)
-		return res;
+	    copyRecurse(getDirContent(f), newDest);
 	}
-	return new Result();
     }
 
-    private Result copyFileToDir(Path file, Path destDir) throws IOException
+    private void copyFileToDir(Path file, Path destDir) throws IOException
     {
 	NullCheck.notNull(file, "file");
 	NullCheck.notNull(destDir, "destDir");
-	return copySingleFile(file, destDir.resolve(file.getFileName()));
+	copySingleFile(file, destDir.resolve(file.getFileName()));
     }
 
-    private Result copySingleFile(Path fromFile, Path toFile) throws IOException
+    private void copySingleFile(Path fromFile, Path toFile) throws IOException
     {
 	NullCheck.notNull(fromFile, "fromFile");
 	NullCheck.notNull(toFile, "toFile");
@@ -206,16 +200,16 @@ abstract class CopyingBase extends Operation
 	    switch(confirmOverwrite(toFile))
 	    {
 	    case SKIP:
-		return new Result();
+		return;
 	    case CANCEL:
-		return new Result(Result.Type.INTERRUPTED);
+		throw new IOException(INTERRUPTED);
 	    }
 	    Files.delete(toFile);
 	} // toFile exists
 	if (Files.isSymbolicLink(fromFile))
 	{
 	    Files.createSymbolicLink(toFile, Files.readSymbolicLink(fromFile));
-	    return new Result();
+	    return;
 	}
 	try (final InputStream in = Files.newInputStream(fromFile)) {
 	    try (final OutputStream out = Files.newOutputStream(toFile)) {
@@ -224,10 +218,9 @@ abstract class CopyingBase extends Operation
 					 ()->{ return interrupted; });
 		out.flush();
 		if (interrupted)
-		    return new Result(Result.Type.INTERRUPTED);
+		    throw new IOException("INTERRUPTED");
 	    }
 	}
-    	return new Result();
     }
 
     private void onNewChunk(int bytes)

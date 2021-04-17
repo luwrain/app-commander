@@ -34,7 +34,6 @@ public class CopyTest extends Assert
 	final File destDir = createTestDir("dest");
 	final Copy copyOp = new Copy(listener, "test", new Path[]{srcFile.toPath()}, destDir.toPath());
 	copyOp.run();
-	assertTrue(copyOp.getResult().isOk());
 	assertEquals(TestingBase.calcSha1(srcFile), TestingBase.calcSha1(new File(destDir, "testfile")));
     }
 
@@ -45,7 +44,6 @@ public class CopyTest extends Assert
 	final File destFile = new File(destDir, "destfile");
 	final Copy copyOp = new Copy(listener, "test", new Path[]{srcFile.toPath()}, destFile.toPath());
 	copyOp.run();
-	assertTrue(copyOp.getResult().isOk());
 	assertEquals(TestingBase.calcSha1(srcFile), TestingBase.calcSha1(destFile));
     }
 
@@ -58,7 +56,6 @@ public class CopyTest extends Assert
 	final File destFile = new File(nonExistingDir, fileName);
 	final Copy copyOp = new Copy(new DummyListener(), "test", new Path[]{srcFile.toPath()}, destFile.toPath());
 	copyOp.run();
-	assertTrue(copyOp.getResult().isOk());
 	assertTrue(TestingBase.calcSha1(srcFile).equals(TestingBase.calcSha1(destFile)));
     }
 
@@ -71,7 +68,6 @@ public class CopyTest extends Assert
 	final File destDir = createTestDir("dest");
 	final Copy copyOp = new Copy(new DummyListener(), "test", new Path[]{srcFile1.toPath(), srcFile2.toPath()}, destDir.toPath());
 	copyOp.run();
-	assertTrue(copyOp.getResult().isOk());
 	assertTrue(TestingBase.calcSha1(srcFile1).equals(TestingBase.calcSha1(new File(destDir, fileName1))));
 	assertTrue(TestingBase.calcSha1(srcFile2).equals(TestingBase.calcSha1(new File(destDir, fileName2))));
     }
@@ -87,7 +83,6 @@ public class CopyTest extends Assert
 	final File nonExistingPlace2 = new File(nonExistingPlace1, "non-existing2");
 	final Copy copyOp = new Copy(new DummyListener(), "test", new Path[]{srcFile1.toPath(), srcFile2.toPath()}, nonExistingPlace2.toPath());
 	copyOp.run();
-	assertTrue(copyOp.getResult().isOk());
 	assertTrue(TestingBase.calcSha1(srcFile1).equals(TestingBase.calcSha1(new File(nonExistingPlace2, fileName1))));
 	assertTrue(TestingBase.calcSha1(srcFile2).equals(TestingBase.calcSha1(new File(nonExistingPlace2, fileName2))));
     }

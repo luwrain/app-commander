@@ -38,15 +38,12 @@ class Delete extends Operation
 		throw new IllegalArgumentException("toDelete[" + i + "] must be absolute");
     }
 
-    @Override protected Result work() throws IOException
+    @Override protected void work() throws IOException
     {
 	for(Path p: toDelete)
 	{
-	    final Result res = deleteFileOrDir(p);
-	    if (res.getType() != Result.Type.OK)
-		return res;
+	    deleteFileOrDir(p);
 	}
-	return new Result();
     }
 
     public int getPercent()

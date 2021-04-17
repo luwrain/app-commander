@@ -116,7 +116,7 @@ final class App extends AppBase<Strings>
 			operationsLayout.operationsArea.redraw();
 			if (operation.isFinished())
 			{
-			    if (operation.getResult().getType() == Result.Type.OK)
+			    if (operation.getException() == null)
 				getLuwrain().playSound(Sounds.DONE);
 			    mainLayout.leftPanel.refresh();
 			    mainLayout.rightPanel.refresh();

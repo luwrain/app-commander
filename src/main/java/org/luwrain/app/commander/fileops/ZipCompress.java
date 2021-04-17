@@ -41,7 +41,7 @@ public final class ZipCompress extends Operation
 	this.zipFile = zipFile;
     }
 
-    @Override protected Result work() throws IOException
+    @Override protected void work() throws IOException
     {
 	try (final OutputStream os = Files.newOutputStream(zipFile)) {
 	    try(final ZipOutputStream zip = new ZipOutputStream(os)) {
@@ -50,7 +50,6 @@ public final class ZipCompress extends Operation
 		    add(p);
 	    }
 	}
-	return new Result();
     }
 
     private void add(Path path) throws IOException

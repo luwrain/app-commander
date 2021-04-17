@@ -38,8 +38,8 @@ public final class Copy extends CopyingBase
 	this.copyTo = copyTo;
     }
 
-    @Override protected Result work() throws IOException
+    @Override protected void work() throws IOException
     {
-	return copy(copyFrom, copyTo);
+	copy(copyFrom, copyTo);
     }
 }

@@ -38,7 +38,7 @@ class Move extends CopyingBase
 	this.moveTo = moveTo;
     }
 
-    @Override protected Result work() throws IOException
+    @Override protected void work() throws IOException
     {
 	Path dest = moveTo;
 	if (!dest.isAbsolute())
@@ -49,22 +49,25 @@ class Move extends CopyingBase
 	}
 	for(Path path: toMove)
 	    if (dest.startsWith(path))
-		return new Result(Result.Type.SOURCE_PARENT_OF_DEST);
+		throw new IOException(INTERRUPTED);
 	if (toMove.length > 1)
-	    return multipleSource(dest);
-	return singleSource(dest);
+	    multipleSource(dest); else
+singleSource(dest);
     }
 
-	private Result multipleSource(Path dest) throws IOException
+	private void multipleSource(Path dest) throws IOException
 	{
 	    NullCheck.notNull(dest, "dest");
 	    //dest should be a directory (trying to implement the same behaviour as by 'mv' utility in Linux)
 	    if (!isDirectory(dest, true))
-		return new Result(Result.Type.MOVE_DEST_NOT_DIR);
+		throw new IOException(MOVE_DEST_NOT_DIR);
 	    //All paths must belong to the same partition
 	    for(Path p: toMove)
 		if (!Files.getFileStore(p).equals(Files.getFileStore(dest)))
-		    return movingThroughCopying();
+		{
+		    movingThroughCopying();
+		    return;
+		}
 	    //Do actual moving
 	    for(Path p: toMove)
 	    {
@@ -76,16 +79,15 @@ class Move extends CopyingBase
 		    case SKIP:
 			continue;
 		    case CANCEL:
-			return new Result(Result.Type.INTERRUPTED);
+			throw new IOException(INTERRUPTED);
 		    }
 		    Files.delete(d);
 		} //if exists
 		Files.move(p, d, StandardCopyOption.ATOMIC_MOVE);
 	    }
-	    return new Result();
 	}
 
-    private Result singleSource(Path dest) throws IOException
+    private void singleSource(Path dest) throws IOException
     {
 	NullCheck.notNull(dest, "dest");
 	final Path d;
@@ -97,9 +99,9 @@ class Move extends CopyingBase
 	    switch(confirmOverwrite(d))
 	    {
 	    case SKIP:
-		return new Result();
+		return;
 	    case CANCEL:
-		return new Result(Result.Type.INTERRUPTED);
+		throw new IOException(INTERRUPTED);
 	    }
 	    Files.delete(d);
 	}
@@ -110,26 +112,20 @@ class Move extends CopyingBase
 	catch(java.nio.file.AtomicMoveNotSupportedException e)
 	{
 	    status("singleSource:atomic move failed, launching moving through copying");
-	    return movingThroughCopying();
+	    movingThroughCopying();
+	    return;
 	}
-	return new Result();
     }
 
-    private Result movingThroughCopying() throws IOException
+    private void movingThroughCopying() throws IOException
     {
 	status("performing moving through copying to " + moveTo.toString());
-	final Result res = copy(toMove, moveTo);
-	status("copying result is " + res.toString());
-	if (res.getType() != Result.Type.OK)
-	    return res;
+	copy(toMove, moveTo);
 	status("deleting source files");
 	for(Path p: toMove)
 	{
 	    status("deleting " + p.toString());
-	    final Result delRes = deleteFileOrDir(p);
-	    if (delRes.getType() != Result.Type.OK)
-		return delRes;
+	    deleteFileOrDir(p);
 	}
-	return new Result();
     }
 }

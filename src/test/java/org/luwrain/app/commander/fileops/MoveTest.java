@@ -33,7 +33,6 @@ public class MoveTest extends Assert
 	final File destDir = createDestDir();
 	final Move moveOp = new Move(new DummyListener(), "test", new Path[]{srcFile.toPath()}, destDir.toPath());
 	moveOp.run();
-	assertTrue(moveOp.getResult().isOk());
 	assertTrue(srcSha1.equals(TestingBase.calcSha1(new File(destDir, fileName))));
 	assertFalse(srcFile.exists());
     }
@@ -47,7 +46,6 @@ public class MoveTest extends Assert
 	final File destFile = new File(destDir, fileName);
 	final Move moveOp = new Move(new DummyListener(), "test", new Path[]{srcFile.toPath()}, destFile.toPath());
 	moveOp.run();
-	assertTrue(moveOp.getResult().isOk());
 	assertTrue(srcSha1.equals(TestingBase.calcSha1(destFile)));
 	assertFalse(srcFile.exists());
     }
@@ -78,7 +76,6 @@ public class MoveTest extends Assert
 	final File destDir = createDestDir();
 	final Move moveOp = new Move(new DummyListener(), "test", new Path[]{srcFile1.toPath(), srcFile2.toPath()}, destDir.toPath());
 	moveOp.run();
-	assertTrue(moveOp.getResult().isOk());
 	assertTrue(src1Sha1.equals(TestingBase.calcSha1(new File(destDir, fileName1))));
 	assertTrue(src2Sha1.equals(TestingBase.calcSha1(new File(destDir, fileName2))));
 	assertFalse(srcFile1.exists());
