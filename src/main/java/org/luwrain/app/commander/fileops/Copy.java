@@ -34,7 +34,7 @@ public final class Copy extends CopyingBase
 	NullCheck.notNullItems(copyFrom, "copyFrom");
 	NullCheck.notEmptyArray(copyFrom, "copyFrom");
 	NullCheck.notNull(copyTo, "copyTo");
-	this.copyFrom = copyFrom;
+	this.copyFrom = copyFrom.clone();
 	this.copyTo = copyTo;
     }
 

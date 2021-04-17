@@ -25,34 +25,35 @@ import org.luwrain.core.*;
 
 public class CopyTest extends Assert
 {
-    @Ignore @Test public void singleFileToEmptyDir() throws Exception
+    private final OperationListener listener = new DummyListener();
+    private File testDir = null;
+
+    @Test public void singleFileToExistingDir() throws Exception
     {
-	final String fileName = "testing.dat";
-	final File srcFile = createSingleTestingFile(fileName, 5123456);
-	final File destDir = createDestDir();
-	final Copy copyOp = new Copy(new DummyListener(), "test", new Path[]{srcFile.toPath()}, destDir.toPath());
+	final File srcFile = createTestFile("testfile", 1234);
+	final File destDir = createTestDir("dest");
+	final Copy copyOp = new Copy(listener, "test", new Path[]{srcFile.toPath()}, destDir.toPath());
 	copyOp.run();
 	assertTrue(copyOp.getResult().isOk());
-	assertTrue(TestingBase.calcSha1(srcFile).equals(TestingBase.calcSha1(new File(destDir, fileName))));
+	assertEquals(TestingBase.calcSha1(srcFile), TestingBase.calcSha1(new File(destDir, "testfile")));
     }
 
-    @Ignore @Test public void singleFileToNonExistingPlace() throws Exception
+    @Test public void singleFileToNonExistingPlace() throws Exception
     {
-	final String fileName = "testing.dat";
-	final File srcFile = createSingleTestingFile(fileName, 5123456);
-	final File destDir = createDestDir();
-	final File destFile = new File(destDir, fileName);
-	final Copy copyOp = new Copy(new DummyListener(), "test", new Path[]{srcFile.toPath()}, destFile.toPath());
+	final File srcFile = createTestFile("testfile", 12345);
+	final File destDir = createTestDir("dest");
+	final File destFile = new File(destDir, "destfile");
+	final Copy copyOp = new Copy(listener, "test", new Path[]{srcFile.toPath()}, destFile.toPath());
 	copyOp.run();
 	assertTrue(copyOp.getResult().isOk());
-	assertTrue(TestingBase.calcSha1(srcFile).equals(TestingBase.calcSha1(destFile)));
+	assertEquals(TestingBase.calcSha1(srcFile), TestingBase.calcSha1(destFile));
     }
 
     @Ignore @Test public void singleFileToNonExistingPlaceInNonExistingDir() throws Exception
     {
 	final String fileName = "testing.dat";
-	final File srcFile = createSingleTestingFile(fileName, 5123456);
-	final File destDir = createDestDir();
+	final File srcFile = createTestFile(fileName, 5123456);
+	final File destDir = createTestDir("dest");
 	final File nonExistingDir = new File(destDir, "non-existing");
 	final File destFile = new File(nonExistingDir, fileName);
 	final Copy copyOp = new Copy(new DummyListener(), "test", new Path[]{srcFile.toPath()}, destFile.toPath());
@@ -65,9 +66,9 @@ public class CopyTest extends Assert
     {
 	final String fileName1 = "testing1.dat";
 	final String fileName2 = "testing2.dat";
-	final File srcFile1 = createSingleTestingFile(fileName1, 5123456);
-	final File srcFile2 = createSingleTestingFile(fileName2, 5123456);
-	final File destDir = createDestDir();
+	final File srcFile1 = createTestFile(fileName1, 5123456);
+	final File srcFile2 = createTestFile(fileName2, 5123456);
+	final File destDir = createTestDir("dest");
 	final Copy copyOp = new Copy(new DummyListener(), "test", new Path[]{srcFile1.toPath(), srcFile2.toPath()}, destDir.toPath());
 	copyOp.run();
 	assertTrue(copyOp.getResult().isOk());
@@ -79,9 +80,9 @@ public class CopyTest extends Assert
     {
 	final String fileName1 = "testing1.dat";
 	final String fileName2 = "testing2.dat";
-	final File srcFile1 = createSingleTestingFile(fileName1, 5123456);
-	final File srcFile2 = createSingleTestingFile(fileName2, 5123456);
-	final File destDir = createDestDir();
+	final File srcFile1 = createTestFile(fileName1, 5123456);
+	final File srcFile2 = createTestFile(fileName2, 5123456);
+	final File destDir = createTestDir("dest");
 	final File nonExistingPlace1 = new File(destDir, "non-existing1");
 	final File nonExistingPlace2 = new File(nonExistingPlace1, "non-existing2");
 	final Copy copyOp = new Copy(new DummyListener(), "test", new Path[]{srcFile1.toPath(), srcFile2.toPath()}, nonExistingPlace2.toPath());
@@ -98,22 +99,27 @@ public class CopyTest extends Assert
     //FIXME:symlinks
     //FIXME:non existing dest, must be an error
 
-    private File createSingleTestingFile(String fileName, int len) throws IOException
+    private File createTestFile(String name, int len) throws IOException
     {
-	TestingBase.TMP_DIR.mkdir();
-	final File srcDir = new File(TestingBase.TMP_DIR, "src");
-	srcDir.mkdir();
-	final File file = new File(srcDir, fileName);
+	assertNotNull(testDir);
+	final File file = new File(testDir, name);
 	final TestingBase base = new TestingBase();
 	base.writeRandFile(file, len);
 	return file;
     }
 
-    private File createDestDir() throws IOException
+    private File createTestDir(String name) throws IOException
     {
-	TestingBase.TMP_DIR.mkdir();
-	final File destDir = new File(TestingBase.TMP_DIR, "dest");
-	destDir.mkdir();
-	return destDir;
+	assertNotNull(testDir);
+	final File dir = new File(testDir, name);
+	dir.mkdir();
+	return dir;
+    }
+
+    @Before public void createTestDir() throws IOException
+    {
+	testDir = File.createTempFile(".lwr-junit-commander-fileops-", "");
+	testDir.delete();
+	testDir.mkdir();
     }
 }

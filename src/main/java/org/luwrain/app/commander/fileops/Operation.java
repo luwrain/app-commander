@@ -59,7 +59,7 @@ public abstract class Operation implements Runnable
 	    }
 	    catch (Exception e)
 	    {
-		Log.error("linux", name + ":" + e.getClass().getName() + ":" + e.getMessage());
+		Log.error("fileops", name + ":" + e.getClass().getName() + ":" + e.getMessage());
 		result = new Result(Result.Type.EXCEPTION, e);
 	    }
 	}
@@ -152,7 +152,7 @@ public abstract class Operation implements Runnable
 
     protected void status(String message)
     {
-	Log.debug("linux", message);
+	Log.debug("fileops", message);
     }
 
     protected ConfirmationChoices confirmOverwrite(Path path)

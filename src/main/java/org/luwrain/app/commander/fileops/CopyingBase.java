@@ -40,7 +40,6 @@ abstract class CopyingBase extends Operation
 	return percent;
     }
 
-
     protected Result copy(Path[] toCopy, Path dest) throws IOException
     {
 	NullCheck.notNullItems(toCopy, "toCopy");
@@ -49,7 +48,7 @@ abstract class CopyingBase extends Operation
 	for(Path p: toCopy)
 	    if (!p.isAbsolute())
 		throw new IllegalArgumentException("Paths of all source files must be absolute");
-	//Calculating total size of source files
+	// Calculating the total size of the source files
 	totalBytes = 0;
 	for(Path f: toCopy)
 	{
@@ -67,7 +66,7 @@ abstract class CopyingBase extends Operation
 	}
 	for(Path path: toCopy)
 	    if (d.startsWith(path))
-		return new Result(Result.Type.SOURCE_PARENT_OF_DEST);
+		throw new IOException("SOURCE_IS_A_PARENT_OF_THE_DEST");
 	if (toCopy.length == 1)
 	    return singleSource(toCopy[0], d); else
 	    return multipleSource(toCopy, d);
@@ -76,16 +75,16 @@ abstract class CopyingBase extends Operation
     private Result singleSource(Path fileFrom, Path dest) throws IOException
     {
 	status("single source mode:copying " + fileFrom + " to " + dest);
-	//The destination directory already exists, just copying whatever fileFrom is
+	// The destination directory already exists, just copying whatever fileFrom is
 	if (isDirectory(dest, true))
 	{
 	    status("" + dest + " exists and is a directory (or a symlink to a directory)");
 	    return copyRecurse(new Path[]{fileFrom}, dest);
 	}
-	//The destination isn't a directory, maybe even doesn't exist
+	// The destination isn't a directory, maybe even doesn't exist
 	if (isDirectory(fileFrom, false))
 	{
-	    //fileFrom is a directory, we must copy its content to newly created directory
+	    // fileFrom is a directory, we must copy its content to newly created directory
 	    status("" + fileFrom + " is a directory and isn\'t a symlink");
 	    if (exists(dest, false))
 	    {
@@ -103,7 +102,7 @@ abstract class CopyingBase extends Operation
 	    //Copying the content of fileFrom to the newly created directory dest
 	    return copyRecurse(getDirContent(fileFrom), dest);
 	}
-	//We sure that fileFrom and dest aren't directories, but dest may exist
+	// We sure that fileFrom and dest aren't directories, but dest may exist
 	if (!Files.isSymbolicLink(fileFrom) && !isRegularFile(fileFrom, false))
 	{
 	    status("" + fileFrom + "is not a symlink and is not a regular file, nothing to do");
@@ -158,7 +157,7 @@ abstract class CopyingBase extends Operation
 	{
 	    if (!isDirectory(f, false))
 	    {
-		status("" + f.toString() + " is not a directory");
+		status("" + f.toString() + " is not a directory, copying it");
 		final Result res = copyFileToDir(f, fileTo);
 		if (res.getType() != Result.Type.OK)
 		    return res;
