@@ -32,49 +32,23 @@ final class OperationsLayout extends LayoutBase
 
     OperationsLayout(App app)
     {
-	NullCheck.notNull(app, "app");
+	super(app);
 	this.app = app;
-	this.operationsArea = new ListArea(createOperationsParams()) {
-		@Override public boolean onInputEvent(InputEvent event)
-		{
-		    NullCheck.notNull(event, "event");
-		    if (app.onInputEvent(this, event, ()->app.layouts().main()))
-			return true;
-		    return super.onInputEvent(event);
-		}
-		@Override public boolean onSystemEvent(SystemEvent event)
-		{
-		    NullCheck.notNull(event, "event");
-		    if (app.onSystemEvent(this, event))
-			return true;
-		    return super.onSystemEvent(event);
-		}
-		@Override public boolean onAreaQuery(AreaQuery query)
-		{
-		    NullCheck.notNull(query, "query");
-		    if (app.onAreaQuery(this, query))
-			return true;
-		    return super.onAreaQuery(query);
-		}
-		@Override protected String noContentStr()
-		{
-		    return "Файловые операции отсутствуют";//FIXME:
-		}
-	    };
-    }
-
-    private ListArea.Params createOperationsParams()
-    {
-	final ListArea.Params params = new ListArea.Params();
-	params.context = new DefaultControlContext(app.getLuwrain());
-	params.name = app.getStrings().operationsAreaName();
-	params.model = new ListUtils.ArrayModel(()->app.operations.toArray(new Operation[app.operations.size()]));
-	params.appearance = new ListUtils.DefaultAppearance(params.context);
-	return params;
-    }
-
-    AreaLayout getLayout()
-    {
-	return new AreaLayout(operationsArea);
+	setCloseHandler(()->{ app.layouts().main(); return true; });
+	{
+	    final ListArea.Params params = new ListArea.Params();
+	    params.context = getControlContext();
+	    params.name = app.getStrings().operationsAreaName();
+	    params.model = new ListUtils.ListModel(app.operations);
+	    params.appearance = new ListUtils.DefaultAppearance(params.context);
+	    this.operationsArea = new ListArea(params) {
+		    @Override protected String noContentStr()
+		    {
+			return "Файловые операции отсутствуют";//FIXME:
+		    }
+		};
+	}
+	final Actions operationsActions = actions();
+	setAreaLayout(operationsArea, operationsActions);
     }
 }

@@ -174,7 +174,7 @@ final class App extends AppBase<Strings>
 	    }
 	    @Override public void operations()
 	    {
-		getLayout().setBasicLayout(operationsLayout.getLayout());
+		setAreaLayout(operationsLayout);
 		getLuwrain().announceActiveArea();
 	    }
 	};
