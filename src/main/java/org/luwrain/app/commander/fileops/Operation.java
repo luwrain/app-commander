@@ -28,9 +28,9 @@ public abstract class Operation implements Runnable
 {
     static public final String
 	INTERRUPTED = "LWR_INTERRUPTED",
+	SOURCE_IS_A_PARENT_OF_THE_DEST = "LWR_SOURCE_IS_A_PARENT_OF_THE_DEST",
 	MOVE_DEST_NOT_DIR = "LWR_MOVE_DEST_NOT_DIR";
 
-    
     public enum ConfirmationChoices {
 	OVERWRITE,
 	SKIP,
@@ -38,7 +38,7 @@ public abstract class Operation implements Runnable
     };
 
     private final OperationListener listener;
-    private final String name;
+    public final String name;
 
     private boolean finished = false;
     private Exception ex = null;
@@ -66,6 +66,7 @@ public abstract class Operation implements Runnable
 	    catch (Exception e)
 	    {
 		Log.error("fileops", name + ":" + e.getClass().getName() + ": " + e.getMessage());
+		e.printStackTrace();
 		this.ex = e;
 	    }
 	}

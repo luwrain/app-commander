@@ -55,7 +55,7 @@ abstract class CopyingBase extends Operation
 	    status("calculating size of " + f);
 	    totalBytes += getTotalSize(f);
 	}
-	status("total size is " + totalBytes);
+	status("total size is " + String.valueOf(totalBytes));
 	Path d = dest;
 	if (!d.isAbsolute())
 	{
@@ -64,9 +64,10 @@ abstract class CopyingBase extends Operation
 	    d = parent.resolve(d);
 	    status("absolute destination path:" + d.toString());
 	}
+	// Checking that d is not a child of any item of toCopy
 	for(Path path: toCopy)
 	    if (d.startsWith(path))
-		throw new IOException("SOURCE_IS_A_PARENT_OF_THE_DEST");
+		throw new IOException(SOURCE_IS_A_PARENT_OF_THE_DEST);
 	if (toCopy.length == 1)
 	    singleSource(toCopy[0], d); else
 	    multipleSource(toCopy, d);
@@ -75,37 +76,40 @@ abstract class CopyingBase extends Operation
     private void singleSource(Path fileFrom, Path dest) throws IOException
     {
 	status("single source mode:copying " + fileFrom + " to " + dest);
-	// The destination directory already exists, just copying whatever fileFrom is
+	// If the destination directory already exists, just copying whatever fileFrom is
 	if (isDirectory(dest, true))
 	{
-	    status("" + dest + " exists and is a directory (or a symlink to a directory)");
+	    status("" + dest + " exists and is a directory (or a symlink to a directory), copying the source file to it");
 	    copyRecurse(new Path[]{fileFrom}, dest);
+	    return;
 	}
-	// The destination isn't a directory, maybe even doesn't exist
+	// We sure the destination isn't a directory, maybe even doesn't exist
+		    // If fileFrom is a directory, we should copy its content to newly created directory
 	if (isDirectory(fileFrom, false))
 	{
-	    // fileFrom is a directory, we must copy its content to newly created directory
 	    status("" + fileFrom + " is a directory and isn\'t a symlink");
-	    if (exists(dest, false))
+	    if (exists(dest, false)) // Dest can exist, but it's certainly not a directory
 	    {
 		switch(confirmOverwrite(dest))
 		{
 		case SKIP:
 		    return;
 		case CANCEL:
-		    throw new IOException("INTERRUPTED");
+		    throw new IOException(INTERRUPTED);
 		}
 		status("deleting previously existing " + dest.toString());
 		Files.delete(dest);
 	    }
 	    Files.createDirectories(dest);
-	    //Copying the content of fileFrom to the newly created directory dest
+	    // Copying the content of fileFrom to the newly created directory
 	    copyRecurse(getDirContent(fileFrom), dest);
+	    return;
 	}
 	// We sure that fileFrom and dest aren't directories, but dest may exist
 	if (!Files.isSymbolicLink(fileFrom) && !isRegularFile(fileFrom, false))
 	{
 	    status("" + fileFrom + "is not a symlink and is not a regular file, nothing to do");
+	    return;
 	}
 	status("" + fileFrom + " is a symlink or a regular file");
 	if (exists(dest, false))
@@ -116,10 +120,11 @@ abstract class CopyingBase extends Operation
 	    case SKIP:
 		return;
 	    case CANCEL:
-		throw new IOException("INTERRUPTED");
+		throw new IOException(INTERRUPTED);
 	    }
 	    Files.delete(dest);
 	}
+	// We must be sure that the parent directory of dest exists (but not dest itself)
 	if (dest.getParent() != null)
 	    Files.createDirectories(dest.getParent());
 	copySingleFile(fileFrom, dest);//This takes care if fromFile is a symlink
