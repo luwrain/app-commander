@@ -1,5 +1,5 @@
 /*
-   Copyright 2012-2017 Michael Pozhidaev <michael.pozhidaev@gmail.com>
+   Copyright 2012-2021 Michael Pozhidaev <msp@luwrain.org>
 
    This file is part of LUWRAIN.
 
@@ -14,7 +14,7 @@
    General Public License for more details.
 */
 
-package org.luwrain.linux.fileops;
+package org.luwrain.app.commander.fileops;
 
 import java.io.*;
 import java.util.*;
@@ -61,21 +61,5 @@ class TestingBase
 	    byte b = (byte)(rand.nextInt(256) - 128);
 	    buf[i] = b;
 	}
-    }
-
-    
-    static void deleteTmpDir()
-    {
-	deleteDirOrFile(TMP_DIR);
-    }
-
-    static private void deleteDirOrFile(File file)
-    {
-	if (!file.getAbsolutePath().startsWith("/tmp/"))
-	    throw new RuntimeException("Dangerous file to delete:" + file.getAbsolutePath());
-	if (file.isDirectory())
-	    for(File f: file.listFiles())
-		deleteDirOrFile(f);
-	file.delete();
     }
 }

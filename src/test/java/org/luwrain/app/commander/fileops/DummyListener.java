@@ -1,5 +1,5 @@
 /*
-   Copyright 2012-2017 Michael Pozhidaev <michael.pozhidaev@gmail.com>
+   Copyright 2012-2021 Michael Pozhidaev <msp@luwrain.org>
 
    This file is part of LUWRAIN.
 
@@ -14,20 +14,15 @@
    General Public License for more details.
 */
 
-package org.luwrain.linux.fileops;
+package org.luwrain.app.commander.fileops;
 
 import java.nio.file.*;
 
 import org.luwrain.base.*;
 
-class DummyListener implements FilesOperation.Listener
+class DummyListener implements OperationListener
 {
-    @Override public void onOperationProgress(FilesOperation operation)
+    @Override public void onOperationProgress(Operation operation)
     {
-    }
-
-    @Override public FilesOperation.ConfirmationChoices confirmOverwrite(Path path)
-    {
-	return FilesOperation.ConfirmationChoices.SKIP;
     }
 }
