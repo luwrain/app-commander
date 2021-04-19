@@ -16,6 +16,7 @@
 
 package org.luwrain.app.commander;
 
+import java.util.*;
 import java.io.*;
 import java.nio.file.*;
 
@@ -27,6 +28,7 @@ final class Conversations
 {
     private final Luwrain luwrain;
     private final Strings strings;
+    private final Set<String> runHistory = new TreeSet();
 
     Conversations(App app)
     {
@@ -118,5 +120,10 @@ final class Conversations
         File rightPanelVolume()
     {
 	return Popups.disksVolumes(luwrain, strings.rightPanelVolumePopupName());
+    }
+
+    String run()
+    {
+	return Popups.editWithHistory(luwrain, "Выполнить", "Команда:", "", runHistory);
     }
 }

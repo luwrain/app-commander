@@ -127,6 +127,7 @@ final class MainLayout extends LayoutBase
 		       action("copy", app.getStrings().actionCopy(), new InputEvent(InputEvent.Special.F5), ()->fileActions.localCopy(panelArea, oppositePanelArea)),
 		       		       action("move", app.getStrings().actionMove(), new InputEvent(InputEvent.Special.F6), ()->fileActions.localMove(panelArea, oppositePanelArea)),
 		       action("mkdir", app.getStrings().actionMkdir(), new InputEvent(InputEvent.Special.F7), ()->fileActions.localMkdir(panelArea)),
+		       		       action("run", "Выполнить", new InputEvent(InputEvent.Special.F9), ()->fileActions.localRun(panelArea)),
 		       action("left-panel-volume", app.getStrings().leftPanelVolume(), new InputEvent(InputEvent.Special.F1, EnumSet.of(InputEvent.Modifiers.ALT)), ()->actPanelVolume(leftPanel)),
 		       action("right-panel-volume", app.getStrings().rightPanelVolume(), new InputEvent(InputEvent.Special.F2, EnumSet.of(InputEvent.Modifiers.ALT)), ()->actPanelVolume(rightPanel)),
 		       action("zip", app.getStrings().actionZip(), ()->fileActions.zipCompress(panelArea)),

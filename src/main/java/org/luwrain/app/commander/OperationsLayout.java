@@ -25,7 +25,7 @@ import org.luwrain.app.base.*;
 import org.luwrain.app.commander.App.Side;
 import org.luwrain.app.commander.fileops.*;
 
-final class OperationsLayout extends LayoutBase
+final class OperationsLayout extends LayoutBase implements ListArea.ClickHandler
 {
     private final App app;
     final ListArea operationsArea;
@@ -39,8 +39,9 @@ final class OperationsLayout extends LayoutBase
 	    final ListArea.Params params = new ListArea.Params();
 	    params.context = getControlContext();
 	    params.name = app.getStrings().operationsAreaName();
+	    params.clickHandler = this;
 	    params.model = new ListUtils.ListModel(app.operations);
-	    params.appearance = new ListUtils.DefaultAppearance(params.context);
+	    params.appearance = new OperationsAppearance(app);
 	    this.operationsArea = new ListArea(params) {
 		    @Override protected String noContentStr()
 		    {
@@ -50,5 +51,15 @@ final class OperationsLayout extends LayoutBase
 	}
 	final Actions operationsActions = actions();
 	setAreaLayout(operationsArea, operationsActions);
+    }
+
+    @Override public boolean onListClick(ListArea area, int index, Object item)
+    {
+	if (!app.operations.get(index).isDone())
+	    return false;
+	app.operations.remove(index);
+	operationsArea.refresh();
+	app.getLuwrain().playSound(Sounds.OK);
+	return true;
     }
 }

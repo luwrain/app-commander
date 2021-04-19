@@ -32,6 +32,7 @@ final class App extends AppBase<Strings>
     final String startFrom;
 
     final List<Operation> operations = new ArrayList();
+    final OperationListener opListener = newOperationListener();
     private Settings sett = null;
     private Conversations conv = null;
     private Hooks hooks = null;
@@ -72,7 +73,7 @@ final class App extends AppBase<Strings>
     boolean allOperationsFinished()
     {
 	for(Operation op:operations)
-	    if (!op.isFinished())
+	    if (!op.isDone())
 		return false;
 	return true;
     }
@@ -81,7 +82,7 @@ final class App extends AppBase<Strings>
     {
 	if (index < 0 || index >= operations.size())
 	    throw new IllegalArgumentException("index (" + String.valueOf(index) + ") must be positive and less than the number of operations (" + String.valueOf(operations.size()) + ")");
-	if (!operations.get(index).isFinished())
+	if (!operations.get(index).isDone())
 	    return false;
 	operations.remove(index);
 	operationsLayout.operationsArea.refresh();
@@ -113,7 +114,7 @@ final class App extends AppBase<Strings>
 	return "";
     }
 
-    OperationListener createOperationListener()
+    private OperationListener newOperationListener()
     {
 	return new OperationListener(){
 	    @Override public void onOperationProgress(Operation operation)
@@ -121,12 +122,13 @@ final class App extends AppBase<Strings>
 		NullCheck.notNull(operation, "operation");
 		getLuwrain().runUiSafely(()->{
 			operationsLayout.operationsArea.redraw();
-			if (operation.isFinished())
+			if (operation.isDone())
 			{
 			    if (operation.getException() == null)
-				getLuwrain().playSound(Sounds.DONE);
-			    mainLayout.leftPanel.refresh();
-			    mainLayout.rightPanel.refresh();
+				getLuwrain().playSound(Sounds.DONE); else
+				getLuwrain().playSound(Sounds.ERROR);
+			    mainLayout.leftPanel.reread(false);
+			    mainLayout.rightPanel.reread(false);
 			}
 		    });
 	    }

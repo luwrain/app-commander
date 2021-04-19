@@ -29,7 +29,6 @@ class OperationsAppearance implements ListArea.Appearance
     private final Luwrain luwrain;
     private final Strings strings;
 
-
     OperationsAppearance(App app)
     {
 	NullCheck.notNull(app, "app");
@@ -42,32 +41,29 @@ class OperationsAppearance implements ListArea.Appearance
     {
 	NullCheck.notNull(item, "item");
 	NullCheck.notNull(flags, "flags");
-
-	final Operation op = (Operation)item;
-	if (op.isFinished())
-	{
-	    app.getLuwrain().speak(app.getOperationResultDescr(op) + " " + op.name);
+	if (!(item instanceof Operation))
 	    return;
-	}
-	final int percents = op.getPercent();
-	if (percents > 0)
-	    luwrain.speak("" + luwrain.i18n().getNumberStr(percents, "percents") + " " + op.name); else
-	    luwrain.speak(op.name);
+		final Operation op = (Operation)item;
+	final Sounds sound;
 
-
+	if (op.isDone())
+	{
+	    if (op.getException() == null)
+		sound = Sounds.SELECTED; else
+		sound = Sounds.ATTENTION;
+	} else
+	    sound = Sounds.LIST_ITEM;
+	luwrain.setEventResponse(DefaultEventResponse.listItem(sound, op.name, null));
     }
 
     @Override public String getScreenAppearance(Object item, Set<Flags> flags)
     {
 	NullCheck.notNull(item, "item");
 	NullCheck.notNull(flags, "flags");
+	if (!(item instanceof Operation))
+	    return item.toString();
 	final Operation op = (Operation)item;
-	if (op.isFinished())
-	    return app.getOperationResultDescr(op);
-	final int percent = op.getPercent();
-	if (percent == 0)
-	    return op.name + "...";
-	return  percent + "%: "+ op.name;
+	return op.name;
     }
 
     @Override public int getObservableLeftBound(Object item)

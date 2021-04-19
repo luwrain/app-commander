@@ -81,7 +81,7 @@ public abstract class Operation implements Runnable
 	interrupted = true;
     }
 
-    public boolean isFinished()
+    public boolean isDone()
     {
 	return finished;
     }

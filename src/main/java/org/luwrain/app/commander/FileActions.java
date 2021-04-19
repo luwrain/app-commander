@@ -92,7 +92,7 @@ final class FileActions extends OperationsNames
 	if (dest == null)
 	    return true;
 	final String name = copyOperationName(filesToCopy, dest);
-	final Copy copy = new Copy(app.createOperationListener(), name, filesToCopy, dest);
+	final Copy copy = new Copy(app.opListener, name, filesToCopy, dest);
 	app.runOperation(copy);
 	return true;
     }
@@ -158,13 +158,32 @@ final class FileActions extends OperationsNames
 	return true;
     }
 
+    boolean localRun(PanelArea panelArea)
+    {
+	NullCheck.notNull(panelArea, "panelArea");
+	if (!panelArea.isLocalDir())
+	    return false;
+		final Path[] toProcess = PanelArea.asPath(panelArea.getToProcess());
+	if (toProcess.length == 0)
+	    return false;
+	final String cmd = app.getConv().run();
+	if (cmd == null || cmd.trim().isEmpty())
+	    return true;
+	final List<String> args = new ArrayList();
+	args.add(cmd.trim());
+	for(Path p: toProcess)
+	    args.add(p.toAbsolutePath().toString());
+	app.getLuwrain().newJob("sys", args.toArray(new String[args.size()]), EnumSet.noneOf(Luwrain.JobFlags.class), null);
+	return true;
+    }
+
     boolean zipCompress(PanelArea panelArea)
     {
 	NullCheck.notNull(panelArea, "panelArea");
 	final Path[] toProcess = PanelArea.asPath(panelArea.getToProcess());
 	if (toProcess.length == 0)
 	    return false;
-	final ZipCompress zipCompress = new ZipCompress(app.createOperationListener(), "zip", toProcess, Paths.get("/tmp/proba.zip"));
+	final ZipCompress zipCompress = new ZipCompress(app.opListener, "zip", toProcess, Paths.get("/tmp/proba.zip"));
 	final App.TaskId taskId = app.newTaskId();
 	return app.runTask(taskId, ()->{
 		zipCompress.run();
