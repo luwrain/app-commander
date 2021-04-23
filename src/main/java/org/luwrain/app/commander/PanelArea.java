@@ -30,6 +30,7 @@ import org.luwrain.controls.*;
 import org.luwrain.script.*;
 import org.luwrain.io.*;
 
+
 class PanelArea extends CommanderArea<FileObject>
 {
     private final Luwrain luwrain;
@@ -39,6 +40,23 @@ class PanelArea extends CommanderArea<FileObject>
 	super(params);
 	NullCheck.notNull(luwrain, "luwrain");
 	this.luwrain = luwrain;
+    }
+
+    @Override public CommanderUtilsVfs.Model getCommanderModel()
+    {
+	return (CommanderUtilsVfs.Model)super.getCommanderModel();
+    }
+
+    void open(File file)
+    {
+	NullCheck.notNull(file, "file");
+	try {
+	    open(getCommanderModel().getFileSystemManager().resolveFile(file.getAbsolutePath()));
+	}
+	catch(org.apache.commons.vfs2.FileSystemException e)
+	{
+	    throw new RuntimeException(e);
+	}
     }
 
     @Override public boolean onAreaQuery(AreaQuery query)

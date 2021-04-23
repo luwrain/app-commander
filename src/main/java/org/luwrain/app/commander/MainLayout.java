@@ -178,17 +178,18 @@ final class MainLayout extends LayoutBase
     {
 	NullCheck.notNull(panelArea, "panelArea");
 	final File res = panelArea == leftPanel?app.getConv().leftPanelVolume():app.getConv().rightPanelVolume();
+	if (res == null)
+	    return true;
+	panelArea.open(res);
 	return true;
     }
 
-     private boolean showFilesInfo(PanelArea panelArea)
+    private boolean showFilesInfo(PanelArea panelArea)
     {
 	NullCheck.notNull(panelArea, "panelArea");
-
-		    final FilesInfoLayout info = new FilesInfoLayout(app, new File[0], ()->app.layout(getAreaLayout(), panelArea));
-	    app.layout(info.getLayout());
-	    return true;
-
+	final FilesInfoLayout info = new FilesInfoLayout(app, new File[0], ()->app.layout(getAreaLayout(), panelArea));
+	app.layout(info.getLayout());
+	return true;
 	    
 	/*
 	if (panelArea.isLocalDir())
@@ -219,7 +220,6 @@ final class MainLayout extends LayoutBase
 	    final File opened = PanelArea.asFile(area.opened());
 	    if (opened == null)
 		return false;
-	    //	    infoAndProps.fillLocalVolumeInfo(opened, propsArea);
 	} else
 	{
 	    final FileObject fileObj = area.opened();

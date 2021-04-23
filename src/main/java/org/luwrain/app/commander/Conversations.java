@@ -114,12 +114,12 @@ final class Conversations
 
     File leftPanelVolume()
     {
-	return Popups.disksVolumes(luwrain, strings.leftPanelVolumePopupName());
+	return Popups.disks(luwrain, strings.leftPanelVolumePopupName());
     }
 
         File rightPanelVolume()
     {
-	return Popups.disksVolumes(luwrain, strings.rightPanelVolumePopupName());
+	return Popups.disks(luwrain, strings.rightPanelVolumePopupName());
     }
 
     String run()
