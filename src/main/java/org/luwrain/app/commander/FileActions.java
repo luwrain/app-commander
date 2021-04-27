@@ -25,6 +25,7 @@ import org.luwrain.base.*;
 import org.luwrain.core.*;
 import org.luwrain.controls.*;
 import org.luwrain.app.commander.fileops.*;
+import org.luwrain.io.json.*;
 
 final class FileActions extends OperationsNames
 {
@@ -176,6 +177,30 @@ final class FileActions extends OperationsNames
 	app.getLuwrain().newJob("sys", args.toArray(new String[args.size()]), EnumSet.noneOf(Luwrain.JobFlags.class), null);
 	return true;
     }
+
+        boolean localMail(PanelArea panelArea)
+    {
+	NullCheck.notNull(panelArea, "panelArea");
+	if (!panelArea.isLocalDir())
+	    return false;
+		final Path[] toProcess = PanelArea.asPath(panelArea.getToProcess());
+	if (toProcess.length == 0)
+	    return false;
+	for(Path p: toProcess)
+	    if (Files.isDirectory(p))
+	    {
+		app.message("Невозможно отправить по почте каталог", Luwrain.MessageType.ERROR);//FIXME:
+		return true;
+	    }
+	final List<String> files = new ArrayList();
+	for(Path p: toProcess)
+	    files.add(p.toAbsolutePath().toString());
+	final Message message = new Message();
+	message.setAttachments(files);
+	app.getLuwrain().launchApp("message", new String[]{message.toString()});
+	return true;
+    }
+
 
     boolean zipCompress(PanelArea panelArea)
     {
