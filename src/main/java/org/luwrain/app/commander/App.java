@@ -52,7 +52,7 @@ final class App extends AppBase<Strings>
 	    this.startFrom = null;
     }
 
-    @Override public boolean onAppInit()
+    @Override public AreaLayout onAppInit()
     {
 	this.sett = Settings.create(getLuwrain());
 	this.conv = new Conversations(this);
@@ -60,7 +60,7 @@ final class App extends AppBase<Strings>
 	this.mainLayout = new MainLayout(this);
 	this.operationsLayout = new OperationsLayout(this);
 	setAppName(getStrings().appName());
-	return true;
+	return mainLayout.getAreaLayout();
     }
 
     void runOperation(Operation op)
@@ -140,11 +140,6 @@ final class App extends AppBase<Strings>
 	NullCheck.notNull(event, "event");
 	closeApp();
 	return true;
-    }
-
-    @Override public AreaLayout getDefaultAreaLayout()
-    {
-	return mainLayout.getAreaLayout();
     }
 
     @Override public void closeApp()
