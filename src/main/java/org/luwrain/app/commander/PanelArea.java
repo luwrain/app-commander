@@ -21,6 +21,7 @@ import java.util.concurrent.*;
 import java.io.*;
 import java.nio.file.*;
 import java.net.*;
+import org.luwrain.script.hooks.*;
 
 import org.apache.commons.vfs2.*;
 
@@ -85,16 +86,9 @@ class PanelArea extends CommanderArea<FileObject>
 	    if (!(obj instanceof org.apache.commons.vfs2.provider.local.LocalFile))
 		throw new RuntimeException("The entry is not a local file while the local dir is opened");
 	    final File f = new File(obj.getName().getPath());
-	    try {
-		if (luwrain.xRunHooks(hookPrefix + ".local.custom", new Object[]{f}, Luwrain.HookStrategy.CHAIN_OF_RESPONSIBILITY))
+		if (new ChainOfResponsibilityHook(luwrain).runNoExcept(hookPrefix + ".local.custom", new Object[]{f}))
 		    return true;
-		return luwrain.xRunHooks(hookPrefix + ".local.default", new Object[]{f}, Luwrain.HookStrategy.CHAIN_OF_RESPONSIBILITY);
-	    }
-	    catch(RuntimeException e)
-	    {
-		luwrain.message(luwrain.i18n().getExceptionDescr(e), Luwrain.MessageType.ERROR);
-		return true;
-	    }
+		return new ChainOfResponsibilityHook(luwrain).runNoExcept(hookPrefix + ".local.default", new Object[]{f});
 	}
 	//FIXME:remote 
 	return false;
@@ -118,27 +112,15 @@ class PanelArea extends CommanderArea<FileObject>
 	} else
 	    return false;
 	if (!background)
-	    try {
-		if (luwrain.xRunHooks(hookName + ".custom", new Object[]{arg}, Luwrain.HookStrategy.CHAIN_OF_RESPONSIBILITY))
+	{
+	    if (new ChainOfResponsibilityHook(luwrain).runNoExcept(hookName + ".custom", new Object[]{arg}))
 		    return true;
-		return luwrain.xRunHooks(hookName, new Object[]{arg}, Luwrain.HookStrategy.CHAIN_OF_RESPONSIBILITY);
-	    }
-	    catch(RuntimeException e)
-	    {
-		luwrain.crash(e);
-		return true;
+	    return new ChainOfResponsibilityHook(luwrain).runNoExcept(hookName, new Object[]{arg});
 	    }
 	luwrain.executeBkg(new FutureTask(()->{
-		    try {
-			if (luwrain.xRunHooks(hookName + ".custom", new Object[]{arg}, Luwrain.HookStrategy.CHAIN_OF_RESPONSIBILITY))
+		    if (new ChainOfResponsibilityHook(luwrain).runNoExcept(hookName + ".custom", new Object[]{arg}))
 			    return;
-			luwrain.xRunHooks(hookName, new Object[]{arg}, Luwrain.HookStrategy.CHAIN_OF_RESPONSIBILITY);
-			return;
-		    }
-		    catch(RuntimeException e)
-		    {
-			luwrain.crash(e);
-		    }
+		    new ChainOfResponsibilityHook(luwrain).runNoExcept(hookName, new Object[]{arg});
 	}, null));
 	return true;
     }
