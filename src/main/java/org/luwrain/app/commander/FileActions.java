@@ -26,6 +26,7 @@ import org.luwrain.core.*;
 import org.luwrain.controls.*;
 import org.luwrain.app.commander.fileops.*;
 import org.luwrain.io.json.*;
+import static org.luwrain.util.PathUtils.*;
 
 final class FileActions extends OperationsNames
 {
@@ -164,17 +165,30 @@ final class FileActions extends OperationsNames
 	NullCheck.notNull(panelArea, "panelArea");
 	if (!panelArea.isLocalDir())
 	    return false;
-		final Path[] toProcess = PanelArea.asPath(panelArea.getToProcess());
+	final Path dir = PanelArea.asPath(panelArea.opened());
+	if (dir == null)
+	    return false;
+	final Path[] toProcess = PanelArea.asPath(panelArea.getToProcess());
 	if (toProcess.length == 0)
 	    return false;
 	final String cmd = app.getConv().run();
 	if (cmd == null || cmd.trim().isEmpty())
 	    return true;
-	final List<String> args = new ArrayList();
-	args.add(cmd.trim());
-	for(Path p: toProcess)
-	    args.add(p.toAbsolutePath().toString());
-	app.getLuwrain().newJob("sys", args.toArray(new String[args.size()]), EnumSet.noneOf(Luwrain.JobFlags.class), null);
+	final StringBuilder b = new StringBuilder();
+	final int pos = cmd.indexOf(" *");
+	if (pos < 0)
+	{
+	    b.append(cmd.trim());
+	    for(Path p: toProcess)
+		b.append(" ").append(escapeBash(p.toString()));
+	} else
+	{
+	    b.append(cmd.substring(0, pos).trim());
+	    for(Path p: toProcess)
+		b.append(" ").append(escapeBash(p.toString()));
+	    b.append(" ").append(cmd.substring(pos + 2).trim());
+	}
+	app.getLuwrain().newJob("sys", new String[]{new String(b)}, dir.toAbsolutePath().toString(), EnumSet.noneOf(Luwrain.JobFlags.class), null);//FIXME: reread panel on finish
 	return true;
     }
 
