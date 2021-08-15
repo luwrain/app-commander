@@ -22,7 +22,6 @@ import java.net.*;
 
 import org.apache.commons.vfs2.*;
 
-import org.luwrain.base.*;
 import org.luwrain.core.*;
 import org.luwrain.core.events.*;
 import org.luwrain.core.events.InputEvent.Special;

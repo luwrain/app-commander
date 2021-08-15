@@ -18,7 +18,6 @@ package org.luwrain.app.commander;
 
 import java.util.*;
 
-import org.luwrain.base.*;
 import org.luwrain.core.*;
 import org.luwrain.controls.*;
 import org.luwrain.app.commander.fileops.*;

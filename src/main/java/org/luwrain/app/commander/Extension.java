@@ -18,10 +18,9 @@ package org.luwrain.app.commander;
 
 import java.util.*;
 
-import org.luwrain.base.*;
 import org.luwrain.core.*;
 
-public class Extension extends org.luwrain.core.extensions.EmptyExtension
+public class Extension extends EmptyExtension
 {
     @Override public Command[] getCommands(Luwrain luwrain)
     {
