@@ -91,7 +91,7 @@ final class Conversations
 
     String ftpAddress()
     {
-	return Popups.simple(luwrain, strings.ftpConnectPopupName(), strings.ftpConnectPopupText(), "ftp://");
+	return Popups.text(luwrain, strings.ftpConnectPopupName(), strings.ftpConnectPopupText(), "ftp://");
     }
 
     /*
