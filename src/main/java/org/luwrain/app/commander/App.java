@@ -31,7 +31,7 @@ final class App extends AppBase<Strings>
 
     final String startFrom;
 
-    final List<Operation> operations = new ArrayList();
+    final List<Operation> operations = new ArrayList<>();
     final OperationListener opListener = newOperationListener();
     private Settings sett = null;
     private Conversations conv = null;
@@ -67,7 +67,7 @@ final class App extends AppBase<Strings>
     {
 	NullCheck.notNull(op, "op");
 	this.operations.add(0, op);
-	getLuwrain().executeBkg(new FutureTask(op, null));
+	getLuwrain().executeBkg(new FutureTask<>(op, null));
     }
 
     boolean allOperationsFinished()

@@ -117,7 +117,7 @@ class PanelArea extends CommanderArea<FileObject>
 		    return true;
 	    return new ChainOfResponsibilityHook(luwrain).runNoExcept(hookName, new Object[]{arg});
 	    }
-	luwrain.executeBkg(new FutureTask(()->{
+	luwrain.executeBkg(new FutureTask<>(()->{
 		    if (new ChainOfResponsibilityHook(luwrain).runNoExcept(hookName + ".custom", new Object[]{arg}))
 			    return;
 		    new ChainOfResponsibilityHook(luwrain).runNoExcept(hookName, new Object[]{arg});
@@ -135,7 +135,7 @@ class PanelArea extends CommanderArea<FileObject>
 
     FileObject[] getToProcess()
     {
-	final List<FileObject> res = new ArrayList();
+	final List<FileObject> res = new ArrayList<>();
 	for(Object o: getMarked())
 	    res.add((FileObject)o);
 	if (!res.isEmpty())
@@ -223,7 +223,7 @@ class PanelArea extends CommanderArea<FileObject>
             static Path[] asPath(FileObject[] fileObjects)
     {
 	NullCheck.notNullItems(fileObjects, "fileObjects");
-	final List<Path> res = new ArrayList();
+	final List<Path> res = new ArrayList<>();
 	for(FileObject f: fileObjects)
 	{
 	    final Path ff = asPath(f);
@@ -236,7 +236,7 @@ class PanelArea extends CommanderArea<FileObject>
         static File[] asFile(FileObject[] fileObjects)
     {
 	NullCheck.notNullItems(fileObjects, "fileObjects");
-	final List<File> res = new ArrayList();
+	final List<File> res = new ArrayList<>();
 	for(FileObject f: fileObjects)
 	{
 	    final File ff = asFile(f);
@@ -261,8 +261,8 @@ class PanelArea extends CommanderArea<FileObject>
 		final int count = model.getItemCount();
 		if (fromIndex >= toIndex || fromIndex >= count || toIndex > count)
 		    return false;
-		final List<String> names = new ArrayList();
-		final List<Serializable> res = new ArrayList();
+		final List<String> names = new ArrayList<>();
+		final List<Serializable> res = new ArrayList<>();
 		for(int i = fromIndex;i < toIndex;++i)
 		{
 		    final CommanderArea.NativeItem<FileObject> nativeObj = (CommanderArea.NativeItem<FileObject>)model.getItem(i);

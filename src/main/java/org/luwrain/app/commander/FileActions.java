@@ -205,7 +205,7 @@ final class FileActions extends OperationsNames
 		app.message("Невозможно отправить по почте каталог", Luwrain.MessageType.ERROR);//FIXME:
 		return true;
 	    }
-	final List<String> files = new ArrayList();
+	final List<String> files = new ArrayList<>();
 	for(Path p: toProcess)
 	    files.add(p.toAbsolutePath().toString());
 	final Message message = new Message();

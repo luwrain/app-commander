@@ -109,7 +109,7 @@ public abstract class Operation implements Runnable
 
     static protected Path[] getDirContent(final Path path) throws IOException
     {
-	final List<Path> res = new ArrayList();
+	final List<Path> res = new ArrayList<>();
         try (DirectoryStream<Path> directoryStream = Files.newDirectoryStream(path)) {
 	    for (Path p : directoryStream) 
 		res.add(p);

@@ -28,7 +28,7 @@ final class Conversations
 {
     private final Luwrain luwrain;
     private final Strings strings;
-    private final Set<String> runHistory = new TreeSet();
+    private final Set<String> runHistory = new TreeSet<>();
 
     Conversations(App app)
     {
