@@ -88,14 +88,6 @@ final class MainLayout extends LayoutBase
 		    return super.onSystemEvent(event);
 		}
 	    };
-
-	leftPanel.setLoadingResultHandler((location, data, selectedIndex, announce)->{
-		app.getLuwrain().runUiSafely(()->leftPanel.acceptNewLocation(location, data, selectedIndex, announce));
-	    });
-	rightPanel.setLoadingResultHandler((location, data, selectedIndex, announce)->{
-		app.getLuwrain().runUiSafely(()->rightPanel.acceptNewLocation(location, data, selectedIndex, announce));
-	    });
-
 	setAreaLayout(AreaLayout.LEFT_RIGHT, leftPanel, getPanelActions(Side.LEFT), rightPanel, getPanelActions(Side.RIGHT));
 
 	if (app.startFrom != null)

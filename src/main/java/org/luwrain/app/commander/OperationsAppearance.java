@@ -22,9 +22,11 @@ import org.luwrain.core.*;
 import org.luwrain.controls.*;
 import org.luwrain.app.commander.fileops.*;
 
-class OperationsAppearance implements ListArea.Appearance
+import static org.luwrain.core.DefaultEventResponse.*;
+
+class OperationsAppearance extends ListUtils.AbstractAppearance<Operation>
 {
-        private final App app;
+    private final App app;
     private final Luwrain luwrain;
     private final Strings strings;
 
@@ -36,15 +38,11 @@ class OperationsAppearance implements ListArea.Appearance
 	this.app = app;
     }
 
-    @Override public void announceItem(Object item, Set<Flags> flags)
+    @Override public void announceItem(Operation op, Set<Flags> flags)
     {
-	NullCheck.notNull(item, "item");
+	NullCheck.notNull(op, "op");
 	NullCheck.notNull(flags, "flags");
-	if (!(item instanceof Operation))
-	    return;
-		final Operation op = (Operation)item;
 	final Sounds sound;
-
 	if (op.isDone())
 	{
 	    if (op.getException() == null)
@@ -52,26 +50,13 @@ class OperationsAppearance implements ListArea.Appearance
 		sound = Sounds.ATTENTION;
 	} else
 	    sound = Sounds.LIST_ITEM;
-	luwrain.setEventResponse(DefaultEventResponse.listItem(sound, op.name, null));
+	luwrain.setEventResponse(listItem(sound, op.name, null));
     }
 
-    @Override public String getScreenAppearance(Object item, Set<Flags> flags)
+    @Override public String getScreenAppearance(Operation op, Set<Flags> flags)
     {
-	NullCheck.notNull(item, "item");
+	NullCheck.notNull(op, "op");
 	NullCheck.notNull(flags, "flags");
-	if (!(item instanceof Operation))
-	    return item.toString();
-	final Operation op = (Operation)item;
 	return op.name;
-    }
-
-    @Override public int getObservableLeftBound(Object item)
-    {
-	return 0;
-    }
-
-    @Override public int getObservableRightBound(Object item)
-    {
-	return getScreenAppearance(item, EnumSet.noneOf(Flags.class)).length();
     }
 }

@@ -25,38 +25,33 @@ import org.luwrain.app.base.*;
 import org.luwrain.app.commander.App.Side;
 import org.luwrain.app.commander.fileops.*;
 
-final class OperationsLayout extends LayoutBase implements ListArea.ClickHandler
+final class OperationsLayout extends LayoutBase implements ListArea.ClickHandler<Operation>
 {
     private final App app;
-    final ListArea operationsArea;
+    final ListArea<Operation> operationsArea;
 
     OperationsLayout(App app)
     {
 	super(app);
 	this.app = app;
 	setCloseHandler(()->{ app.layouts().main(); return true; });
-	{
-	    final ListArea.Params params = new ListArea.Params();
-	    params.context = getControlContext();
+	this.operationsArea = new ListArea<Operation>(listParams((params)->{
 	    params.name = app.getStrings().operationsAreaName();
 	    params.clickHandler = this;
-	    params.model = new ListUtils.ListModel(app.operations);
+	    params.model = new ListUtils.ListModel<>(app.operations);
 	    params.appearance = new OperationsAppearance(app);
-	    this.operationsArea = new ListArea(params) {
+		})) {
 		    @Override protected String noContentStr()
 		    {
 			return "Файловые операции отсутствуют";//FIXME:
 		    }
 		};
-	}
 	final Actions operationsActions = actions();
 	setAreaLayout(operationsArea, operationsActions);
     }
 
-    @Override public boolean onListClick(ListArea area, int index, Object item)
+    @Override public boolean onListClick(ListArea area, int index, Operation op)
     {
-	if (!app.operations.get(index).isDone())
-	    return false;
 	app.operations.remove(index);
 	operationsArea.refresh();
 	app.getLuwrain().playSound(Sounds.OK);
