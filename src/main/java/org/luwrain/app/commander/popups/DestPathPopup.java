@@ -35,7 +35,7 @@ public final class DestPathPopup extends FilePopup
 		  Path srcDir, Path[] files, Path destDir)
 {
     super(luwrain,
-	  name(strings), prefix(), acceptance(),
+	  name(strings, type), prefix(strings, type, files), acceptance(),
 	  destDir.toFile(), srcDir.toFile(),
 	  EnumSet.noneOf(FilePopup.Flags.class), Popups.DEFAULT_POPUP_FLAGS);
     NullCheck.notNull(strings, "strings");
@@ -51,24 +51,32 @@ public final class DestPathPopup extends FilePopup
 	};
     }
 
-static private String name(Strings strings)
+    static private String name(Strings strings, Type type)
 {
     NullCheck.notNull(strings, "strings");
+    NullCheck.notNull(type, "type");
+    switch(type)
+    {
+    case COPY:
     return strings.copyPopupName();
+    case MOVE:
+	    return strings.movePopupName();
+    }
+    return null;
 }
 
-static private String prefix()
+    static private String prefix(Strings strings, Type type, Path[] files)
 {
+    NullCheck.notNull(strings, "strings");
+    NullCheck.notNull(type, "type");
+    NullCheck.notNullItems(files, "files");
+    switch(type)
+    {
+    case COPY:
+	return strings.copyPopupPrefix(files.length > 1?"":files[0].getFileName().toString()).replaceAll("  ", " ");
+    case MOVE:
+	return strings.movePopupPrefix(files.length > 1?"":files[0].getFileName().toString()).replaceAll("  ", " ");
+    }
     return "";
 }
-
-    private String copyPopupPrefix(File[] toCopy)
-	{
-	    return strings.copyPopupPrefix(toCopy.length > 1?luwrain.i18n().getNumberStr(toCopy.length, "items"):toCopy[0].getName());
-	}
-
-private String movePopupPrefix(File[] toMove)
-	{
-	    return strings.movePopupPrefix(toMove.length > 1?luwrain.i18n().getNumberStr(toMove.length, "items"):toMove[0].getName());
-	}
 }
