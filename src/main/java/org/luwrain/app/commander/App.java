@@ -148,6 +148,11 @@ final class App extends AppBase<Strings>
 	    getLuwrain().message(getStrings().notAllOperationsFinished(), Luwrain.MessageType.ERROR);
 	    return;
 	}
+	if (mainLayout != null)
+	{
+	    mainLayout.leftPanel.close();
+	    mainLayout.rightPanel.close();	    
+	}
 	super.closeApp();
     }
 

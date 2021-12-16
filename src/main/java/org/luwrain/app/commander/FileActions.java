@@ -93,10 +93,8 @@ final class FileActions extends OperationsNames
 	if (dest == null)
 	    return true;
 	final String name = copyOperationName(filesToCopy, dest);
-	/*
 	final Copy copy = new Copy(app.opListener, name, filesToCopy, dest);
 	app.runOperation(copy);
-	*/
 	return true;
     }
 
