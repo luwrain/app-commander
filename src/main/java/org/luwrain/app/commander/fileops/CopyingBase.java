@@ -219,8 +219,7 @@ abstract class CopyingBase extends Operation
 	try (final InputStream in = Files.newInputStream(fromFile)) {
 	    try (final OutputStream out = Files.newOutputStream(toFile)) {
 		StreamUtils.copyAllBytes(in, out,
-					 (chunkNumBytes, totalNumBytes)->onNewChunk(chunkNumBytes),
-					 ()->{ return interrupted; });
+					 (chunkNumBytes, totalNumBytes)->onNewChunk(chunkNumBytes), ()->interrupted);
 		out.flush();
 		if (interrupted)
 		    throw new IOException("INTERRUPTED");
