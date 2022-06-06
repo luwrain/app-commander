@@ -32,16 +32,12 @@ final class Conv
 
     Conv(App app)
     {
-	NullCheck.notNull(app, "app");
 	this.luwrain = app.getLuwrain();
 	this.strings = app.getStrings();
     }
 
     Path copy(Path copyFromDir, Path[] filesToCopy, Path copyTo)
     {
-	NullCheck.notNull(copyFromDir, "copyFromDir");
-	NullCheck.notNullItems(filesToCopy, "filesToCopy");
-	NullCheck.notNull(copyTo, "copyTo");
 	final DestPathPopup popup = new DestPathPopup(luwrain, strings, DestPathPopup.Type.COPY, copyFromDir, filesToCopy, copyTo);
 	luwrain.popup(popup);
 	if (popup.wasCancelled())
@@ -51,9 +47,6 @@ final class Conv
 
     Path move(Path  moveFromDir, Path[] filesToMove, Path moveTo)
     {
-	NullCheck.notNull(moveFromDir, "moveFromDir");
-	NullCheck.notNullItems(filesToMove, "filesToMove");
-	NullCheck.notNull(moveTo, "moveTo");
 	final DestPathPopup popup = new DestPathPopup(luwrain, strings, DestPathPopup.Type.MOVE, moveFromDir, filesToMove, moveTo);
 	luwrain.popup(popup);
 	if (popup.wasCancelled())
@@ -80,7 +73,6 @@ final class Conv
 
     boolean deleteConfirmation(File[] files)
     {
-	NullCheck.notNullItems(files, "files");
 	final String text = strings.delPopupText(luwrain.i18n().getNumberStr(files.length, "items"));
 	final YesNoPopup popup = new YesNoPopup(luwrain, strings.delPopupName(), text, false, Popups.DEFAULT_POPUP_FLAGS);
 	luwrain.popup(popup);

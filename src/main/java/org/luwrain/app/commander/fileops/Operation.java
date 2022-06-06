@@ -39,16 +39,13 @@ public abstract class Operation implements Runnable
 
     private final OperationListener listener;
     public final String name;
-
     private boolean finished = false;
-    private Exception ex = null;
+    private Throwable ex = null;
     private boolean finishingAccepted = false ;
     protected boolean interrupted = false;
 
     Operation(OperationListener listener, String name)
     {
-	NullCheck.notNull(listener, "listener");
-	NullCheck.notEmpty(name, "name");
 	this.listener = listener;
 	this.name = name;
     }
@@ -63,9 +60,9 @@ public abstract class Operation implements Runnable
 	    try {
 		work();
 	    }
-	    catch (Exception e)
+	    catch (Throwable e)
 	    {
-		Log.error("fileops", name + ":" + e.getClass().getName() + ": " + e.getMessage());
+		Log.error("commander", name + ": " + e.getClass().getSimpleName() + ": " + e.getMessage());
 		e.printStackTrace();
 		this.ex = e;
 	    }
@@ -94,14 +91,13 @@ public abstract class Operation implements Runnable
 	return false;
     }
 
-    public Exception getException()
+    public Throwable getException()
     {
 	return this.ex;
     }
 
     static protected boolean isDirectory(Path path, boolean followSymlinks) throws IOException
     {
-	NullCheck.notNull(path, "path");
 	if (followSymlinks)
 	    return Files.isDirectory(path); else
 	    return Files.isDirectory(path, LinkOption.NOFOLLOW_LINKS);
@@ -119,7 +115,6 @@ public abstract class Operation implements Runnable
 
     static protected boolean isRegularFile(Path path, boolean followSymlinks) throws IOException
     {
-	NullCheck.notNull(path, "path");
 	if (followSymlinks)
 	    return Files.isRegularFile(path); else
 	    return Files.isRegularFile(path, LinkOption.NOFOLLOW_LINKS);
@@ -127,7 +122,6 @@ public abstract class Operation implements Runnable
 
     static protected boolean exists(Path path, boolean followSymlinks) throws IOException
     {
-	NullCheck.notNull(path, "path");
 	    if (followSymlinks)
 		return Files.exists(path); else
 		return Files.exists(path, LinkOption.NOFOLLOW_LINKS);
@@ -135,16 +129,11 @@ public abstract class Operation implements Runnable
 
     protected void deleteFileOrDir(Path p) throws IOException
     {
-	NullCheck.notNull(p, "p");
-	if (interrupted)
-	    throw new IOException("INTERRUPTED");
 	if (isDirectory(p, false))
 	{
 	    final Path[] content = getDirContent(p);
 	    for(Path pp: content)
-	    {
 		deleteFileOrDir(pp);
-	    }
 	}
 	Files.delete(p);
     }
@@ -172,7 +161,6 @@ FIXME:
 
     static long getTotalSize(Path p) throws IOException
     {
-	NullCheck.notNull(p, "p");
 	if (Files.isRegularFile(p, LinkOption.NOFOLLOW_LINKS))
 	    return Files.size(p);
 	if (!Files.isDirectory(p, LinkOption.NOFOLLOW_LINKS))
@@ -187,18 +175,13 @@ FIXME:
 
     static protected void ensureValidLocalPath(Path[] path)
     {
-	NullCheck.notNullItems(path, "path");
-	NullCheck.notEmptyArray(path, "path");
 	for(Path p: path)
-	    if (!p.isAbsolute())
-		throw new IllegalArgumentException(p.toString() + " can't be relative");
+	    ensureValidLocalPath(p);
     }
 
         static protected void ensureValidLocalPath(Path path)
     {
-	NullCheck.notNull(path, "path");
 	    if (!path.isAbsolute())
 		throw new IllegalArgumentException(path.toString() + " can't be relative");
     }
-
 }
