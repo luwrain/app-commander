@@ -16,42 +16,15 @@
 
 package org.luwrain.app.commander;
 
-import java.io.*;
 import java.util.*;
-import java.util.concurrent.atomic.*;
 
 import org.luwrain.core.*;
-import org.luwrain.script.*;
-import org.luwrain.script.hooks.*;
+
+import static org.luwrain.script.Hooks.*;
 
 final class Hooks
 {
-    static private final String LOCAL_FILES_INFO_HOOK = "luwrain.commander.info.files.local";
-
     private final App app;
+    Hooks(App app) { this.app = app; }
 
-    Hooks(App app)
-    {
-	NullCheck.notNull(app, "app");
-	this.app = app;
-    }
-
-    boolean localFilesInfo(File[] files, MutableLines lines)
-    {
-	NullCheck.notNullItems(files, "files");
-	NullCheck.notNull(lines, "lines");
-	final Object arg = ScriptUtils.createReadOnlyArray(files);
-	final Object res = new ProviderHook(app.getLuwrain()).run(LOCAL_FILES_INFO_HOOK, new Object[]{arg});
-	if (res == null)
-	    return false;
-	final List<String> items = ScriptUtils.getStringArray(res);
-	if (items == null)
-	    return false;
-	lines.addLine("");
-	for(String s: items)
-	    if (s != null)
-		lines.addLine(s);
-	lines.addLine("");
-	return true;
-    }
 }

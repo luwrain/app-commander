@@ -30,19 +30,13 @@ final class App extends AppBase<Strings>
     enum Side {LEFT, RIGHT};
 
     final String startFrom;
-
     final List<Operation> operations = new ArrayList<>();
     final OperationListener opListener = newOperationListener();
     private Settings sett = null;
-    private Conversations conv = null;
+    private Conv conv = null;
     private Hooks hooks = null;
     private MainLayout mainLayout = null;
     private OperationsLayout operationsLayout = null;
-
-    App()
-    {
-	this(null);
-    }
 
     App(String startFrom)
     {
@@ -51,11 +45,12 @@ final class App extends AppBase<Strings>
 	    this.startFrom = startFrom; else
 	    this.startFrom = null;
     }
+    App() { this(null); }
 
     @Override public AreaLayout onAppInit()
     {
 	this.sett = Settings.create(getLuwrain());
-	this.conv = new Conversations(this);
+	this.conv = new Conv(this);
 	this.hooks = new Hooks(this);
 	this.mainLayout = new MainLayout(this);
 	this.operationsLayout = new OperationsLayout(this);
@@ -65,7 +60,6 @@ final class App extends AppBase<Strings>
 
     void runOperation(Operation op)
     {
-	NullCheck.notNull(op, "op");
 	this.operations.add(0, op);
 	getLuwrain().executeBkg(new FutureTask<>(op, null));
     }
@@ -91,7 +85,6 @@ final class App extends AppBase<Strings>
 
     String getOperationResultDescr(Operation op)
     {
-	NullCheck.notNull(op, "op");
 	/*
 	  switch(op.getResult().getType())
 	  {
@@ -119,7 +112,6 @@ final class App extends AppBase<Strings>
 	return new OperationListener(){
 	    @Override public void onOperationProgress(Operation operation)
 	    {
-		NullCheck.notNull(operation, "operation");
 		getLuwrain().runUiSafely(()->{
 			operationsLayout.operationsArea.redraw();
 			if (operation.isDone())
@@ -158,15 +150,12 @@ final class App extends AppBase<Strings>
 
     void layout(AreaLayout layout)
     {
-	NullCheck.notNull(layout, "layout");
 	getLayout().setBasicLayout(layout);
 	getLuwrain().announceActiveArea();
     }
 
     void layout(AreaLayout layout, Area activeArea)
     {
-	NullCheck.notNull(layout, "layout");
-	NullCheck.notNull(activeArea, "activeArea");
 	getLayout().setBasicLayout(layout);
 	getLuwrain().announceActiveArea();
 	getLuwrain().setActiveArea(activeArea);
@@ -188,20 +177,9 @@ final class App extends AppBase<Strings>
 	};
     }
 
-    Settings getSett()
-    {
-	return this.sett;
-    }
-
-    Conversations getConv()
-    {
-	return this.conv;
-    }
-
-    Hooks getHooks()
-    {
-	return this.hooks;
-    }
+    Settings getSett() { return this.sett; }
+    Conv getConv() { return this.conv; }
+    Hooks getHooks() { return this.hooks; }
 
     interface Layouts
     {

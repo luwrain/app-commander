@@ -24,13 +24,13 @@ import org.luwrain.core.*;
 import org.luwrain.popups.*;
 import org.luwrain.app.commander.popups.*;
 
-final class Conversations
+final class Conv
 {
     private final Luwrain luwrain;
     private final Strings strings;
     private final Set<String> runHistory = new TreeSet<>();
 
-    Conversations(App app)
+    Conv(App app)
     {
 	NullCheck.notNull(app, "app");
 	this.luwrain = app.getLuwrain();
