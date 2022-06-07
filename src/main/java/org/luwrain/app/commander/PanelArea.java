@@ -21,7 +21,6 @@ import java.util.concurrent.*;
 import java.io.*;
 import java.nio.file.*;
 import java.net.*;
-import org.luwrain.script.hooks.*;
 
 import org.apache.commons.vfs2.*;
 
@@ -39,7 +38,6 @@ class PanelArea extends CommanderArea<FileObject>
     PanelArea(Params<FileObject> params, Luwrain luwrain)
     {
 	super(params);
-	NullCheck.notNull(luwrain, "luwrain");
 	this.luwrain = luwrain;
     }
 
@@ -50,7 +48,6 @@ class PanelArea extends CommanderArea<FileObject>
 
     void open(File file)
     {
-	NullCheck.notNull(file, "file");
 	try {
 	    open(getCommanderModel().getFileSystemManager().resolveFile(file.getAbsolutePath()));
 	}
@@ -62,7 +59,6 @@ class PanelArea extends CommanderArea<FileObject>
 
     @Override public boolean onAreaQuery(AreaQuery query)
     {
-	NullCheck.notNull(query, "query");
 	if (query.getQueryCode() == AreaQuery.CURRENT_DIR && query instanceof CurrentDirQuery)
 	{
 	    final CurrentDirQuery currentDirQuery = (CurrentDirQuery)query;
@@ -73,56 +69,6 @@ class PanelArea extends CommanderArea<FileObject>
 	    return true;
 	}
 	return super.onAreaQuery(query);
-    }
-
-    boolean runHookOnSelected(String hookPrefix)
-    {
-	NullCheck.notEmpty(hookPrefix, "hookPrefix");
-	final FileObject obj = getSelectedEntry();
-	if (obj == null)
-	    return false;
-	if (isLocalDir())
-	{
-	    if (!(obj instanceof org.apache.commons.vfs2.provider.local.LocalFile))
-		throw new RuntimeException("The entry is not a local file while the local dir is opened");
-	    final File f = new File(obj.getName().getPath());
-		if (new ChainOfResponsibilityHook(luwrain).runNoExcept(hookPrefix + ".local.custom", new Object[]{f}))
-		    return true;
-		return new ChainOfResponsibilityHook(luwrain).runNoExcept(hookPrefix + ".local.default", new Object[]{f});
-	}
-	//FIXME:remote 
-	return false;
-    }
-
-    boolean runHookOnFilesToProcess(String hookPrefix, boolean background)
-    {
-	NullCheck.notEmpty(hookPrefix, "hookPrefix");
-	final Object arg;
-	final String hookName;
-	if (isLocalDir())
-	{
-	    final File[] files = asFile(getToProcess());
-	    if (files.length == 0)
-		return false;
-	    final String[] names = new String[files.length];
-	    for(int i = 0;i < files.length;i++)
-		names[i] = files[i].getAbsolutePath();
-	    arg = ScriptUtils.createReadOnlyArray(names);
-	    hookName = hookPrefix + ".local";
-	} else
-	    return false;
-	if (!background)
-	{
-	    if (new ChainOfResponsibilityHook(luwrain).runNoExcept(hookName + ".custom", new Object[]{arg}))
-		    return true;
-	    return new ChainOfResponsibilityHook(luwrain).runNoExcept(hookName, new Object[]{arg});
-	    }
-	luwrain.executeBkg(new FutureTask<>(()->{
-		    if (new ChainOfResponsibilityHook(luwrain).runNoExcept(hookName + ".custom", new Object[]{arg}))
-			    return;
-		    new ChainOfResponsibilityHook(luwrain).runNoExcept(hookName, new Object[]{arg});
-	}, null));
-	return true;
     }
 
     boolean isLocalDir()
@@ -160,7 +106,6 @@ class PanelArea extends CommanderArea<FileObject>
 
     boolean openInitial(String path)
     {
-	NullCheck.notNull(path, "path");
 	try {
 	    return open(CommanderUtilsVfs.prepareLocation((CommanderUtilsVfs.Model)getCommanderModel(), path), false);
 	}

@@ -37,14 +37,12 @@ import org.luwrain.app.commander.fileops.*;
 final class MainLayout extends LayoutBase
 {
     private final App app;
-    final PanelArea leftPanel;
-    final PanelArea rightPanel;
+    final PanelArea leftPanel, rightPanel;
     private final FileActions fileActions;
 
     MainLayout(App app)
     {
 	super(app);
-	NullCheck.notNull(app, "app");
 	this.app = app;
 	this.fileActions = new FileActions(app);
 
@@ -54,7 +52,6 @@ final class MainLayout extends LayoutBase
  	this.leftPanel = new PanelArea(params, getLuwrain()) {
 		@Override public boolean onSystemEvent(SystemEvent event)
 		{
-		    NullCheck.notNull(event, "event");
 		    if (event.getType() == SystemEvent.Type.REGULAR)
 			switch(event.getCode())
 			{
@@ -73,7 +70,6 @@ final class MainLayout extends LayoutBase
  	this.rightPanel = new PanelArea(params, getLuwrain()) {
 		@Override public boolean onSystemEvent(SystemEvent event)
 		{
-		    NullCheck.notNull(event, "event");
 		    if (event.getType() == SystemEvent.Type.REGULAR)
 			switch(event.getCode())
 			{
@@ -104,9 +100,7 @@ final class MainLayout extends LayoutBase
 
     private Actions getPanelActions(Side side)
     {
-	NullCheck.notNull(side, "side");
-	final PanelArea panelArea;
-	final PanelArea oppositePanelArea;
+	final PanelArea panelArea, oppositePanelArea;
 	if (side == Side.LEFT)
 	{
 	    panelArea = leftPanel;
@@ -117,6 +111,7 @@ final class MainLayout extends LayoutBase
 	    oppositePanelArea = leftPanel;
 	}
 	return actions(
+		       app.getHooks().panelActions(this, panelArea, oppositePanelArea),
 		       action("copy", app.getStrings().actionCopy(), new InputEvent(InputEvent.Special.F5), ()->fileActions.localCopy(panelArea, oppositePanelArea)),
 		       		       action("move", app.getStrings().actionMove(), new InputEvent(InputEvent.Special.F6), ()->fileActions.localMove(panelArea, oppositePanelArea)),
 		       action("mkdir", app.getStrings().actionMkdir(), new InputEvent(InputEvent.Special.F7), ()->fileActions.localMkdir(panelArea)),
