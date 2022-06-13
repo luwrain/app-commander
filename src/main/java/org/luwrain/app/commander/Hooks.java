@@ -23,7 +23,7 @@ import org.apache.commons.vfs2.*;
 import org.luwrain.core.*;
 import org.luwrain.app.base.*;
 import static org.luwrain.script.Hooks.*;
-import static org.luwrain.script2.ScriptUtils.*;
+import static org.luwrain.script.ScriptUtils.*;
 import static org.luwrain.app.commander.PanelArea.*;
 
 final class Hooks
