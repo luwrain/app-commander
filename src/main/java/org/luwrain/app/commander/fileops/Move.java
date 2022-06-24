@@ -22,12 +22,12 @@ import java.nio.file.*;
 import org.luwrain.core.*;
 import org.luwrain.app.commander.*;
 
-class Move extends CopyingBase
+public class Move extends CopyingBase
 {
     private final Path[] toMove;
     private final Path moveTo;
 
-    Move(OperationListener listener, String name,
+    public Move(OperationListener listener, String name,
 	 Path[] toMove, Path moveTo)
     {
 	super(listener, name);
@@ -62,12 +62,14 @@ singleSource(dest);
 	    if (!isDirectory(dest, true))
 		throw new IOException(MOVE_DEST_NOT_DIR);
 	    //All paths must belong to the same partition
+	    /*
 	    for(Path p: toMove)
 		if (!Files.getFileStore(p).equals(Files.getFileStore(dest)))
 		{
 		    movingThroughCopying();
 		    return;
 		}
+	    */
 	    //Do actual moving
 	    for(Path p: toMove)
 	    {
@@ -112,7 +114,7 @@ singleSource(dest);
 	catch(java.nio.file.AtomicMoveNotSupportedException e)
 	{
 	    status("singleSource:atomic move failed, launching moving through copying");
-	    movingThroughCopying();
+	    //	    movingThroughCopying();
 	    return;
 	}
     }

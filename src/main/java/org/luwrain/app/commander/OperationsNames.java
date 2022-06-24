@@ -44,6 +44,17 @@ class OperationsNames
 	return app.getStrings().copyOperationName(whatToCopy[0].getFileName().toString(), copyTo.getFileName().toString());
     }
 
+        String moveOperationName(Path[] whatToMove, Path moveTo)
+    {
+	if (whatToMove.length < 1)
+	    return "";
+	if (whatToMove.length > 1)
+	    return app.getStrings().moveOperationName(whatToMove[0].getFileName().toString() + ",...", moveTo.getFileName().toString());
+	return app.getStrings().moveOperationName(whatToMove[0].getFileName().toString(), moveTo.getFileName().toString());
+    }
+
+
+    /*
     String moveOperationName(File[] whatToMove, File moveTo)
     {
 	if (whatToMove.length < 1)
@@ -52,4 +63,5 @@ class OperationsNames
 	    return app.getStrings().moveOperationName(whatToMove[0].getName() + ",...", moveTo.getName());
 	return app.getStrings().moveOperationName(whatToMove[0].getName(), moveTo.getName());
     }
+    */
 }

@@ -116,6 +116,9 @@ final class FileActions extends OperationsNames
 	final Path dest = app.getConv().move(moveFromDir, filesToMove, moveToDir);
 	if (dest == null)
 	    return true;
+		final String name = moveOperationName(filesToMove, dest);
+	final Move move = new Move(app.opListener, name, filesToMove, dest);
+	app.runOperation(move);
 	return true;
     }
 
