@@ -115,13 +115,14 @@ final class MainLayout extends LayoutBase
 		       action("copy", app.getStrings().actionCopy(), new InputEvent(InputEvent.Special.F5), ()->fileActions.localCopy(panelArea, oppositePanelArea)),
 		       		       action("move", app.getStrings().actionMove(), new InputEvent(InputEvent.Special.F6), ()->fileActions.localMove(panelArea, oppositePanelArea)),
 		       action("mkdir", app.getStrings().actionMkdir(), new InputEvent(InputEvent.Special.F7), ()->fileActions.localMkdir(panelArea)),
+		       		       		       action("delete", app.getStrings().actionDelete(), new InputEvent(InputEvent.Special.F8), ()->fileActions.localDelete(panelArea)),
 		       action("run", "Выполнить", new InputEvent(Special.F4, EnumSet.of(Modifiers.CONTROL)), ()->fileActions.localRun(panelArea)),
 		       action("left-panel-volume", app.getStrings().leftPanelVolume(), new InputEvent(InputEvent.Special.F1, EnumSet.of(InputEvent.Modifiers.ALT)), ()->actPanelVolume(leftPanel)),
 		       action("right-panel-volume", app.getStrings().rightPanelVolume(), new InputEvent(Special.F2, EnumSet.of(Modifiers.ALT)), ()->actPanelVolume(rightPanel)),
-		       action("zip", app.getStrings().actionZip(), ()->fileActions.zipCompress(panelArea)),
-		       action("size", app.getStrings().actionSize(), new InputEvent(Special.F3, EnumSet.of(Modifiers.CONTROL)), ()->fileActions.size(panelArea)),
-		       action("info", app.getStrings().actionInfo(), ()->showFilesInfo(panelArea)),
-		       action("send-mail", "Отправить по электронной почте", new InputEvent(InputEvent.Special.F5, EnumSet.of(InputEvent.Modifiers.ALT)),()->fileActions.localMail(panelArea))
+		       //		       action("zip", app.getStrings().actionZip(), ()->fileActions.zipCompress(panelArea)),
+		       action("size", app.getStrings().actionSize(), new InputEvent(Special.F3, EnumSet.of(Modifiers.CONTROL)), ()->fileActions.size(panelArea))
+		       //		       action("info", app.getStrings().actionInfo(), ()->showFilesInfo(panelArea))
+		       //		       action("send-mail", "Отправить по электронной почте", new InputEvent(InputEvent.Special.F5, EnumSet.of(InputEvent.Modifiers.ALT)),()->fileActions.localMail(panelArea))
 		       );
     }
 

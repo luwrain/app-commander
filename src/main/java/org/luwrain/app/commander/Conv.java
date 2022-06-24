@@ -71,14 +71,10 @@ final class Conv
 	return res != null?res:null;
     }
 
-    boolean deleteConfirmation(File[] files)
+    boolean deleteConfirmation(Path[] files)
     {
 	final String text = strings.delPopupText(luwrain.i18n().getNumberStr(files.length, "items"));
-	final YesNoPopup popup = new YesNoPopup(luwrain, strings.delPopupName(), text, false, Popups.DEFAULT_POPUP_FLAGS);
-	luwrain.popup(popup);
-	if (popup.wasCancelled())
-	    return false;
-	return popup.result();
+return Popups.confirmDefaultNo(luwrain, strings.delPopupName(), text);
     }
 
     String ftpAddress()

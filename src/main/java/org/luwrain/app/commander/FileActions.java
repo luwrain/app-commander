@@ -146,19 +146,19 @@ final class FileActions extends OperationsNames
 	return true;
     }
 
-    boolean localDelete(PanelArea area, OperationListener listener)
+    boolean localDelete(PanelArea area)
     {
 	NullCheck.notNull(area, "area");
-	NullCheck.notNull(listener, "listener");
 	if (!area.isLocalDir())
 	    return false;
-	final File[] files = PanelArea.asFile(area.getToProcess());
+	final Path[] files = PanelArea.asPath(area.getToProcess());
 	if (files.length == 0)
 	    return false;
 	if (!app.getConv().deleteConfirmation(files))
 	    return true;
-	final String opName = app.getStrings().delOperationName(files);
-	//app.launch(app.getLuwrain().getFilesOperations().delete(listener, opName, files));
+	final String opName = "Удаление";//app.getStrings().delOperationName(files);
+	Log.debug("proba", "preparing");
+	app.runOperation(new Delete(app.opListener, opName, files));
 	return true;
     }
 

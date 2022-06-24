@@ -22,12 +22,11 @@ import java.nio.file.Path;
 import org.luwrain.core.*;
 import org.luwrain.app.commander.*;
 
-class Delete extends Operation
+public class Delete extends Operation
 {
     private final Path[] toDelete;
 
-    Delete(OperationListener listener, String name,
-	   Path[] toDelete)
+    public Delete(OperationListener listener, String name, Path[] toDelete)
     {
 	super(listener, name);
 	this.toDelete = toDelete;
@@ -40,8 +39,10 @@ class Delete extends Operation
 
     @Override protected void work() throws IOException
     {
+	Log.debug("proba", "starting");
 	for(Path p: toDelete)
 	{
+	    Log.debug("proba", "deleting " + p);
 	    deleteFileOrDir(p);
 	}
     }
