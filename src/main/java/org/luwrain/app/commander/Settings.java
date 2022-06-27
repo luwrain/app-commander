@@ -22,6 +22,8 @@ interface Settings
 {
 static final String PATH = "/org/luwrain/app/commander";
 
+    boolean getShowHidden(boolean defValue);
+    void setShowHidden(boolean value);
     String getZipFilesEncoding(String defValue);
 
     static Settings create(Luwrain luwrain)
